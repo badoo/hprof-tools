@@ -1,0 +1,11 @@
+/local.properties
+/.idea/workspace.xml
+.DS_Store
+.idea
+bin/
+build/
+app/build/
+.gradle/
+.DS_Store
+out/
+tmp/
