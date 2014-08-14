@@ -2,6 +2,8 @@ package com.badoo.hprof.unobfuscator;
 
 import com.badoo.hprof.library.HprofReader;
 import com.badoo.hprof.library.model.ClassDefinition;
+import com.badoo.hprof.library.model.InstanceField;
+import com.badoo.hprof.library.model.NamedField;
 import com.badoo.hprof.library.model.StaticField;
 
 import java.io.File;
@@ -9,10 +11,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import proguard.obfuscate.MappingProcessor;
 import proguard.obfuscate.MappingReader;
@@ -58,11 +57,7 @@ public class HprofUnobfuscator implements MappingProcessor {
             hprofStrings = unobfuscatingProcessor.getStrings();
             // Unobfuscate all class names first since they are needed when processing fields and methods
             for (ClassDefinition cls : unobfuscatingProcessor.getClasses().values()) {
-                String name = hprofStrings.get(cls.getNameStringId());
-                if (classNameMapping.containsKey(name)) {
-//                    System.out.println("Unobfuscating " + name + " to " + classNameMapping.get(name));
-                    hprofStrings.put(cls.getNameStringId(), classNameMapping.get(name));
-                }
+                unobfuscateClass(cls);
             }
             // Unobfuscate field names
             for (ClassDefinition cls : unobfuscatingProcessor.getClasses().values()) {
@@ -73,16 +68,32 @@ public class HprofUnobfuscator implements MappingProcessor {
                 }
                 Map<String, FieldInfo> mappedFields = fieldMapping.get(className);
                 for (StaticField field : cls.getStaticFields()) {
-                    String obfuscatedFieldName = hprofStrings.get(field.getFieldNameId());
-                    if (mappedFields.containsKey(obfuscatedFieldName)) {
-                        System.out.println("Unobfuscating static field " + obfuscatedFieldName + " to " + mappedFields.get(obfuscatedFieldName).fieldName + " in " + className);
-                    }
+                    unobfuscateField(className, field, mappedFields);
+                }
+                for (InstanceField field : cls.getInstanceFields()) {
+                    unobfuscateField(className, field, mappedFields);
                 }
             }
         }
         catch (IOException e) {
             System.err.println("Failed to convert hprof file: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    private void unobfuscateClass(ClassDefinition cls) {
+        String name = hprofStrings.get(cls.getNameStringId());
+        if (classNameMapping.containsKey(name)) {
+            System.out.println("Unobfuscating class " + name + " to " + classNameMapping.get(name));
+            hprofStrings.put(cls.getNameStringId(), classNameMapping.get(name));
+        }
+    }
+
+    private void unobfuscateField(String className, NamedField field, Map<String, FieldInfo> mappedFields) {
+        String obfuscatedFieldName = hprofStrings.get(field.getFieldNameId());
+        if (mappedFields.containsKey(obfuscatedFieldName)) {
+            System.out.println("Unobfuscating field " + obfuscatedFieldName + " to " + mappedFields.get(obfuscatedFieldName).fieldName + " in " + className);
+            hprofStrings.put(field.getFieldNameId(), mappedFields.get(obfuscatedFieldName).fieldName);
         }
     }
 
