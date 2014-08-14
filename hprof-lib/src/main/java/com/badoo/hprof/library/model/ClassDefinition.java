@@ -1,8 +1,13 @@
 package com.badoo.hprof.library.model;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static com.badoo.hprof.library.IoUtil.readInt;
+import static com.badoo.hprof.library.IoUtil.readShort;
 
 /**
  * Created by Erik Andre on 17/07/2014.
@@ -12,7 +17,7 @@ public class ClassDefinition {
     // Fields from LOAD_CLASS
     private final int serialNumber;
     private final int objectId;
-    private final int stackTraceSerial;
+    private int stackTraceSerial;
     private final int nameStringId;
 
     // Fiends from CLASS_DUMP
@@ -25,12 +30,68 @@ public class ClassDefinition {
     private List<StaticField> staticFields;
     private List<InstanceFieldInfo> instanceFields;
 
+    public static ClassDefinition createFromLoadClassData(InputStream in) throws IOException {
+        int serialNumber = readInt(in);
+        int classObjectId = readInt(in);
+        int stackTraceSerial = readInt(in);
+        int classNameStringId = readInt(in);
+        return new ClassDefinition(serialNumber, classObjectId, stackTraceSerial, classNameStringId);
+    }
 
     public ClassDefinition(int serialNumber, int objectId, int stackTraceSerial, int nameStringId) {
         this.serialNumber = serialNumber;
         this.objectId = objectId;
         this.stackTraceSerial = stackTraceSerial;
         this.nameStringId = nameStringId;
+    }
+
+    /**
+     * Populate the fields of this ClassDefinition using data from a CLASS_DUMP record. It is assumed that the object id has already been read.
+     *
+     * @param in Input stream positioned at the "stack trace serial number" field of the CLASS_DUMP
+     * @throws IOException
+     */
+    public void populateFromClassDump(InputStream in) throws IOException {
+        stackTraceSerial = readInt(in);
+        superClassObjectId = readInt(in);
+        classLoaderObjectId = readInt(in);
+        signersObjectId = readInt(in);
+        protectionDomainObjectId = readInt(in);
+        in.skip(8); // Reserved data
+        instanceSize = readInt(in);
+
+        short constantCount = readShort(in);
+        if (constantCount > 0) {
+            constantFields = new ArrayList<ConstantField>();
+        }
+        for (int i = 0; i < constantCount; i++) {
+            short poolIndex = readShort(in);
+            BasicType type = BasicType.fromType(in.read());
+            byte[] value = new byte[type.size];
+            in.read(value);
+            constantFields.add(new ConstantField(poolIndex, type, value));
+
+        }
+        short staticCount = readShort(in);
+        if (staticCount > 0) {
+            staticFields = new ArrayList<StaticField>();
+        }
+        for (int i = 0; i < staticCount; i++) {
+            int nameId = readInt(in);
+            BasicType type = BasicType.fromType(in.read());
+            byte[] value = new byte[type.size];
+            in.read(value);
+            staticFields.add(new StaticField(type, value, nameId));
+        }
+        short fieldCount = readShort(in);
+        if (fieldCount > 0) {
+            instanceFields = new ArrayList<InstanceFieldInfo>();
+        }
+        for (int i = 0; i < fieldCount; i++) {
+            int nameId = readInt(in);
+            BasicType type = BasicType.fromType(in.read());
+            instanceFields.add(new InstanceFieldInfo(type, nameId));
+        }
     }
 
     public int getSerialNumber() {

@@ -4,6 +4,7 @@ import com.badoo.hprof.library.Tag;
 import com.badoo.hprof.library.heap.HeapDumpReader;
 import com.badoo.hprof.library.heap.HeapTag;
 import com.badoo.hprof.library.heap.processor.HeapDumpDiscardProcessor;
+import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.processor.CopyProcessor;
 
 import java.io.ByteArrayInputStream;
@@ -25,9 +26,18 @@ public class UnobfuscatingProcessor extends CopyProcessor {
 
     private ClassDumpProcessor classDumpProcessor = new ClassDumpProcessor();
     private Map<Integer, String> strings = new HashMap<Integer, String>();
+    private Map<Integer, ClassDefinition> classes = new HashMap<Integer, ClassDefinition>();
 
     public UnobfuscatingProcessor(OutputStream out) {
         super(out);
+    }
+
+    public Map<Integer, String> getStrings() {
+        return strings;
+    }
+
+    public Map<Integer, ClassDefinition> getClasses() {
+        return classes;
     }
 
     @Override
@@ -48,6 +58,12 @@ public class UnobfuscatingProcessor extends CopyProcessor {
             String string = new String(data);
             strings.put(stringId, string);
         }
+        else if (tag == Tag.LOAD_CLASS) {
+            writer.writeRecordHeader(tag, timestamp, length);
+            byte[] data = copy(in, out, length);
+            ClassDefinition classDef = ClassDefinition.createFromLoadClassData(new ByteArrayInputStream(data));
+            classes.put(classDef.getObjectId(), classDef);
+        }
         else {
             super.onRecord(tag, timestamp, length, in); // Discard
         }
@@ -64,12 +80,17 @@ public class UnobfuscatingProcessor extends CopyProcessor {
 
         @Override
         public void onHeapRecord(int tag, InputStream in) throws IOException {
-//            if (tag == HeapTag.CLASS_DUMP) {
-//
-//            }
-//            else {
+            if (tag == HeapTag.CLASS_DUMP) {
+                int objectId = readInt(in);
+                ClassDefinition classDef = classes.get(objectId);
+                if (classDef == null) {
+                    throw new IllegalStateException("Class with id " + objectId + " no loaded before reading class dump!");
+                }
+                classDef.populateFromClassDump(in);
+            }
+            else {
                 super.onHeapRecord(tag, in);
-//            }
+            }
         }
     }
 
