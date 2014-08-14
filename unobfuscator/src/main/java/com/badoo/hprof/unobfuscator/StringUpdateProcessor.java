@@ -4,6 +4,7 @@ import com.badoo.hprof.library.HprofWriter;
 import com.badoo.hprof.library.Tag;
 import com.badoo.hprof.library.heap.HeapDumpReader;
 import com.badoo.hprof.library.heap.HeapTag;
+import com.badoo.hprof.library.heap.processor.HeapDumpBaseProcessor;
 import com.badoo.hprof.library.heap.processor.HeapDumpCopyProcessor;
 import com.badoo.hprof.library.heap.processor.HeapDumpDiscardProcessor;
 import com.badoo.hprof.library.model.ClassDefinition;
@@ -22,18 +23,20 @@ import static com.badoo.hprof.library.IoUtil.writeInt;
  */
 public class StringUpdateProcessor extends CopyProcessor {
 
-    private class ClassDefinitionRemoverProcessor extends HeapDumpCopyProcessor {
+    private class ClassDefinitionRemoverProcessor extends HeapDumpBaseProcessor {
+
+        private final OutputStream out;
 
         public ClassDefinitionRemoverProcessor(OutputStream out) {
-            super(out);
+            this.out = out;
         }
 
         @Override
         public void onHeapRecord(int tag, InputStream in) throws IOException {
             if (tag == HeapTag.CLASS_DUMP) {
-                HeapDumpDiscardProcessor.discard(tag, in); // Discard all class definitions since we are writing an updated version instead
+                skipHeapRecord(tag, in); // Discard all class definitions since we are writing an updated version instead
             } else {
-                super.onHeapRecord(tag, in);
+                copyHeapRecord(tag, in, out);
             }
         }
     }
