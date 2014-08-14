@@ -1,13 +1,19 @@
 package com.badoo.hprof.library.model;
 
+import com.badoo.hprof.library.heap.HeapTag;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import static com.badoo.hprof.library.IoUtil.readInt;
 import static com.badoo.hprof.library.IoUtil.readShort;
+import static com.badoo.hprof.library.IoUtil.writeInt;
+import static com.badoo.hprof.library.IoUtil.writeShort;
 
 /**
  * Created by Erik Andre on 17/07/2014.
@@ -184,4 +190,33 @@ public class ClassDefinition {
     }
 
 
+    public void writeClassDump(OutputStream out) throws IOException {
+        out.write(HeapTag.CLASS_DUMP);
+        writeInt(out, objectId);
+        writeInt(out, stackTraceSerial);
+        writeInt(out, superClassObjectId);
+        writeInt(out, classLoaderObjectId);
+        writeInt(out, signersObjectId);
+        writeInt(out, protectionDomainObjectId);
+        writeInt(out, 0); // Reserved
+        writeInt(out, 0); // Reserved
+        writeInt(out, instanceSize);
+        writeShort(out, (short) getConstantFields().size());
+        for (ConstantField field : getConstantFields()) {
+            writeShort(out, field.getPoolIndex());
+            out.write(field.getType().type);
+            out.write(field.getValue());
+        }
+        writeShort(out, (short) getStaticFields().size());
+        for (StaticField field : getStaticFields()) {
+            writeInt(out, field.getFieldNameId());
+            out.write(field.getType().type);
+            out.write(field.getValue());
+        }
+        writeShort(out, (short) getInstanceFields().size());
+        for (InstanceField field : getInstanceFields()) {
+            writeInt(out, field.getFieldNameId());
+            out.write(field.getType().type);
+        }
+    }
 }

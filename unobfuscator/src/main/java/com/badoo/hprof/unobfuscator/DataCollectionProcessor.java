@@ -1,6 +1,5 @@
 package com.badoo.hprof.unobfuscator;
 
-import com.badoo.hprof.library.IoUtil;
 import com.badoo.hprof.library.Tag;
 import com.badoo.hprof.library.heap.HeapDumpReader;
 import com.badoo.hprof.library.heap.HeapTag;
@@ -9,26 +8,23 @@ import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.InstanceField;
 import com.badoo.hprof.library.model.NamedField;
 import com.badoo.hprof.library.model.StaticField;
-import com.badoo.hprof.library.processor.CopyProcessor;
+import com.badoo.hprof.library.processor.DiscardProcessor;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static com.badoo.hprof.library.IoUtil.copy;
 import static com.badoo.hprof.library.IoUtil.read;
 import static com.badoo.hprof.library.IoUtil.readInt;
-import static com.badoo.hprof.library.IoUtil.writeInt;
 
 /**
  * Created by Erik Andre on 13/08/2014.
  */
-public class UnobfuscatingProcessor extends CopyProcessor {
+public class DataCollectionProcessor extends DiscardProcessor {
 
     class ClassDumpProcessor extends HeapDumpDiscardProcessor {
 
@@ -56,10 +52,6 @@ public class UnobfuscatingProcessor extends CopyProcessor {
     private int lastStringId = 0;
     private Set<Integer> referencedStringIds = new HashSet<Integer>();
 
-    public UnobfuscatingProcessor(OutputStream out) {
-        super(out);
-    }
-
     public Map<Integer, String> getStrings() {
         return strings;
     }
@@ -74,12 +66,9 @@ public class UnobfuscatingProcessor extends CopyProcessor {
             // Write the record to output but keep a copy to process
             byte[] record = new byte[length];
             in.read(record);
-            writer.writeRecordHeader(tag, timestamp, length);
-            out.write(record);
             readHeapDump(record);
         }
         else if (tag == Tag.STRING) {
-            // Strings are not written to the output stream at this point since they might need to be updated
             int stringId = readInt(in);
             lastStringId = Math.max(lastStringId, stringId);
             byte[] data = read(in, length - 4);
@@ -87,8 +76,7 @@ public class UnobfuscatingProcessor extends CopyProcessor {
             strings.put(stringId, string);
         }
         else if (tag == Tag.LOAD_CLASS) {
-            writer.writeRecordHeader(tag, timestamp, length);
-            byte[] data = copy(in, out, length);
+            byte[] data = read(in, length);
             ClassDefinition classDef = ClassDefinition.createFromLoadClassData(new ByteArrayInputStream(data));
             classes.put(classDef.getObjectId(), classDef);
         }

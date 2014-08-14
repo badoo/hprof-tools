@@ -55,19 +55,18 @@ public class HprofUnobfuscator implements MappingProcessor {
         MappingReader mappingReader = new MappingReader(new File(mappingFile));
         try {
             mappingReader.pump(this);
-            OutputStream out = new FileOutputStream(outFile);
-            UnobfuscatingProcessor unobfuscatingProcessor = new UnobfuscatingProcessor(out);
-            HprofReader hprofReader = new HprofReader(new FileInputStream(hprofFile), unobfuscatingProcessor);
+            DataCollectionProcessor dataCollectionProcessor = new DataCollectionProcessor();
+            HprofReader hprofReader = new HprofReader(new FileInputStream(hprofFile), dataCollectionProcessor);
             while (hprofReader.hasNext()) {
                 hprofReader.next();
             }
-            hprofStrings = unobfuscatingProcessor.getStrings();
+            hprofStrings = dataCollectionProcessor.getStrings();
             // Unobfuscate all class names first since they are needed when processing fields and methods
-            for (ClassDefinition cls : unobfuscatingProcessor.getClasses().values()) {
+            for (ClassDefinition cls : dataCollectionProcessor.getClasses().values()) {
                 unobfuscateClass(cls);
             }
             // Unobfuscate field names
-            for (ClassDefinition cls : unobfuscatingProcessor.getClasses().values()) {
+            for (ClassDefinition cls : dataCollectionProcessor.getClasses().values()) {
                 // Check if the class has any mapped fields
                 String className = hprofStrings.get(cls.getNameStringId());
                 if (!fieldMapping.containsKey(className)) {
@@ -81,22 +80,17 @@ public class HprofUnobfuscator implements MappingProcessor {
                     unobfuscateField(className, field, mappedFields);
                 }
             }
-            // Write updated strings to the output
-            writeStrings(out);
+            // Start the second pass where we write the modified hprof file to the output stream
+            OutputStream out = new FileOutputStream(outFile);
+            StringUpdateProcessor updateProcessor = new StringUpdateProcessor(out, dataCollectionProcessor.getClasses(), dataCollectionProcessor.getStrings());
+            hprofReader = new HprofReader(new FileInputStream(hprofFile), updateProcessor);
+            while (hprofReader.hasNext()) {
+                hprofReader.next();
+            }
         }
         catch (IOException e) {
             System.err.println("Failed to convert hprof file: " + e.getMessage());
             e.printStackTrace();
-        }
-    }
-
-    private void writeStrings(OutputStream out) throws IOException {
-        HprofWriter writer = new HprofWriter(out);
-        for (Map.Entry<Integer, String> e : hprofStrings.entrySet()) {
-            byte[] stringData = e.getValue().getBytes();
-            writer.writeRecordHeader(Tag.STRING, 0, stringData.length + 4);
-            writeInt(out, e.getKey()); // String id
-            out.write(stringData);
         }
     }
 
