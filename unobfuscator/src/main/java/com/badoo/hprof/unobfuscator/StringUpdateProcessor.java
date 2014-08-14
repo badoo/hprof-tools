@@ -31,7 +31,7 @@ public class StringUpdateProcessor extends CopyProcessor {
         @Override
         public void onHeapRecord(int tag, InputStream in) throws IOException {
             if (tag == HeapTag.CLASS_DUMP) {
-                HeapDumpDiscardProcessor.discard(tag, in);
+                HeapDumpDiscardProcessor.discard(tag, in); // Discard all class definitions since we are writing an updated version instead
             } else {
                 super.onHeapRecord(tag, in);
             }
@@ -88,6 +88,7 @@ public class StringUpdateProcessor extends CopyProcessor {
     }
 
     private void writeClasses(int tag, int timestamp) throws IOException {
+        // Write all class definitions to a buffer in order to calculate the size. Uses more memory but avoids an extra pass to calculate size before writing the data
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         for (ClassDefinition cls : classes.values()) {
             cls.writeClassDump(buffer);

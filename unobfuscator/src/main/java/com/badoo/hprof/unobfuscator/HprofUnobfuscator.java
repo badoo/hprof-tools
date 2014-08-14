@@ -1,8 +1,6 @@
 package com.badoo.hprof.unobfuscator;
 
 import com.badoo.hprof.library.HprofReader;
-import com.badoo.hprof.library.HprofWriter;
-import com.badoo.hprof.library.Tag;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.InstanceField;
 import com.badoo.hprof.library.model.NamedField;
@@ -19,9 +17,16 @@ import java.util.Map;
 import proguard.obfuscate.MappingProcessor;
 import proguard.obfuscate.MappingReader;
 
-import static com.badoo.hprof.library.IoUtil.writeInt;
-
 /**
+ * Unobfuscator for hprof files obfuscated using proguard/dexguard.
+ *
+ * Unobfuscation is performed in two passes over the input file:
+ *
+ *  1. Read all strings, class and field names. Deduplicate all shared strings for field names.
+ *  2. Write a modified copy of the input file with strings modified.
+ *
+ *  Input is the mapping file and the obfuscated hprof file.
+ *
  * Created by Erik Andre on 13/08/2014.
  */
 public class HprofUnobfuscator implements MappingProcessor {
@@ -64,7 +69,7 @@ public class HprofUnobfuscator implements MappingProcessor {
             hprofStrings = dataCollectionProcessor.getStrings();
             // Unobfuscate all class names first since they are needed when processing fields and methods
             for (ClassDefinition cls : dataCollectionProcessor.getClasses().values()) {
-                unobfuscateClass(cls);
+                unobfuscateClassName(cls);
             }
             // Unobfuscate field names
             for (ClassDefinition cls : dataCollectionProcessor.getClasses().values()) {
@@ -75,10 +80,10 @@ public class HprofUnobfuscator implements MappingProcessor {
                 }
                 Map<String, FieldInfo> mappedFields = fieldMapping.get(className);
                 for (StaticField field : cls.getStaticFields()) {
-                    unobfuscateField(className, field, mappedFields);
+                    unobfuscateFieldName(className, field, mappedFields);
                 }
                 for (InstanceField field : cls.getInstanceFields()) {
-                    unobfuscateField(className, field, mappedFields);
+                    unobfuscateFieldName(className, field, mappedFields);
                 }
             }
             // Start the second pass where we write the modified hprof file to the output stream
@@ -95,7 +100,7 @@ public class HprofUnobfuscator implements MappingProcessor {
         }
     }
 
-    private void unobfuscateClass(ClassDefinition cls) {
+    private void unobfuscateClassName(ClassDefinition cls) {
         String name = hprofStrings.get(cls.getNameStringId());
         if (classNameMapping.containsKey(name)) {
             if (debug) {
@@ -105,7 +110,7 @@ public class HprofUnobfuscator implements MappingProcessor {
         }
     }
 
-    private void unobfuscateField(String className, NamedField field, Map<String, FieldInfo> mappedFields) {
+    private void unobfuscateFieldName(String className, NamedField field, Map<String, FieldInfo> mappedFields) {
         String obfuscatedFieldName = hprofStrings.get(field.getFieldNameId());
         if (mappedFields.containsKey(obfuscatedFieldName)) {
             if (debug) {
@@ -116,6 +121,7 @@ public class HprofUnobfuscator implements MappingProcessor {
     }
 
     public static void main(String args[]) {
+        //TODO Remove hard coded strings
         new HprofUnobfuscator("/Users/erikandre/temp/hprof/mapping.txt", "/Users/erikandre/temp/hprof/obfuscated.hprof", "/Users/erikandre/temp/hprof/out.hprof");
     }
 
@@ -128,7 +134,7 @@ public class HprofUnobfuscator implements MappingProcessor {
     @Override
     public void processFieldMapping(String className, String fieldType, String fieldName, String newFieldName) {
         if (fieldName.equals(newFieldName)) {
-            return;
+            return; // Ignore mappings that are not obfuscated
         }
         FieldInfo field = new FieldInfo(className, fieldType, fieldName, newFieldName);
         if (!fieldMapping.containsKey(className)) {
