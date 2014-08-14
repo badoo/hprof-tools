@@ -1,5 +1,6 @@
 package com.badoo.hprof.unobfuscator;
 
+import com.badoo.hprof.library.IoUtil;
 import com.badoo.hprof.library.Tag;
 import com.badoo.hprof.library.heap.HeapDumpReader;
 import com.badoo.hprof.library.heap.HeapTag;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.badoo.hprof.library.IoUtil.copy;
+import static com.badoo.hprof.library.IoUtil.read;
 import static com.badoo.hprof.library.IoUtil.readInt;
 import static com.badoo.hprof.library.IoUtil.writeInt;
 
@@ -77,11 +79,10 @@ public class UnobfuscatingProcessor extends CopyProcessor {
             readHeapDump(record);
         }
         else if (tag == Tag.STRING) {
-            writer.writeRecordHeader(tag, timestamp, length);
+            // Strings are not written to the output stream at this point since they might need to be updated
             int stringId = readInt(in);
             lastStringId = Math.max(lastStringId, stringId);
-            writeInt(out, stringId);
-            byte[] data = copy(in, out, length - 4);
+            byte[] data = read(in, length - 4);
             String string = new String(data);
             strings.put(stringId, string);
         }

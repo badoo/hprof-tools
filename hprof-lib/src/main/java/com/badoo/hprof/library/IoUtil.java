@@ -60,4 +60,10 @@ public class IoUtil {
         return buffer;
     }
 
+    public static byte[] read(InputStream in, int length) throws IOException {
+        byte[] data = new byte[length];
+        in.read(data);
+        return data;
+    }
+
 }
