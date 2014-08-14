@@ -1,11 +1,14 @@
 package com.badoo.hprof.unobfuscator;
 
 import com.badoo.hprof.library.HprofReader;
+import com.badoo.hprof.library.model.ClassDefinition;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import proguard.obfuscate.MappingProcessor;
 import proguard.obfuscate.MappingReader;
@@ -15,6 +18,8 @@ import proguard.obfuscate.MappingReader;
  */
 public class HprofUnobfuscator implements MappingProcessor {
 
+    private Map<String, String> classNameMapping = new HashMap<String, String>();
+
     public HprofUnobfuscator(String mappingFile, String hprofFile, String outFile) {
         MappingReader mappingReader = new MappingReader(new File(mappingFile));
         try {
@@ -23,6 +28,12 @@ public class HprofUnobfuscator implements MappingProcessor {
             HprofReader hprofReader = new HprofReader(new FileInputStream(hprofFile), unobfuscatingProcessor);
             while (hprofReader.hasNext()) {
                 hprofReader.next();
+            }
+            for (ClassDefinition cls : unobfuscatingProcessor.getClasses().values()) {
+                String name = unobfuscatingProcessor.getStrings().get(cls.getNameStringId());
+                if (classNameMapping.containsKey(name)) {
+                    System.out.println("Unobfuscating " + name + " to " + classNameMapping.get(name));
+                }
             }
         }
         catch (IOException e) {
@@ -37,7 +48,7 @@ public class HprofUnobfuscator implements MappingProcessor {
 
     @Override
     public boolean processClassMapping(String className, String newClassName) {
-//        System.out.println("Class mapping " + className + "->" + newClassName);
+        classNameMapping.put(newClassName, className);
         return true;
     }
 
