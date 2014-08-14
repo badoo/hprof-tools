@@ -1,15 +1,15 @@
 package com.badoo.hprof.library.model;
 
 /**
- * Created by erikandre on 24/06/2014.
+ * Created by Erik Andre on 24/06/2014.
  */
-public class StaticField {
+public class StaticField implements NamedField{
 
-    private final BasicType type;
+    private BasicType type;
 
-    private final byte[] value;
+    private byte[] value;
 
-    private final int fieldNameId;
+    private int fieldNameId;
 
     public StaticField(BasicType type, byte[] value, int fieldNameId) {
         this.type = type;
@@ -25,7 +25,21 @@ public class StaticField {
         return value;
     }
 
+    @Override
     public int getFieldNameId() {
         return fieldNameId;
+    }
+
+    public void setType(BasicType type) {
+        this.type = type;
+    }
+
+    public void setValue(byte[] value) {
+        this.value = value;
+    }
+
+    @Override
+    public void setFieldNameId(int fieldNameId) {
+        this.fieldNameId = fieldNameId;
     }
 }

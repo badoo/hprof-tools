@@ -17,4 +17,17 @@ public class ConstantField {
         this.value = value;
     }
 
+    public short getPoolIndex() {
+        return poolIndex;
+    }
+
+    public BasicType getType() {
+        return type;
+    }
+
+    public byte[] getValue() {
+        return value;
+    }
+
+
 }

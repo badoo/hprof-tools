@@ -28,7 +28,7 @@ public class ClassDefinition {
     private int instanceSize;
     private List<ConstantField> constantFields;
     private List<StaticField> staticFields;
-    private List<InstanceFieldInfo> instanceFields;
+    private List<InstanceField> instanceFields;
 
     public static ClassDefinition createFromLoadClassData(InputStream in) throws IOException {
         int serialNumber = readInt(in);
@@ -85,12 +85,12 @@ public class ClassDefinition {
         }
         short fieldCount = readShort(in);
         if (fieldCount > 0) {
-            instanceFields = new ArrayList<InstanceFieldInfo>();
+            instanceFields = new ArrayList<InstanceField>();
         }
         for (int i = 0; i < fieldCount; i++) {
             int nameId = readInt(in);
             BasicType type = BasicType.fromType(in.read());
-            instanceFields.add(new InstanceFieldInfo(type, nameId));
+            instanceFields.add(new InstanceField(type, nameId));
         }
     }
 
@@ -164,9 +164,9 @@ public class ClassDefinition {
         staticFields.add(field);
     }
 
-    public void addInstanceField(InstanceFieldInfo field) {
+    public void addInstanceField(InstanceField field) {
         if (instanceFields == null) {
-            instanceFields = new ArrayList<InstanceFieldInfo>();
+            instanceFields = new ArrayList<InstanceField>();
         }
         instanceFields.add(field);
     }
@@ -179,7 +179,7 @@ public class ClassDefinition {
         return staticFields != null ? staticFields : Collections.EMPTY_LIST;
     }
 
-    public List<InstanceFieldInfo> getInstanceFields() {
+    public List<InstanceField> getInstanceFields() {
         return instanceFields != null ? instanceFields : Collections.EMPTY_LIST;
     }
 
