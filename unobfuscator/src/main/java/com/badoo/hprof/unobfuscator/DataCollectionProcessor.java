@@ -104,7 +104,6 @@ public class DataCollectionProcessor extends DiscardProcessor {
     private void deduplicateFieldName(NamedField field) {
         if (referencedStringIds.contains(field.getFieldNameId())) {
             // Create an alias for this string
-            System.out.println("Created alias for duplicate string " + field.getFieldNameId() + " (" + strings.get(field.getFieldNameId()) + ")");
             String value = strings.get(field.getFieldNameId());
             int newId = createNewStringId();
             if (strings.containsKey(newId)) {

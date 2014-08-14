@@ -49,6 +49,7 @@ public class HprofUnobfuscator implements MappingProcessor {
     private Map<String, Map<String, FieldInfo>> fieldMapping = new HashMap<String, Map<String, FieldInfo>>();
     // Map of string id -> string
     private Map<Integer, String> hprofStrings;
+    private boolean debug;
 
 
     public HprofUnobfuscator(String mappingFile, String hprofFile, String outFile) {
@@ -97,7 +98,9 @@ public class HprofUnobfuscator implements MappingProcessor {
     private void unobfuscateClass(ClassDefinition cls) {
         String name = hprofStrings.get(cls.getNameStringId());
         if (classNameMapping.containsKey(name)) {
-            System.out.println("Unobfuscating class " + name + " to " + classNameMapping.get(name));
+            if (debug) {
+                System.out.println("Unobfuscating class " + name + " to " + classNameMapping.get(name));
+            }
             hprofStrings.put(cls.getNameStringId(), classNameMapping.get(name));
         }
     }
@@ -105,7 +108,9 @@ public class HprofUnobfuscator implements MappingProcessor {
     private void unobfuscateField(String className, NamedField field, Map<String, FieldInfo> mappedFields) {
         String obfuscatedFieldName = hprofStrings.get(field.getFieldNameId());
         if (mappedFields.containsKey(obfuscatedFieldName)) {
-            System.out.println("Unobfuscating field " + obfuscatedFieldName + " to " + mappedFields.get(obfuscatedFieldName).fieldName + " in " + className);
+            if (debug) {
+                System.out.println("Unobfuscating field " + obfuscatedFieldName + " to " + mappedFields.get(obfuscatedFieldName).fieldName + " in " + className);
+            }
             hprofStrings.put(field.getFieldNameId(), mappedFields.get(obfuscatedFieldName).fieldName);
         }
     }

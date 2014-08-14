@@ -95,6 +95,5 @@ public class StringUpdateProcessor extends CopyProcessor {
         byte[] data = buffer.toByteArray();
         writer.writeRecordHeader(tag, timestamp, data.length);
         out.write(data);
-        System.out.println("Wrote updated data: " + data.length);
     }
 }
