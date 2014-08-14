@@ -16,4 +16,16 @@ public class StaticField {
         this.value = value;
         this.fieldNameId = fieldNameId;
     }
+
+    public BasicType getType() {
+        return type;
+    }
+
+    public byte[] getValue() {
+        return value;
+    }
+
+    public int getFieldNameId() {
+        return fieldNameId;
+    }
 }
