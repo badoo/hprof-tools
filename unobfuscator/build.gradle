@@ -1,5 +1,5 @@
 apply plugin: 'java'
-apply plugin:'application'
+apply plugin: 'application'
 
 sourceCompatibility = 1.5
 version = '1.0'

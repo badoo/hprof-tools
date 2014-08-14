@@ -21,10 +21,10 @@ public interface HprofProcessor {
     /**
      * Callback method invoked when a record is read.
      *
-     * @param tag A tag indicating what type of record it is
+     * @param tag       A tag indicating what type of record it is
      * @param timestamp Number of microseconds since the timestamp in the header
-     * @param length Number of bytes in the record (excluding the record header)
-     * @param in InputStream from which the record can be read
+     * @param length    Number of bytes in the record (excluding the record header)
+     * @param in        InputStream from which the record can be read
      */
     void onRecord(int tag, int timestamp, int length, InputStream in) throws IOException;
 

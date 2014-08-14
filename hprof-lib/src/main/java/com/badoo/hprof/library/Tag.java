@@ -21,6 +21,7 @@ public final class Tag {
     public static final int CPU_SAMPLES = 0xd;
     public static final int CONTROL_SETTINGS = 0xe;
 
-    private Tag() {}
+    private Tag() {
+    }
 
 }

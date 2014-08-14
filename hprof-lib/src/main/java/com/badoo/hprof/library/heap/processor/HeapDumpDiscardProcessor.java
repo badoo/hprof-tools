@@ -12,7 +12,7 @@ import static com.badoo.hprof.library.IoUtil.readShort;
 
 /**
  * A HeapDumpProcessor that reads each record and discards the data
- *
+ * <p/>
  * Created by Erik Andre on 14/08/2014.
  */
 public class HeapDumpDiscardProcessor implements HeapDumpProcessor {

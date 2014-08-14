@@ -26,7 +26,8 @@ public class HprofReader {
     public void next() throws IOException {
         if (readCount == 0) { // Read header first
             readHeader();
-        } else {
+        }
+        else {
             readRecord();
         }
         readCount++;

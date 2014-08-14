@@ -1,22 +1,19 @@
 package com.badoo.hprof.unobfuscator;
 
 import com.badoo.hprof.library.HprofReader;
-import proguard.obfuscate.MappingProcessor;
-import proguard.obfuscate.MappingReader;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import proguard.obfuscate.MappingProcessor;
+import proguard.obfuscate.MappingReader;
+
 /**
  * Created by Erik Andre on 13/08/2014.
  */
 public class HprofUnobfuscator implements MappingProcessor {
-
-    public static void main(String args[]) {
-        new HprofUnobfuscator("/Users/erikandre/temp/hprof/mapping.txt", "/Users/erikandre/temp/hprof/obfuscated.hprof", "/Users/erikandre/temp/hprof/out.hprof");
-    }
 
     public HprofUnobfuscator(String mappingFile, String hprofFile, String outFile) {
         MappingReader mappingReader = new MappingReader(new File(mappingFile));
@@ -27,10 +24,15 @@ public class HprofUnobfuscator implements MappingProcessor {
             while (hprofReader.hasNext()) {
                 hprofReader.next();
             }
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             System.err.println("Failed to convert hprof file: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    public static void main(String args[]) {
+        new HprofUnobfuscator("/Users/erikandre/temp/hprof/mapping.txt", "/Users/erikandre/temp/hprof/obfuscated.hprof", "/Users/erikandre/temp/hprof/out.hprof");
     }
 
     @Override

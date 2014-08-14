@@ -2,7 +2,6 @@ package com.badoo.hprof.library.heap;
 
 import com.google.common.io.CountingInputStream;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 

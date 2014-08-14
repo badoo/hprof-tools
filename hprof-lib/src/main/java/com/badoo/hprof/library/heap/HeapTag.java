@@ -30,7 +30,7 @@ public final class HeapTag {
     public static final int HPROF_UNREACHABLE = 0x90;  /* deprecated */
     public static final int HPROF_PRIMITIVE_ARRAY_NODATA_DUMP = 0xc3;
 
-    private HeapTag () {
+    private HeapTag() {
     }
 
 }

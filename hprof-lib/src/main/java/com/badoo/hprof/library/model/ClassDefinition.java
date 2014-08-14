@@ -111,15 +111,15 @@ public class ClassDefinition {
     }
 
     public List<ConstantField> getConstantFields() {
-        return constantFields != null? constantFields : Collections.EMPTY_LIST;
+        return constantFields != null ? constantFields : Collections.EMPTY_LIST;
     }
 
     public List<StaticField> getStaticFields() {
-        return staticFields != null? staticFields : Collections.EMPTY_LIST;
+        return staticFields != null ? staticFields : Collections.EMPTY_LIST;
     }
 
     public List<InstanceFieldInfo> getInstanceFields() {
-        return instanceFields != null? instanceFields : Collections.EMPTY_LIST;
+        return instanceFields != null ? instanceFields : Collections.EMPTY_LIST;
     }
 
 

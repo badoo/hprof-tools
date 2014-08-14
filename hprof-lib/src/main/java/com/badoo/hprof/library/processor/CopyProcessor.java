@@ -3,7 +3,6 @@ package com.badoo.hprof.library.processor;
 
 import com.badoo.hprof.library.HprofProcessor;
 import com.badoo.hprof.library.HprofWriter;
-import com.badoo.hprof.library.Tag;
 
 import java.io.IOException;
 import java.io.InputStream;
