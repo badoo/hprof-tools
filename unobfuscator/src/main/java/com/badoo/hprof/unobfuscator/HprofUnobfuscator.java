@@ -65,7 +65,6 @@ public class HprofUnobfuscator implements MappingProcessor {
                 }
             }
             // Unobfuscate field names
-            Set<Integer> updatedStrings = new HashSet<Integer>();
             for (ClassDefinition cls : unobfuscatingProcessor.getClasses().values()) {
                 // Check if the class has any mapped fields
                 String className = hprofStrings.get(cls.getNameStringId());
@@ -76,10 +75,6 @@ public class HprofUnobfuscator implements MappingProcessor {
                 for (StaticField field : cls.getStaticFields()) {
                     String obfuscatedFieldName = hprofStrings.get(field.getFieldNameId());
                     if (mappedFields.containsKey(obfuscatedFieldName)) {
-                        if (updatedStrings.contains(field.getFieldNameId())) {
-                            throw new IllegalStateException("Multiple references to obfuscated string " + field.getFieldNameId());
-                        }
-                        updatedStrings.add(field.getFieldNameId());
                         System.out.println("Unobfuscating static field " + obfuscatedFieldName + " to " + mappedFields.get(obfuscatedFieldName).fieldName + " in " + className);
                     }
                 }
@@ -103,7 +98,9 @@ public class HprofUnobfuscator implements MappingProcessor {
 
     @Override
     public void processFieldMapping(String className, String fieldType, String fieldName, String newFieldName) {
-//        System.out.println("Field mapping, class:" + className + ", fieldType:" + fieldType + ", fieldName:" + fieldName + " ->" + newFieldName);
+        if (fieldName.equals(newFieldName)) {
+            return;
+        }
         FieldInfo field = new FieldInfo(className, fieldType, fieldName, newFieldName);
         if (!fieldMapping.containsKey(className)) {
             Map<String, FieldInfo> map = new HashMap<String, FieldInfo>();
@@ -115,7 +112,7 @@ public class HprofUnobfuscator implements MappingProcessor {
 
     @Override
     public void processMethodMapping(String className, int firstLineNumber, int lastLineNumber, String methodReturnType, String methodName, String methodArguments, String newMethodName) {
-//        System.out.println("Method mapping " + className + "." + methodName + "->" + newMethodName);
+        // Not used since hprof files do not contain method information
     }
 
 }

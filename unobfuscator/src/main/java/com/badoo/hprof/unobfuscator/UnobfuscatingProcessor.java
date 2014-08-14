@@ -79,6 +79,7 @@ public class UnobfuscatingProcessor extends CopyProcessor {
         else if (tag == Tag.STRING) {
             writer.writeRecordHeader(tag, timestamp, length);
             int stringId = readInt(in);
+            lastStringId = Math.max(lastStringId, stringId);
             writeInt(out, stringId);
             byte[] data = copy(in, out, length - 4);
             String string = new String(data);
@@ -117,6 +118,9 @@ public class UnobfuscatingProcessor extends CopyProcessor {
             System.out.println("Created alias for duplicate string " + field.getFieldNameId() + " (" + strings.get(field.getFieldNameId()) + ")");
             String value = strings.get(field.getFieldNameId());
             int newId = createNewStringId();
+            if (strings.containsKey(newId)) {
+                throw new IllegalStateException("Failed to generate string id!");
+            }
             field.setFieldNameId(newId);
             strings.put(newId, value);
             referencedStringIds.add(newId); // Just in case
