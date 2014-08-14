@@ -14,24 +14,17 @@ import static com.badoo.hprof.library.IoUtil.copy;
 /**
  * Created by Erik Andre on 13/07/2014.
  */
-public class CopyProcessor implements HprofProcessor {
+public class DiscardProcessor implements HprofProcessor {
 
-    protected final HprofWriter writer;
-    protected final OutputStream out;
-
-    public CopyProcessor(OutputStream out) {
-        writer = new HprofWriter(out);
-        this.out = out;
+    public DiscardProcessor() {
     }
 
     @Override
     public void onHeader(String text, int idSize, int timeHigh, int timeLow) throws IOException {
-        writer.writeHeader(text, idSize, timeHigh, timeLow);
     }
 
     @Override
     public void onRecord(int tag, int timestamp, int length, InputStream in) throws IOException {
-        writer.writeRecordHeader(tag, timestamp, length);
-        copy(in, out, length);
+        in.skip(length);
     }
 }

@@ -1,4 +1,4 @@
-package com.badoo.hprof.library;
+package com.badoo.hprof.library.model;
 
 /**
  * Created by Erik Andre on 21/06/2014.

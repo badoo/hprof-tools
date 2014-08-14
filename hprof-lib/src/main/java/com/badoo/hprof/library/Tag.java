@@ -21,47 +21,6 @@ public final class Tag {
     public static final int CPU_SAMPLES = 0xd;
     public static final int CONTROL_SETTINGS = 0xe;
 
+    private Tag() {}
 
-    public final int value;
-
-    Tag(int value) {
-        this.value = value;
-    }
-
-    public static Tag fromValue(int value) {
-        switch (value) {
-            case 0x1:
-                return STRING;
-            case 0x2:
-                return LOAD_CLASS;
-            case 0x3:
-                return UNLOAD_CLASS;
-            case 0x4:
-                return STACK_FRAME;
-            case 0x5:
-                return STACK_TRACE;
-            case 0x6:
-                return ALLOC_SITES;
-            case 0x7:
-                return HEAP_SUMMARY;
-            case 0xa:
-                return START_THREAD;
-            case 0xb:
-                return END_THREAD;
-            case 0xc:
-                return HEAP_DUMP;
-            case 0x1c:
-                return HEAP_DUMP_SEGMENT;
-            case 0x2c:
-                return HEAP_DUMP_END;
-            case 0xd:
-                return CPU_SAMPLES;
-            case 0xe:
-                return CONTROL_SETTINGS;
-            case 0x30:
-                return STRING_HASH;
-            default:
-                return UNKNOWN;
-        }
-    }
 }

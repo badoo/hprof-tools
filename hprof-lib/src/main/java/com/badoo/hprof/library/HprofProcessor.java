@@ -26,6 +26,6 @@ public interface HprofProcessor {
      * @param length Number of bytes in the record (excluding the record header)
      * @param in InputStream from which the record can be read
      */
-    void onRecord(Tag tag, int timestamp, int length, InputStream in) throws IOException;
+    void onRecord(int tag, int timestamp, int length, InputStream in) throws IOException;
 
 }

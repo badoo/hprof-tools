@@ -1,5 +1,6 @@
 package com.badoo.hprof.library.heap;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -7,6 +8,6 @@ import java.io.InputStream;
  */
 public interface HeapDumpProcessor {
 
-    void onRecord(int tag, InputStream in);
+    void onHeapRecord(int tag, InputStream in) throws IOException;
 
 }

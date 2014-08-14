@@ -3,7 +3,8 @@ package com.badoo.hprof.library;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import static com.badoo.hproflib.IoUtil.*;
+import static com.badoo.hprof.library.IoUtil.writeInt;
+import static com.badoo.hprof.library.IoUtil.writeNullTerminatedString;
 
 /**
  * Created by Erik Andre on 13/07/2014.
@@ -23,8 +24,8 @@ public class HprofWriter {
         writeInt(out, timeLow);
     }
 
-    public void writeRecordHeader(Tag tag, int timestamp, int length) throws IOException {
-        out.write(tag.value);
+    public void writeRecordHeader(int tag, int timestamp, int length) throws IOException {
+        out.write(tag);
         writeInt(out, timestamp);
         writeInt(out, length);
     }

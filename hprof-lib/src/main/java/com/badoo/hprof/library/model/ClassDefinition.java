@@ -1,6 +1,4 @@
-package com.badoo.hprof.library;
-
-import com.sun.tools.internal.jxc.apt.Const;
+package com.badoo.hprof.library.model;
 
 import java.util.ArrayList;
 import java.util.Collections;

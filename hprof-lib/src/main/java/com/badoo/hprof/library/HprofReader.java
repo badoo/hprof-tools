@@ -3,7 +3,7 @@ package com.badoo.hprof.library;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static com.badoo.hproflib.IoUtil.readInt;
+import static com.badoo.hprof.library.IoUtil.readInt;
 
 /**
  * Created by Erik Andre on 12/07/2014.
@@ -36,7 +36,7 @@ public class HprofReader {
         int tagValue = in.read(); // 1 byte
         int time = readInt(in);
         int size = readInt(in);
-        processor.onRecord(Tag.fromValue(tagValue), time, size, in);
+        processor.onRecord(tagValue, time, size, in);
     }
 
     private void readHeader() throws IOException {
