@@ -2,6 +2,7 @@ package com.badoo.hprof.unobfuscator;
 
 import com.badoo.hprof.library.HprofReader;
 import com.badoo.hprof.library.model.ClassDefinition;
+import com.badoo.hprof.library.model.HprofString;
 import com.badoo.hprof.library.model.InstanceField;
 import com.badoo.hprof.library.model.NamedField;
 import com.badoo.hprof.library.model.StaticField;
@@ -35,7 +36,7 @@ public class HprofUnobfuscator implements MappingProcessor {
     // Map of class name -> Map of obfuscated field name -> FieldInfo
     private Map<String, Map<String, FieldInfo>> fieldMapping = new HashMap<String, Map<String, FieldInfo>>();
     // Map of string id -> string
-    private Map<Integer, String> hprofStrings;
+    private Map<Integer, HprofString> hprofStrings;
     private boolean debug;
     public HprofUnobfuscator(String mappingFile, String hprofFile, String outFile) {
         MappingReader mappingReader = new MappingReader(new File(mappingFile));
@@ -54,21 +55,21 @@ public class HprofUnobfuscator implements MappingProcessor {
             // Unobfuscate field names
             for (ClassDefinition cls : dataCollectionProcessor.getClasses().values()) {
                 // Check if the class has any mapped fields
-                String className = hprofStrings.get(cls.getNameStringId());
-                if (!fieldMapping.containsKey(className)) {
+                HprofString className = hprofStrings.get(cls.getNameStringId());
+                if (!fieldMapping.containsKey(className.getValue())) {
                     continue;
                 }
-                Map<String, FieldInfo> mappedFields = fieldMapping.get(className);
+                Map<String, FieldInfo> mappedFields = fieldMapping.get(className.getValue());
                 for (StaticField field : cls.getStaticFields()) {
-                    unobfuscateFieldName(className, field, mappedFields);
+                    unobfuscateFieldName(className.getValue(), field, mappedFields);
                 }
                 for (InstanceField field : cls.getInstanceFields()) {
-                    unobfuscateFieldName(className, field, mappedFields);
+                    unobfuscateFieldName(className.getValue(), field, mappedFields);
                 }
             }
             // Start the second pass where we write the modified hprof file to the output stream
             OutputStream out = new FileOutputStream(outFile);
-            StringUpdateProcessor updateProcessor = new StringUpdateProcessor(out, dataCollectionProcessor.getClasses(), dataCollectionProcessor.getStrings());
+            StringUpdateProcessor updateProcessor = new StringUpdateProcessor(out, dataCollectionProcessor.getClasses(), hprofStrings.values());
             hprofReader = new HprofReader(new FileInputStream(hprofFile), updateProcessor);
             while (hprofReader.hasNext()) {
                 hprofReader.next();
@@ -86,22 +87,22 @@ public class HprofUnobfuscator implements MappingProcessor {
     }
 
     private void unobfuscateClassName(ClassDefinition cls) {
-        String name = hprofStrings.get(cls.getNameStringId());
-        if (classNameMapping.containsKey(name)) {
+        HprofString name = hprofStrings.get(cls.getNameStringId());
+        if (classNameMapping.containsKey(name.getValue())) {
             if (debug) {
-                System.out.println("Unobfuscating class " + name + " to " + classNameMapping.get(name));
+                System.out.println("Unobfuscating class " + name + " to " + classNameMapping.get(name.getValue()));
             }
-            hprofStrings.put(cls.getNameStringId(), classNameMapping.get(name));
+            name.setValue(classNameMapping.get(name.getValue()));
         }
     }
 
     private void unobfuscateFieldName(String className, NamedField field, Map<String, FieldInfo> mappedFields) {
-        String obfuscatedFieldName = hprofStrings.get(field.getFieldNameId());
-        if (mappedFields.containsKey(obfuscatedFieldName)) {
+        HprofString fieldName = hprofStrings.get(field.getFieldNameId());
+        if (mappedFields.containsKey(fieldName.getValue())) {
             if (debug) {
-                System.out.println("Unobfuscating field " + obfuscatedFieldName + " to " + mappedFields.get(obfuscatedFieldName).fieldName + " in " + className);
+                System.out.println("Unobfuscating field " + fieldName + " to " + mappedFields.get(fieldName.getValue()).fieldName + " in " + className);
             }
-            hprofStrings.put(field.getFieldNameId(), mappedFields.get(obfuscatedFieldName).fieldName);
+            fieldName.setValue(mappedFields.get(fieldName.getValue()).fieldName);
         }
     }
 

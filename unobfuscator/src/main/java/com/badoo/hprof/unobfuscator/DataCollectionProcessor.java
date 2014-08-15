@@ -6,6 +6,7 @@ import com.badoo.hprof.library.heap.HeapDumpReader;
 import com.badoo.hprof.library.heap.HeapTag;
 import com.badoo.hprof.library.heap.processor.HeapDumpDiscardProcessor;
 import com.badoo.hprof.library.model.ClassDefinition;
+import com.badoo.hprof.library.model.HprofString;
 import com.badoo.hprof.library.model.InstanceField;
 import com.badoo.hprof.library.model.NamedField;
 import com.badoo.hprof.library.model.StaticField;
@@ -29,12 +30,12 @@ import static com.badoo.hprof.library.StreamUtil.readString;
 public class DataCollectionProcessor extends DiscardProcessor {
 
     private ClassDumpProcessor classDumpProcessor = new ClassDumpProcessor();
-    private Map<Integer, String> strings = new HashMap<Integer, String>();
+    private Map<Integer, HprofString> strings = new HashMap<Integer, HprofString>();
     private Map<Integer, ClassDefinition> classes = new HashMap<Integer, ClassDefinition>();
     private int lastStringId = 0;
     private Set<Integer> referencedStringIds = new HashSet<Integer>();
 
-    public Map<Integer, String> getStrings() {
+    public Map<Integer, HprofString> getStrings() {
         return strings;
     }
 
@@ -50,9 +51,9 @@ public class DataCollectionProcessor extends DiscardProcessor {
             readHeapDump(record);
         }
         else if (tag == Tag.STRING) {
-            int stringId = readInt(in);
-            lastStringId = Math.max(lastStringId, stringId); // Keep track of the highest string id encountered so that we can add new ids later without having a collision
-            strings.put(stringId, readString(in, length - 4));
+            HprofString string = reader.readStringRecord(length, timestamp);
+            lastStringId = Math.max(lastStringId, string.getId()); // Keep track of the highest string id encountered so that we can add new ids later without having a collision
+            strings.put(string.getId(), string);
         }
         else if (tag == Tag.LOAD_CLASS) { // ClassDefinitions are first created from a LOAD_CLASS record and then populate from a DUMP_CLASS heap record
             ClassDefinition classDef = reader.readLoadClassRecord();
@@ -82,13 +83,13 @@ public class DataCollectionProcessor extends DiscardProcessor {
     private void deduplicateFieldName(NamedField field) {
         if (referencedStringIds.contains(field.getFieldNameId())) {
             // Create an alias for this string
-            String value = strings.get(field.getFieldNameId());
+            HprofString string = strings.get(field.getFieldNameId());
             int newId = createNewStringId();
             if (strings.containsKey(newId)) {
                 throw new IllegalStateException("Failed to generate string id!");
             }
             field.setFieldNameId(newId);
-            strings.put(newId, value);
+            strings.put(newId, new HprofString(newId, string.getValue(), string.getTimestamp()));
             referencedStringIds.add(newId); // Just in case
         }
         else {

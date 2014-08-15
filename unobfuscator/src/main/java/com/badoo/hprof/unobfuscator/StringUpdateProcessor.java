@@ -7,11 +7,14 @@ import com.badoo.hprof.library.heap.HeapDumpReader;
 import com.badoo.hprof.library.heap.HeapTag;
 import com.badoo.hprof.library.heap.processor.HeapDumpBaseProcessor;
 import com.badoo.hprof.library.model.ClassDefinition;
+import com.badoo.hprof.library.model.HprofString;
 import com.badoo.hprof.library.processor.CopyProcessor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,10 +22,10 @@ import java.util.Map;
  */
 public class StringUpdateProcessor extends CopyProcessor {
 
-    private final Map<Integer, String> strings;
+    private final Collection<HprofString> strings;
     private final Map<Integer, ClassDefinition> classes;
     private boolean writeUpdatedClassDefinitions = true;
-    public StringUpdateProcessor(OutputStream out, Map<Integer, ClassDefinition> classes, Map<Integer, String> strings) {
+    public StringUpdateProcessor(OutputStream out, Map<Integer, ClassDefinition> classes, Collection<HprofString> strings) {
         super(out);
         this.strings = strings;
         this.classes = classes;
@@ -33,8 +36,8 @@ public class StringUpdateProcessor extends CopyProcessor {
         super.onHeader(text, idSize, timeHigh, timeLow);
         // Write all updated strings
         HprofWriter writer = new HprofWriter(out);
-        for (Map.Entry<Integer, String> e : strings.entrySet()) {
-            writer.writeStringRecord(e.getKey(), 0, e.getValue());
+        for (HprofString string : strings) {
+            writer.writeStringRecord(string);
         }
     }
 

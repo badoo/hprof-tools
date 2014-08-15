@@ -3,6 +3,7 @@ package com.badoo.hprof.library;
 import com.badoo.hprof.library.heap.HeapTag;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.ConstantField;
+import com.badoo.hprof.library.model.HprofString;
 import com.badoo.hprof.library.model.InstanceField;
 import com.badoo.hprof.library.model.StaticField;
 
@@ -61,14 +62,12 @@ public class HprofWriter {
     /**
      * Write a string record (including the header).
      *
-     * @param id        The string id
-     * @param timestamp Timestamp for the record
      * @param string    The string
      */
-    public void writeStringRecord(int id, int timestamp, String string) throws IOException {
-        byte[] stringData = string.getBytes();
-        writeRecordHeader(Tag.STRING, timestamp, stringData.length + 4);
-        writeInt(out, id);
+    public void writeStringRecord(HprofString string) throws IOException {
+        byte[] stringData = string.getValue().getBytes();
+        writeRecordHeader(Tag.STRING, string.getTimestamp(), stringData.length + 4);
+        writeInt(out, string.getId());
         write(out, stringData);
     }
 
