@@ -1,11 +1,13 @@
 package com.badoo.hprof.library;
 
 import com.badoo.hprof.library.model.ClassDefinition;
+import com.badoo.hprof.library.model.HprofString;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 import static com.badoo.hprof.library.StreamUtil.readInt;
+import static com.badoo.hprof.library.StreamUtil.readString;
 
 /**
  * Created by Erik Andre on 12/07/2014.
@@ -79,4 +81,9 @@ public class HprofReader {
         processor.onHeader(text, idSize, timeHigh, timeLow);
     }
 
+    public HprofString readStringRecord(int recordLength, int timestamp) throws IOException {
+        int id = readInt(in);
+        String string = readString(in, recordLength - 4);
+        return new HprofString(id, string, timestamp);
+    }
 }

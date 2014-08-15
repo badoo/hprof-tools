@@ -61,12 +61,13 @@ public class HprofWriter {
     /**
      * Write a string record (including the header).
      *
-     * @param id     The string id
-     * @param string The string
+     * @param id        The string id
+     * @param timestamp Timestamp for the record
+     * @param string    The string
      */
-    public void writeStringRecord(int id, String string) throws IOException {
+    public void writeStringRecord(int id, int timestamp, String string) throws IOException {
         byte[] stringData = string.getBytes();
-        writeRecordHeader(Tag.STRING, 0, stringData.length + 4);
+        writeRecordHeader(Tag.STRING, timestamp, stringData.length + 4);
         writeInt(out, id);
         write(out, stringData);
     }

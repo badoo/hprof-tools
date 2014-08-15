@@ -34,7 +34,7 @@ public class StringUpdateProcessor extends CopyProcessor {
         // Write all updated strings
         HprofWriter writer = new HprofWriter(out);
         for (Map.Entry<Integer, String> e : strings.entrySet()) {
-            writer.writeStringRecord(e.getKey(), e.getValue());
+            writer.writeStringRecord(e.getKey(), 0, e.getValue());
         }
     }
 
