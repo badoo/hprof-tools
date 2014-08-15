@@ -56,9 +56,9 @@ public class HprofReaderTest {
     @Test
     public void readStrings() throws IOException {
         // Setup data
-        writer.writeStringRecord(0, 0, STRING_A);
-        writer.writeStringRecord(1, 1, STRING_B);
-        writer.writeStringRecord(2, 2, STRING_C);
+        writer.writeStringRecord(new HprofString(0, STRING_A, 0));
+        writer.writeStringRecord(new HprofString(1, STRING_B, 1));
+        writer.writeStringRecord(new HprofString(2, STRING_C, 2));
         // Verify
         final AtomicInteger calls = new AtomicInteger(0);
         HprofProcessor processor = new DiscardProcessor() {

@@ -32,12 +32,29 @@ import proguard.obfuscate.MappingReader;
  */
 public class HprofUnobfuscator implements MappingProcessor {
 
+    private static class FieldInfo {
+
+        final String className;
+        final String fieldType;
+        final String fieldName;
+        final String obfuscatedFieldName;
+
+        private FieldInfo(String className, String fieldType, String fieldName, String obfuscatedFieldName) {
+            this.className = className;
+            this.fieldType = fieldType;
+            this.fieldName = fieldName;
+            this.obfuscatedFieldName = obfuscatedFieldName;
+        }
+    }
+
     private Map<String, String> classNameMapping = new HashMap<String, String>();
     // Map of class name -> Map of obfuscated field name -> FieldInfo
     private Map<String, Map<String, FieldInfo>> fieldMapping = new HashMap<String, Map<String, FieldInfo>>();
     // Map of string id -> string
     private Map<Integer, HprofString> hprofStrings;
     private boolean debug;
+
+
     public HprofUnobfuscator(String mappingFile, String hprofFile, String outFile) {
         MappingReader mappingReader = new MappingReader(new File(mappingFile));
         try {
@@ -129,24 +146,6 @@ public class HprofUnobfuscator implements MappingProcessor {
     @Override
     public void processMethodMapping(String className, int firstLineNumber, int lastLineNumber, String methodReturnType, String methodName, String methodArguments, String newMethodName) {
         // Not used since hprof files do not contain method information
-    }
-
-    private static class FieldInfo {
-
-        final String className;
-
-        final String fieldType;
-
-        final String fieldName;
-
-        final String obfuscatedFieldName;
-
-        private FieldInfo(String className, String fieldType, String fieldName, String obfuscatedFieldName) {
-            this.className = className;
-            this.fieldType = fieldType;
-            this.fieldName = fieldName;
-            this.obfuscatedFieldName = obfuscatedFieldName;
-        }
     }
 
 }
