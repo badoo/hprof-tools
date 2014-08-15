@@ -1,5 +1,6 @@
 package com.badoo.hprof.library;
 
+import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.HprofString;
 import com.badoo.hprof.library.processor.DiscardProcessor;
 
@@ -24,6 +25,10 @@ public class HprofReaderTest {
     private static final String STRING_A = "a";
     private static final String STRING_B = "b";
     private static final String STRING_C = "c";
+    private static final int SERIAL = 123;
+    private static final int OBJECT_ID = 666;
+    private static final int STACK_SERIAL = 999;
+    private static final int NAME_ID = 2;
 
 
     private ByteArrayOutputStream buffer;
@@ -95,4 +100,30 @@ public class HprofReaderTest {
         }
         assertEquals(3, calls.get());
     }
+
+    @Test
+    public void readLoadClassRecord() throws IOException {
+        ClassDefinition cls = new ClassDefinition(SERIAL, OBJECT_ID, STACK_SERIAL, NAME_ID);
+        writer.writeLoadClassRecord(cls);
+        // Verify written data
+        final AtomicBoolean called = new AtomicBoolean(false);
+        HprofProcessor processor = new DiscardProcessor() {
+
+            @Override
+            public void onRecord(int tag, int timestamp, int length, HprofReader reader) throws IOException {
+                called.set(true);
+                ClassDefinition readCls = reader.readLoadClassRecord();
+                assertEquals(SERIAL, readCls.getSerialNumber());
+                assertEquals(OBJECT_ID, readCls.getObjectId());
+                assertEquals(STACK_SERIAL, readCls.getStackTraceSerial());
+                assertEquals(NAME_ID, readCls.getNameStringId());
+            }
+        };
+        HprofReader reader = new HprofReader(new ByteArrayInputStream(buffer.toByteArray()), processor);
+        while (reader.hasNext()) {
+            reader.next();
+        }
+        assertTrue(called.get());
+    }
+
 }

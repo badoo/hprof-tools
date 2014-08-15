@@ -60,7 +60,7 @@ public class HprofWriter {
     }
 
     /**
-     * Write a string record (including the header).
+     * Write a STRING record.
      *
      * @param string    The string
      */
@@ -69,6 +69,20 @@ public class HprofWriter {
         writeRecordHeader(Tag.STRING, string.getTimestamp(), stringData.length + 4);
         writeInt(out, string.getId());
         write(out, stringData);
+    }
+
+    /**
+     * Write a LOAD_CLASS record, containing some of the fields of a ClassDefinition.
+     *
+     * @param cls The class definition to write
+     * @throws IOException
+     */
+    public void writeLoadClassRecord(ClassDefinition cls) throws IOException {
+        writeRecordHeader(Tag.LOAD_CLASS, cls.getTimestamp(), 16);
+        writeInt(out, cls.getSerialNumber());
+        writeInt(out, cls.getObjectId());
+        writeInt(out, cls.getStackTraceSerial());
+        writeInt(out, cls.getNameStringId());
     }
 
     // Methods for writing heap records

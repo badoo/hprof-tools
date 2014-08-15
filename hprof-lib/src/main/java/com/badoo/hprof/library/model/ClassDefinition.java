@@ -8,7 +8,7 @@ import java.util.List;
  * <p/>
  * Created by Erik Andre on 17/07/2014.
  */
-public class ClassDefinition {
+public class ClassDefinition extends Record {
 
     private static final List<ConstantField> NO_CONSTANT_FIELDS = new ArrayList<ConstantField>(0);
     private static final List<StaticField> NO_STATIC_FIELDS = new ArrayList<StaticField>(0);
