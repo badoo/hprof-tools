@@ -44,11 +44,15 @@ public class HprofReader {
         readCount++;
     }
 
+    public InputStream getInputStream() {
+        return in;
+    }
+
     private void readRecord() throws IOException {
         int tagValue = in.read(); // 1 byte tag, see definitions in Tag
         int time = readInt(in);
         int size = readInt(in);
-        processor.onRecord(tagValue, time, size, in);
+        processor.onRecord(tagValue, time, size, this);
     }
 
     private void readHeader() throws IOException {

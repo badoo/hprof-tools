@@ -2,6 +2,7 @@ package com.badoo.hprof.library.processor;
 
 
 import com.badoo.hprof.library.HprofProcessor;
+import com.badoo.hprof.library.HprofReader;
 import com.badoo.hprof.library.HprofWriter;
 
 import java.io.IOException;
@@ -29,8 +30,8 @@ public class CopyProcessor implements HprofProcessor {
     }
 
     @Override
-    public void onRecord(int tag, int timestamp, int length, InputStream in) throws IOException {
+    public void onRecord(int tag, int timestamp, int length, HprofReader reader) throws IOException {
         writer.writeRecordHeader(tag, timestamp, length);
-        copy(in, out, length);
+        copy(reader.getInputStream(), out, length);
     }
 }

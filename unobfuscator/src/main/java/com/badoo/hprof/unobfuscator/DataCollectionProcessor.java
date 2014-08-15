@@ -1,5 +1,6 @@
 package com.badoo.hprof.unobfuscator;
 
+import com.badoo.hprof.library.HprofReader;
 import com.badoo.hprof.library.Tag;
 import com.badoo.hprof.library.heap.HeapDumpReader;
 import com.badoo.hprof.library.heap.HeapTag;
@@ -20,6 +21,7 @@ import java.util.Set;
 
 import static com.badoo.hprof.library.StreamUtil.read;
 import static com.badoo.hprof.library.StreamUtil.readInt;
+import static com.badoo.hprof.library.StreamUtil.readString;
 
 /**
  * Created by Erik Andre on 13/08/2014.
@@ -61,27 +63,24 @@ public class DataCollectionProcessor extends DiscardProcessor {
     }
 
     @Override
-    public void onRecord(int tag, int timestamp, int length, InputStream in) throws IOException {
+    public void onRecord(int tag, int timestamp, int length, HprofReader reader) throws IOException {
+        InputStream in = reader.getInputStream();
         if (tag == Tag.HEAP_DUMP || tag == Tag.HEAP_DUMP_SEGMENT) {
-            // Write the record to output but keep a copy to process
-            byte[] record = new byte[length];
-            in.read(record);
+            byte[] record = read(in, length);
             readHeapDump(record);
         }
         else if (tag == Tag.STRING) {
             int stringId = readInt(in);
-            lastStringId = Math.max(lastStringId, stringId);
-            byte[] data = read(in, length - 4);
-            String string = new String(data);
-            strings.put(stringId, string);
+            lastStringId = Math.max(lastStringId, stringId); // Keep track of the highest string id encountered so that we can add new ids later without having a collision
+            strings.put(stringId, readString(in, length - 4));
         }
-        else if (tag == Tag.LOAD_CLASS) {
+        else if (tag == Tag.LOAD_CLASS) { // ClassDefinitions are first created from a LOAD_CLASS record and then populate from a DUMP_CLASS heap record
             byte[] data = read(in, length);
             ClassDefinition classDef = ClassDefinition.createFromLoadClassData(new ByteArrayInputStream(data));
             classes.put(classDef.getObjectId(), classDef);
         }
         else {
-            super.onRecord(tag, timestamp, length, in); // Discard
+            super.onRecord(tag, timestamp, length, reader); // Discard
         }
     }
 

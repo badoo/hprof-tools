@@ -2,6 +2,7 @@ package com.badoo.hprof.library.processor;
 
 
 import com.badoo.hprof.library.HprofProcessor;
+import com.badoo.hprof.library.HprofReader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +20,7 @@ public class DiscardProcessor implements HprofProcessor {
     }
 
     @Override
-    public void onRecord(int tag, int timestamp, int length, InputStream in) throws IOException {
-        in.skip(length);
+    public void onRecord(int tag, int timestamp, int length, HprofReader reader) throws IOException {
+        reader.getInputStream().skip(length);
     }
 }
