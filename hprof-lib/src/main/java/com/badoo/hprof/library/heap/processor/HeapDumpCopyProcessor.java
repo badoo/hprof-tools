@@ -1,12 +1,13 @@
 package com.badoo.hprof.library.heap.processor;
 
+import com.badoo.hprof.library.heap.HeapDumpReader;
+
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
  * A HeapDumpProcessor that reads each record and discards the data
- *
+ * <p/>
  * Created by Erik Andre on 14/08/2014.
  */
 public class HeapDumpCopyProcessor extends HeapDumpBaseProcessor {
@@ -18,7 +19,7 @@ public class HeapDumpCopyProcessor extends HeapDumpBaseProcessor {
     }
 
     @Override
-    public void onHeapRecord(int tag, InputStream in) throws IOException {
-        copyHeapRecord(tag, in, out);
+    public void onHeapRecord(int tag, HeapDumpReader reader) throws IOException {
+        copyHeapRecord(tag, reader.getInputStream(), out);
     }
 }

@@ -1,6 +1,7 @@
 package com.badoo.hprof.library.heap.processor;
 
 import com.badoo.hprof.library.heap.HeapDumpProcessor;
+import com.badoo.hprof.library.heap.HeapDumpReader;
 import com.badoo.hprof.library.heap.HeapTag;
 import com.badoo.hprof.library.model.BasicType;
 
@@ -20,7 +21,7 @@ import static com.badoo.hprof.library.StreamUtil.writeShort;
 public abstract class HeapDumpBaseProcessor implements HeapDumpProcessor {
 
     @Override
-    public abstract void onHeapRecord(int tag, InputStream in) throws IOException;
+    public abstract void onHeapRecord(int tag, HeapDumpReader reader) throws IOException;
 
     protected void skipHeapRecord(int tag, InputStream in) throws IOException {
         switch (tag) {

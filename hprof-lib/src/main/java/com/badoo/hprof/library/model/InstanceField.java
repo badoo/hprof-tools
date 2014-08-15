@@ -17,13 +17,13 @@ public class InstanceField implements NamedField {
         return type;
     }
 
+    public void setType(BasicType type) {
+        this.type = type;
+    }
+
     @Override
     public int getFieldNameId() {
         return nameId;
-    }
-
-    public void setType(BasicType type) {
-        this.type = type;
     }
 
     @Override

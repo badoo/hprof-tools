@@ -2,7 +2,7 @@ package com.badoo.hprof.library.model;
 
 /**
  * Base class for named fields (instance and static fields)
- *
+ * <p/>
  * Created by Erik Andre on 14/08/2014.
  */
 public interface NamedField {

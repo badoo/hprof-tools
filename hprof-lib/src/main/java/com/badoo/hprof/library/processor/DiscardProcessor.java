@@ -5,7 +5,6 @@ import com.badoo.hprof.library.HprofProcessor;
 import com.badoo.hprof.library.HprofReader;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * Created by Erik Andre on 13/07/2014.

@@ -7,7 +7,7 @@ import java.io.OutputStream;
 
 /**
  * Utility class containing methods to read and write to streams.
- *
+ * <p/>
  * Created by Erik Andre on 13/07/2014.
  */
 public class StreamUtil {

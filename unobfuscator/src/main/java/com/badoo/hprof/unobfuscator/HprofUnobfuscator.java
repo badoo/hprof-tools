@@ -19,35 +19,17 @@ import proguard.obfuscate.MappingReader;
 
 /**
  * Unobfuscator for hprof files obfuscated using proguard/dexguard.
- *
+ * <p/>
  * Unobfuscation is performed in two passes over the input file:
- *
- *  1. Read all strings, class and field names. Deduplicate all shared strings for field names.
- *  2. Write a modified copy of the input file with strings modified.
- *
- *  Input is the mapping file and the obfuscated hprof file.
- *
+ * <p/>
+ * 1. Read all strings, class and field names. Deduplicate all shared strings for field names.
+ * 2. Write a modified copy of the input file with strings modified.
+ * <p/>
+ * Input is the mapping file and the obfuscated hprof file.
+ * <p/>
  * Created by Erik Andre on 13/08/2014.
  */
 public class HprofUnobfuscator implements MappingProcessor {
-
-    private static class FieldInfo {
-
-        final String className;
-
-        final String fieldType;
-
-        final String fieldName;
-
-        final String obfuscatedFieldName;
-
-        private FieldInfo(String className, String fieldType, String fieldName, String obfuscatedFieldName) {
-            this.className = className;
-            this.fieldType = fieldType;
-            this.fieldName = fieldName;
-            this.obfuscatedFieldName = obfuscatedFieldName;
-        }
-    }
 
     private Map<String, String> classNameMapping = new HashMap<String, String>();
     // Map of class name -> Map of obfuscated field name -> FieldInfo
@@ -55,8 +37,6 @@ public class HprofUnobfuscator implements MappingProcessor {
     // Map of string id -> string
     private Map<Integer, String> hprofStrings;
     private boolean debug;
-
-
     public HprofUnobfuscator(String mappingFile, String hprofFile, String outFile) {
         MappingReader mappingReader = new MappingReader(new File(mappingFile));
         try {
@@ -100,6 +80,11 @@ public class HprofUnobfuscator implements MappingProcessor {
         }
     }
 
+    public static void main(String args[]) {
+        //TODO Remove hard coded strings
+        new HprofUnobfuscator("/Users/erikandre/temp/hprof/mapping.txt", "/Users/erikandre/temp/hprof/obfuscated.hprof", "/Users/erikandre/temp/hprof/out.hprof");
+    }
+
     private void unobfuscateClassName(ClassDefinition cls) {
         String name = hprofStrings.get(cls.getNameStringId());
         if (classNameMapping.containsKey(name)) {
@@ -118,11 +103,6 @@ public class HprofUnobfuscator implements MappingProcessor {
             }
             hprofStrings.put(field.getFieldNameId(), mappedFields.get(obfuscatedFieldName).fieldName);
         }
-    }
-
-    public static void main(String args[]) {
-        //TODO Remove hard coded strings
-        new HprofUnobfuscator("/Users/erikandre/temp/hprof/mapping.txt", "/Users/erikandre/temp/hprof/obfuscated.hprof", "/Users/erikandre/temp/hprof/out.hprof");
     }
 
     @Override
@@ -148,6 +128,24 @@ public class HprofUnobfuscator implements MappingProcessor {
     @Override
     public void processMethodMapping(String className, int firstLineNumber, int lastLineNumber, String methodReturnType, String methodName, String methodArguments, String newMethodName) {
         // Not used since hprof files do not contain method information
+    }
+
+    private static class FieldInfo {
+
+        final String className;
+
+        final String fieldType;
+
+        final String fieldName;
+
+        final String obfuscatedFieldName;
+
+        private FieldInfo(String className, String fieldType, String fieldName, String obfuscatedFieldName) {
+            this.className = className;
+            this.fieldType = fieldType;
+            this.fieldName = fieldName;
+            this.obfuscatedFieldName = obfuscatedFieldName;
+        }
     }
 
 }

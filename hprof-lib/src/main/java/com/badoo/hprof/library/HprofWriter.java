@@ -17,7 +17,7 @@ import static com.badoo.hprof.library.StreamUtil.writeShort;
 
 /**
  * Class containing methods for writing hprof files
- *
+ * <p/>
  * Created by Erik Andre on 13/07/2014.
  */
 public class HprofWriter {
@@ -31,10 +31,10 @@ public class HprofWriter {
     /**
      * Write the header that is present in the beginning of all hprof files.
      *
-     * @param text A magic text identifying the version and type of hprof file
-     * @param idSize Size in bytes for all ID fields
+     * @param text     A magic text identifying the version and type of hprof file
+     * @param idSize   Size in bytes for all ID fields
      * @param timeHigh High four bytes of the file timestamp, all other 2-byte timestamps in the file are relative to this
-     * @param timeLow Low four bytes of the file timestamp
+     * @param timeLow  Low four bytes of the file timestamp
      * @throws IOException
      */
     public void writeHprofFileHeader(String text, int idSize, int timeHigh, int timeLow) throws IOException {
@@ -47,9 +47,9 @@ public class HprofWriter {
     /**
      * Write a record header
      *
-     * @param tag The tag, see definitions in Tag
+     * @param tag       The tag, see definitions in Tag
      * @param timestamp Timestamp for the record
-     * @param length Length in bytes of the record (not including the header)
+     * @param length    Length in bytes of the record (not including the header)
      * @throws IOException
      */
     public void writeRecordHeader(int tag, int timestamp, int length) throws IOException {
@@ -61,7 +61,7 @@ public class HprofWriter {
     /**
      * Write a string record (including the header).
      *
-     * @param id The string id
+     * @param id     The string id
      * @param string The string
      */
     public void writeStringRecord(int id, String string) throws IOException {

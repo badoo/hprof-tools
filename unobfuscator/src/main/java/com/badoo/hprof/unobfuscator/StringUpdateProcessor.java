@@ -11,7 +11,6 @@ import com.badoo.hprof.library.processor.CopyProcessor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
@@ -20,28 +19,9 @@ import java.util.Map;
  */
 public class StringUpdateProcessor extends CopyProcessor {
 
-    private class ClassDefinitionRemoverProcessor extends HeapDumpBaseProcessor {
-
-        private final OutputStream out;
-
-        public ClassDefinitionRemoverProcessor(OutputStream out) {
-            this.out = out;
-        }
-
-        @Override
-        public void onHeapRecord(int tag, InputStream in) throws IOException {
-            if (tag == HeapTag.CLASS_DUMP) {
-                skipHeapRecord(tag, in); // Discard all class definitions since we are writing an updated version instead
-            } else {
-                copyHeapRecord(tag, in, out);
-            }
-        }
-    }
-
     private final Map<Integer, String> strings;
     private final Map<Integer, ClassDefinition> classes;
     private boolean writeUpdatedClassDefinitions = true;
-
     public StringUpdateProcessor(OutputStream out, Map<Integer, ClassDefinition> classes, Map<Integer, String> strings) {
         super(out);
         this.strings = strings;
@@ -62,7 +42,8 @@ public class StringUpdateProcessor extends CopyProcessor {
     public void onRecord(int tag, int timestamp, int length, HprofReader reader) throws IOException {
         if (tag == Tag.STRING) {
             reader.getInputStream().skip(length); // Discard all the original strings
-        } else if (tag == Tag.HEAP_DUMP || tag == Tag.HEAP_DUMP_SEGMENT) {
+        }
+        else if (tag == Tag.HEAP_DUMP || tag == Tag.HEAP_DUMP_SEGMENT) {
             if (writeUpdatedClassDefinitions) {
                 // Write the updated class definitions before continuing with the existing data
                 writeClasses(tag, timestamp);
@@ -93,5 +74,24 @@ public class StringUpdateProcessor extends CopyProcessor {
         byte[] data = buffer.toByteArray();
         writer.writeRecordHeader(tag, timestamp, data.length);
         out.write(data);
+    }
+
+    private class ClassDefinitionRemoverProcessor extends HeapDumpBaseProcessor {
+
+        private final OutputStream out;
+
+        public ClassDefinitionRemoverProcessor(OutputStream out) {
+            this.out = out;
+        }
+
+        @Override
+        public void onHeapRecord(int tag, HeapDumpReader reader) throws IOException {
+            if (tag == HeapTag.CLASS_DUMP) {
+                skipHeapRecord(tag, reader.getInputStream()); // Discard all class definitions since we are writing an updated version instead
+            }
+            else {
+                copyHeapRecord(tag, reader.getInputStream(), out);
+            }
+        }
     }
 }

@@ -6,7 +6,6 @@ import com.badoo.hprof.library.HprofReader;
 import com.badoo.hprof.library.HprofWriter;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 import static com.badoo.hprof.library.StreamUtil.copy;

@@ -1,5 +1,7 @@
 package com.badoo.hprof.library;
 
+import com.badoo.hprof.library.model.ClassDefinition;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -46,6 +48,20 @@ public class HprofReader {
 
     public InputStream getInputStream() {
         return in;
+    }
+
+    /**
+     * Read a LOAD_CLASS record and create a class definition for the loaded class.
+     *
+     * @return A ClassDefinition with some fields filled in (Serial number, class object id, stack trace serial & class name string id)
+     * @throws IOException
+     */
+    public ClassDefinition readLoadClassRecord() throws IOException {
+        int serialNumber = readInt(in);
+        int classObjectId = readInt(in);
+        int stackTraceSerial = readInt(in);
+        int classNameStringId = readInt(in);
+        return new ClassDefinition(serialNumber, classObjectId, stackTraceSerial, classNameStringId);
     }
 
     private void readRecord() throws IOException {

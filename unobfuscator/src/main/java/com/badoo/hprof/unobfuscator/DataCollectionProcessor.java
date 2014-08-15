@@ -28,26 +28,6 @@ import static com.badoo.hprof.library.StreamUtil.readString;
  */
 public class DataCollectionProcessor extends DiscardProcessor {
 
-    class ClassDumpProcessor extends HeapDumpDiscardProcessor {
-
-        @Override
-        public void onHeapRecord(int tag, InputStream in) throws IOException {
-            if (tag == HeapTag.CLASS_DUMP) {
-                int objectId = readInt(in);
-                ClassDefinition classDef = classes.get(objectId);
-                if (classDef == null) {
-                    throw new IllegalStateException("Class with id " + objectId + " no loaded before reading class dump!");
-                }
-                classDef.populateFromClassDump(in);
-                // Since the names of obfuscated fields are shared between classes we need to deduplicate the references, otherwise we cannot deobfuscate them independently
-                deduplicateStrings(classDef);
-            }
-            else {
-                super.onHeapRecord(tag, in);
-            }
-        }
-    }
-
     private ClassDumpProcessor classDumpProcessor = new ClassDumpProcessor();
     private Map<Integer, String> strings = new HashMap<Integer, String>();
     private Map<Integer, ClassDefinition> classes = new HashMap<Integer, ClassDefinition>();
@@ -75,8 +55,7 @@ public class DataCollectionProcessor extends DiscardProcessor {
             strings.put(stringId, readString(in, length - 4));
         }
         else if (tag == Tag.LOAD_CLASS) { // ClassDefinitions are first created from a LOAD_CLASS record and then populate from a DUMP_CLASS heap record
-            byte[] data = read(in, length);
-            ClassDefinition classDef = ClassDefinition.createFromLoadClassData(new ByteArrayInputStream(data));
+            ClassDefinition classDef = reader.readLoadClassRecord();
             classes.put(classDef.getObjectId(), classDef);
         }
         else {
@@ -111,7 +90,8 @@ public class DataCollectionProcessor extends DiscardProcessor {
             field.setFieldNameId(newId);
             strings.put(newId, value);
             referencedStringIds.add(newId); // Just in case
-        } else {
+        }
+        else {
             referencedStringIds.add(field.getFieldNameId());
         }
     }
@@ -119,6 +99,26 @@ public class DataCollectionProcessor extends DiscardProcessor {
     private int createNewStringId() {
         lastStringId++;
         return lastStringId;
+    }
+
+    class ClassDumpProcessor extends HeapDumpDiscardProcessor {
+
+        @Override
+        public void onHeapRecord(int tag, HeapDumpReader reader) throws IOException {
+            if (tag == HeapTag.CLASS_DUMP) {
+                int objectId = readInt(reader.getInputStream());
+                ClassDefinition classDef = classes.get(objectId);
+                if (classDef == null) {
+                    throw new IllegalStateException("Class with id " + objectId + " no loaded before reading class dump!");
+                }
+                reader.readClassDumpRecord(classDef);
+                // Since the names of obfuscated fields are shared between classes we need to deduplicate the references, otherwise we cannot deobfuscate them independently
+                deduplicateStrings(classDef);
+            }
+            else {
+                super.onHeapRecord(tag, reader);
+            }
+        }
     }
 
 

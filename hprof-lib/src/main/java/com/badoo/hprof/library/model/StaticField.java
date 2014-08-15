@@ -3,7 +3,7 @@ package com.badoo.hprof.library.model;
 /**
  * Created by Erik Andre on 24/06/2014.
  */
-public class StaticField implements NamedField{
+public class StaticField implements NamedField {
 
     private BasicType type;
 
@@ -21,21 +21,21 @@ public class StaticField implements NamedField{
         return type;
     }
 
+    public void setType(BasicType type) {
+        this.type = type;
+    }
+
     public byte[] getValue() {
         return value;
+    }
+
+    public void setValue(byte[] value) {
+        this.value = value;
     }
 
     @Override
     public int getFieldNameId() {
         return fieldNameId;
-    }
-
-    public void setType(BasicType type) {
-        this.type = type;
-    }
-
-    public void setValue(byte[] value) {
-        this.value = value;
     }
 
     @Override

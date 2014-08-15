@@ -1,7 +1,8 @@
 package com.badoo.hprof.library.heap.processor;
 
+import com.badoo.hprof.library.heap.HeapDumpReader;
+
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * A HeapDumpProcessor that reads each record and discards the data
@@ -11,7 +12,7 @@ import java.io.InputStream;
 public class HeapDumpDiscardProcessor extends HeapDumpBaseProcessor {
 
     @Override
-    public void onHeapRecord(int tag, InputStream in) throws IOException {
-       skipHeapRecord(tag, in);
+    public void onHeapRecord(int tag, HeapDumpReader reader) throws IOException {
+        skipHeapRecord(tag, reader.getInputStream());
     }
 }

@@ -2,7 +2,7 @@ package com.badoo.hprof.library.model;
 
 /**
  * Definitions of the basic types supported by Java.
- *
+ * <p/>
  * Created by Erik Andre on 21/06/2014.
  */
 public enum BasicType {
