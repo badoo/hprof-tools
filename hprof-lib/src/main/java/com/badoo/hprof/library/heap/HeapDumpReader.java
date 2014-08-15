@@ -28,10 +28,21 @@ public class HeapDumpReader {
         this.length = length;
     }
 
+    /**
+     * Returns true if there is more data to be read (You can call next())
+     *
+     * @return True if there is more data to be read.
+     * @throws IOException
+     */
     public boolean hasNext() throws IOException {
         return in.getCount() < length;
     }
 
+    /**
+     * Read the next record. This will trigger a callback to the processor.
+     *
+     * @throws IOException
+     */
     public void next() throws IOException {
         int tag = in.read();
         processor.onHeapRecord(tag, in);

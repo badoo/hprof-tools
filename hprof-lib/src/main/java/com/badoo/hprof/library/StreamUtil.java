@@ -6,9 +6,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
+ * Utility class containing methods to read and write to streams.
+ *
  * Created by Erik Andre on 13/07/2014.
  */
-public class IoUtil {
+public class StreamUtil {
 
     public static String readNullTerminatedString(InputStream in) throws IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -22,15 +24,27 @@ public class IoUtil {
         return new String(buffer.toByteArray());
     }
 
+    public static String readString(InputStream in, int length) throws IOException {
+        byte[] buffer = new byte[length];
+        in.read(buffer);
+        return new String(buffer);
+    }
+
+    public static void writeString(OutputStream out, String str) throws IOException {
+        out.write(str.getBytes());
+    }
+
     public static void writeNullTerminatedString(OutputStream out, String str) throws IOException {
         out.write(str.getBytes());
         out.write(0);
     }
 
-    public static String readString(InputStream in, int length) throws IOException {
-        byte[] buffer = new byte[length];
-        in.read(buffer);
-        return new String(buffer);
+    public static void writeByte(OutputStream out, int value) throws IOException {
+        out.write(value);
+    }
+
+    public static int readByte(InputStream in) throws IOException {
+        return in.read();
     }
 
     public static int readInt(InputStream in) throws IOException {
@@ -64,6 +78,10 @@ public class IoUtil {
         byte[] data = new byte[length];
         in.read(data);
         return data;
+    }
+
+    public static void write(OutputStream out, byte[] data) throws IOException {
+        out.write(data);
     }
 
 }

@@ -18,8 +18,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static com.badoo.hprof.library.IoUtil.read;
-import static com.badoo.hprof.library.IoUtil.readInt;
+import static com.badoo.hprof.library.StreamUtil.read;
+import static com.badoo.hprof.library.StreamUtil.readInt;
 
 /**
  * Created by Erik Andre on 13/08/2014.

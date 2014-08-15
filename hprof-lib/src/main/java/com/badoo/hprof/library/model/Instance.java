@@ -6,11 +6,8 @@ package com.badoo.hprof.library.model;
 public class Instance {
 
     private final int objectId;
-
     private final int stackTraceSerialId;
-
     private final int classObjectId;
-
     private final byte[] instanceFieldData;
 
     public Instance(int objectId, int stackTraceSerialId, int classObjectId, byte[] instanceFieldData) {

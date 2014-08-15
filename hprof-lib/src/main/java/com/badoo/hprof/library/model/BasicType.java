@@ -1,6 +1,8 @@
 package com.badoo.hprof.library.model;
 
 /**
+ * Definitions of the basic types supported by Java.
+ *
  * Created by Erik Andre on 21/06/2014.
  */
 public enum BasicType {
@@ -15,7 +17,14 @@ public enum BasicType {
     INT(10, 4),
     LONG(11, 8);
 
+    /**
+     * Type identifier (byte)
+     */
     public final int type;
+
+    /**
+     * Size in bytes for a field of this type
+     */
     public final int size;
 
     BasicType(int type, int size) {
@@ -23,6 +32,12 @@ public enum BasicType {
         this.size = size;
     }
 
+    /**
+     * Get the BasicType based on its type value (as read from the hprof file)
+     *
+     * @param type The type value
+     * @return A BasicType matching the type value
+     */
     public static BasicType fromType(int type) {
         switch (type) {
             case 2:

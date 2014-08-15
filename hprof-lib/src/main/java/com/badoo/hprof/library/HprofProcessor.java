@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
+ * Callback interface used by HprofReader to notify that data is being read.
+ *
  * Created by Erik Andre on 12/07/2014.
  */
 public interface HprofProcessor {

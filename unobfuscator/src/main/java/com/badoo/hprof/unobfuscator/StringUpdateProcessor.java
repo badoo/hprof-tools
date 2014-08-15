@@ -5,8 +5,6 @@ import com.badoo.hprof.library.Tag;
 import com.badoo.hprof.library.heap.HeapDumpReader;
 import com.badoo.hprof.library.heap.HeapTag;
 import com.badoo.hprof.library.heap.processor.HeapDumpBaseProcessor;
-import com.badoo.hprof.library.heap.processor.HeapDumpCopyProcessor;
-import com.badoo.hprof.library.heap.processor.HeapDumpDiscardProcessor;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.processor.CopyProcessor;
 
@@ -16,7 +14,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
-import static com.badoo.hprof.library.IoUtil.writeInt;
+import static com.badoo.hprof.library.StreamUtil.writeInt;
 
 /**
  * Created by Erik Andre on 14/08/2014.

@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import static com.badoo.hprof.library.IoUtil.copy;
+import static com.badoo.hprof.library.StreamUtil.copy;
 
 /**
  * Created by Erik Andre on 13/07/2014.
@@ -25,7 +25,7 @@ public class CopyProcessor implements HprofProcessor {
 
     @Override
     public void onHeader(String text, int idSize, int timeHigh, int timeLow) throws IOException {
-        writer.writeHeader(text, idSize, timeHigh, timeLow);
+        writer.writeHprofFileHeader(text, idSize, timeHigh, timeLow);
     }
 
     @Override

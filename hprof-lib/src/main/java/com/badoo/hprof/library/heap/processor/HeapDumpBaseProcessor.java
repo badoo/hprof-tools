@@ -8,11 +8,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import static com.badoo.hprof.library.IoUtil.copy;
-import static com.badoo.hprof.library.IoUtil.readInt;
-import static com.badoo.hprof.library.IoUtil.readShort;
-import static com.badoo.hprof.library.IoUtil.writeInt;
-import static com.badoo.hprof.library.IoUtil.writeShort;
+import static com.badoo.hprof.library.StreamUtil.copy;
+import static com.badoo.hprof.library.StreamUtil.readInt;
+import static com.badoo.hprof.library.StreamUtil.readShort;
+import static com.badoo.hprof.library.StreamUtil.writeInt;
+import static com.badoo.hprof.library.StreamUtil.writeShort;
 
 /**
  * Created by Erik Andre on 14/08/2014.

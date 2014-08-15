@@ -2,7 +2,6 @@ package com.badoo.hprof.library.model;
 
 import com.badoo.hprof.library.heap.HeapTag;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -10,12 +9,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.badoo.hprof.library.IoUtil.readInt;
-import static com.badoo.hprof.library.IoUtil.readShort;
-import static com.badoo.hprof.library.IoUtil.writeInt;
-import static com.badoo.hprof.library.IoUtil.writeShort;
+import static com.badoo.hprof.library.StreamUtil.read;
+import static com.badoo.hprof.library.StreamUtil.readByte;
+import static com.badoo.hprof.library.StreamUtil.readInt;
+import static com.badoo.hprof.library.StreamUtil.readShort;
+import static com.badoo.hprof.library.StreamUtil.write;
+import static com.badoo.hprof.library.StreamUtil.writeByte;
+import static com.badoo.hprof.library.StreamUtil.writeInt;
+import static com.badoo.hprof.library.StreamUtil.writeShort;
 
 /**
+ * Model for a Java class.
+ *
  * Created by Erik Andre on 17/07/2014.
  */
 public class ClassDefinition {
@@ -36,6 +41,13 @@ public class ClassDefinition {
     private List<StaticField> staticFields;
     private List<InstanceField> instanceFields;
 
+    /**
+     * Create a ClassDefinition based on the data in a LOAD_CLASS record.
+     *
+     * @param in The InputStream to read the LOAD_CLASS record from (should be position at the next byte after the record header)
+     * @return A ClassDefinition with some fields filled in (Serial number, class object id, stack trace serial & class name string id)
+     * @throws IOException
+     */
     public static ClassDefinition createFromLoadClassData(InputStream in) throws IOException {
         int serialNumber = readInt(in);
         int classObjectId = readInt(in);
@@ -65,37 +77,37 @@ public class ClassDefinition {
         protectionDomainObjectId = readInt(in);
         in.skip(8); // Reserved data
         instanceSize = readInt(in);
-
+        // Read constants fields
         short constantCount = readShort(in);
         if (constantCount > 0) {
             constantFields = new ArrayList<ConstantField>();
         }
         for (int i = 0; i < constantCount; i++) {
             short poolIndex = readShort(in);
-            BasicType type = BasicType.fromType(in.read());
-            byte[] value = new byte[type.size];
-            in.read(value);
+            BasicType type = BasicType.fromType(readByte(in));
+            byte[] value = read(in, type.size);
             constantFields.add(new ConstantField(poolIndex, type, value));
 
         }
+        // Read static fields
         short staticCount = readShort(in);
         if (staticCount > 0) {
             staticFields = new ArrayList<StaticField>();
         }
         for (int i = 0; i < staticCount; i++) {
             int nameId = readInt(in);
-            BasicType type = BasicType.fromType(in.read());
-            byte[] value = new byte[type.size];
-            in.read(value);
+            BasicType type = BasicType.fromType(readByte(in));
+            byte[] value = read(in, type.size);
             staticFields.add(new StaticField(type, value, nameId));
         }
+        // Read instance fields
         short fieldCount = readShort(in);
         if (fieldCount > 0) {
             instanceFields = new ArrayList<InstanceField>();
         }
         for (int i = 0; i < fieldCount; i++) {
             int nameId = readInt(in);
-            BasicType type = BasicType.fromType(in.read());
+            BasicType type = BasicType.fromType(readByte(in));
             instanceFields.add(new InstanceField(type, nameId));
         }
     }
@@ -189,7 +201,12 @@ public class ClassDefinition {
         return instanceFields != null ? instanceFields : Collections.EMPTY_LIST;
     }
 
-
+    /**
+     * Write this ClassDefinition to an OutputStream in the form of a CLASS_DUMP heap record (including leading CLASS_DUMP tag)
+     *
+     * @param out OutputStream to write the record to
+     * @throws IOException
+     */
     public void writeClassDump(OutputStream out) throws IOException {
         out.write(HeapTag.CLASS_DUMP);
         writeInt(out, objectId);
@@ -201,22 +218,25 @@ public class ClassDefinition {
         writeInt(out, 0); // Reserved
         writeInt(out, 0); // Reserved
         writeInt(out, instanceSize);
+        // Write constant fields
         writeShort(out, (short) getConstantFields().size());
         for (ConstantField field : getConstantFields()) {
             writeShort(out, field.getPoolIndex());
-            out.write(field.getType().type);
-            out.write(field.getValue());
+            writeByte(out, field.getType().type);
+            write(out, field.getValue());
         }
+        // Write static fields
         writeShort(out, (short) getStaticFields().size());
         for (StaticField field : getStaticFields()) {
             writeInt(out, field.getFieldNameId());
-            out.write(field.getType().type);
-            out.write(field.getValue());
+            writeByte(out, field.getType().type);
+            write(out, field.getValue());
         }
+        // Write instance fields
         writeShort(out, (short) getInstanceFields().size());
         for (InstanceField field : getInstanceFields()) {
             writeInt(out, field.getFieldNameId());
-            out.write(field.getType().type);
+            writeByte(out, field.getType().type);
         }
     }
 }
