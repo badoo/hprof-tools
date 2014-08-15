@@ -107,14 +107,9 @@ public class DataCollectionProcessor extends DiscardProcessor {
         @Override
         public void onHeapRecord(int tag, HeapDumpReader reader) throws IOException {
             if (tag == HeapTag.CLASS_DUMP) {
-                int objectId = readInt(reader.getInputStream());
-                ClassDefinition classDef = classes.get(objectId);
-                if (classDef == null) {
-                    throw new IllegalStateException("Class with id " + objectId + " no loaded before reading class dump!");
-                }
-                reader.readClassDumpRecord(classDef);
+                ClassDefinition cls = reader.readClassDumpRecord(classes);
                 // Since the names of obfuscated fields are shared between classes we need to deduplicate the references, otherwise we cannot deobfuscate them independently
-                deduplicateStrings(classDef);
+                deduplicateStrings(cls);
             }
             else {
                 super.onHeapRecord(tag, reader);

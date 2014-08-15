@@ -4,6 +4,7 @@ import com.badoo.hprof.library.HprofReader;
 import com.badoo.hprof.library.HprofWriter;
 import com.badoo.hprof.library.Tag;
 import com.badoo.hprof.library.heap.HeapDumpReader;
+import com.badoo.hprof.library.heap.HeapDumpWriter;
 import com.badoo.hprof.library.heap.HeapTag;
 import com.badoo.hprof.library.heap.processor.HeapDumpBaseProcessor;
 import com.badoo.hprof.library.model.ClassDefinition;
@@ -70,7 +71,7 @@ public class StringUpdateProcessor extends CopyProcessor {
     private void writeClasses(int tag, int timestamp) throws IOException {
         // Write all class definitions to a buffer in order to calculate the size. Uses more memory but avoids an extra pass to calculate size before writing the data
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        HprofWriter bufferWrite = new HprofWriter(buffer);
+        HeapDumpWriter bufferWrite = new HeapDumpWriter(buffer);
         for (ClassDefinition cls : classes.values()) {
             bufferWrite.writeClassDumpRecord(cls);
         }

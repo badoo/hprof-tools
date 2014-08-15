@@ -63,7 +63,12 @@ public class HprofReader {
         int classObjectId = readInt(in);
         int stackTraceSerial = readInt(in);
         int classNameStringId = readInt(in);
-        return new ClassDefinition(serialNumber, classObjectId, stackTraceSerial, classNameStringId);
+        ClassDefinition cls = new ClassDefinition();
+        cls.setSerialNumber(serialNumber);
+        cls.setObjectId(classObjectId);
+        cls.setStackTraceSerial(stackTraceSerial);
+        cls.setNameStringId(classNameStringId);
+        return cls;
     }
 
     private void readRecord() throws IOException {

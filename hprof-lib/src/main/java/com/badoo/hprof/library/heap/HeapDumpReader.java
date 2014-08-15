@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static com.badoo.hprof.library.StreamUtil.read;
 import static com.badoo.hprof.library.StreamUtil.readByte;
@@ -72,9 +73,15 @@ public class HeapDumpReader {
     /**
      * Read a class dump record. The class definition should already have been created from a LOAD_CLASS record.
      *
-     * @param cls The class definition to update with the data from the CLASS_DUMP record
+     * @param loadedClasses Map of class ids and loaded classes. The class dump being read must be in this map
      */
-    public void readClassDumpRecord(ClassDefinition cls) throws IOException {
+    public ClassDefinition readClassDumpRecord(Map<Integer, ClassDefinition> loadedClasses) throws IOException {
+        int objectId = readInt(in);
+        ClassDefinition cls = loadedClasses.get(objectId);
+        if (cls == null) {
+            throw new IllegalStateException("No class loaded for id " + objectId);
+        }
+        cls.setObjectId(objectId);
         cls.setStackTraceSerial(readInt(in));
         cls.setSuperClassObjectId(readInt(in));
         cls.setClassLoaderObjectId(readInt(in));
@@ -112,5 +119,6 @@ public class HeapDumpReader {
             BasicType type = BasicType.fromType(readByte(in));
             instanceFields.add(new InstanceField(type, nameId));
         }
+        return cls;
     }
 }

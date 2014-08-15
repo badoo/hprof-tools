@@ -14,12 +14,12 @@ public class ClassDefinition extends Record {
     private static final List<StaticField> NO_STATIC_FIELDS = new ArrayList<StaticField>(0);
     private static final List<InstanceField> NO_INSTANCE_FIELDS = new ArrayList<InstanceField>(0);
 
-
     // Fields from LOAD_CLASS
-    private final int serialNumber;
-    private final int objectId;
-    private final int nameStringId;
+    private int serialNumber;
+    private int objectId;
+    private int nameStringId;
     private int stackTraceSerial;
+
     // Fiends from CLASS_DUMP
     private int superClassObjectId;
     private int classLoaderObjectId;
@@ -30,12 +30,6 @@ public class ClassDefinition extends Record {
     private List<StaticField> staticFields;
     private List<InstanceField> instanceFields;
 
-    public ClassDefinition(int serialNumber, int objectId, int stackTraceSerial, int nameStringId) {
-        this.serialNumber = serialNumber;
-        this.objectId = objectId;
-        this.stackTraceSerial = stackTraceSerial;
-        this.nameStringId = nameStringId;
-    }
 
     public int getSerialNumber() {
         return serialNumber;
@@ -141,5 +135,17 @@ public class ClassDefinition extends Record {
 
     public void setInstanceFields(List<InstanceField> instanceFields) {
         this.instanceFields = instanceFields;
+    }
+
+    public void setSerialNumber(int serialNumber) {
+        this.serialNumber = serialNumber;
+    }
+
+    public void setObjectId(int objectId) {
+        this.objectId = objectId;
+    }
+
+    public void setNameStringId(int nameStringId) {
+        this.nameStringId = nameStringId;
     }
 }

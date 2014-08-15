@@ -103,7 +103,11 @@ public class HprofReaderTest {
 
     @Test
     public void readLoadClassRecord() throws IOException {
-        ClassDefinition cls = new ClassDefinition(SERIAL, OBJECT_ID, STACK_SERIAL, NAME_ID);
+        ClassDefinition cls = new ClassDefinition();
+        cls.setSerialNumber(SERIAL);
+        cls.setObjectId(OBJECT_ID);
+        cls.setStackTraceSerial(STACK_SERIAL);
+        cls.setNameStringId(NAME_ID);
         writer.writeLoadClassRecord(cls);
         // Verify written data
         final AtomicBoolean called = new AtomicBoolean(false);
