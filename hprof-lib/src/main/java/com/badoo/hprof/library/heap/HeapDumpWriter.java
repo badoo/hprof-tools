@@ -8,10 +8,10 @@ import com.badoo.hprof.library.model.StaticField;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import static com.badoo.hprof.library.StreamUtil.write;
-import static com.badoo.hprof.library.StreamUtil.writeByte;
-import static com.badoo.hprof.library.StreamUtil.writeInt;
-import static com.badoo.hprof.library.StreamUtil.writeShort;
+import static com.badoo.hprof.library.util.StreamUtil.write;
+import static com.badoo.hprof.library.util.StreamUtil.writeByte;
+import static com.badoo.hprof.library.util.StreamUtil.writeInt;
+import static com.badoo.hprof.library.util.StreamUtil.writeShort;
 
 /**
  * Created by Erik Andre on 15/08/2014.

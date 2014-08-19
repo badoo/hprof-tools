@@ -58,7 +58,7 @@ public class HprofUnobfuscator implements MappingProcessor {
     public HprofUnobfuscator(String mappingFile, String hprofFile, String outFile) {
         MappingReader mappingReader = new MappingReader(new File(mappingFile));
         try {
-            mappingReader.pump(this);
+            mappingReader.pump(this); // TODO Pass an instrance and get data friom itr!
             DataCollectionProcessor dataCollectionProcessor = new DataCollectionProcessor();
             HprofReader hprofReader = new HprofReader(new FileInputStream(hprofFile), dataCollectionProcessor);
             while (hprofReader.hasNext()) {

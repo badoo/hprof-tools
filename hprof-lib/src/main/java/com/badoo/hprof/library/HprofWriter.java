@@ -1,20 +1,14 @@
 package com.badoo.hprof.library;
 
-import com.badoo.hprof.library.heap.HeapTag;
 import com.badoo.hprof.library.model.ClassDefinition;
-import com.badoo.hprof.library.model.ConstantField;
 import com.badoo.hprof.library.model.HprofString;
-import com.badoo.hprof.library.model.InstanceField;
-import com.badoo.hprof.library.model.StaticField;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
-import static com.badoo.hprof.library.StreamUtil.write;
-import static com.badoo.hprof.library.StreamUtil.writeByte;
-import static com.badoo.hprof.library.StreamUtil.writeInt;
-import static com.badoo.hprof.library.StreamUtil.writeNullTerminatedString;
-import static com.badoo.hprof.library.StreamUtil.writeShort;
+import static com.badoo.hprof.library.util.StreamUtil.write;
+import static com.badoo.hprof.library.util.StreamUtil.writeInt;
+import static com.badoo.hprof.library.util.StreamUtil.writeNullTerminatedString;
 
 /**
  * Class containing methods for writing hprof files

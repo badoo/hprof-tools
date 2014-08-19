@@ -2,12 +2,13 @@ package com.badoo.hprof.library;
 
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.HprofString;
+import com.badoo.hprof.library.util.StreamUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import static com.badoo.hprof.library.StreamUtil.readInt;
-import static com.badoo.hprof.library.StreamUtil.readString;
+import static com.badoo.hprof.library.util.StreamUtil.readInt;
+import static com.badoo.hprof.library.util.StreamUtil.readString;
 
 /**
  * Created by Erik Andre on 12/07/2014.

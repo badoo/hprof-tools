@@ -20,14 +20,27 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static com.badoo.hprof.library.StreamUtil.read;
-import static com.badoo.hprof.library.StreamUtil.readInt;
-import static com.badoo.hprof.library.StreamUtil.readString;
+import static com.badoo.hprof.library.util.StreamUtil.read;
 
 /**
  * Created by Erik Andre on 13/08/2014.
  */
 public class DataCollectionProcessor extends DiscardProcessor {
+
+    class ClassDumpProcessor extends HeapDumpDiscardProcessor {
+
+        @Override
+        public void onHeapRecord(int tag, HeapDumpReader reader) throws IOException {
+            if (tag == HeapTag.CLASS_DUMP) {
+                ClassDefinition cls = reader.readClassDumpRecord(classes);
+                // Since the names of obfuscated fields are shared between classes we need to deduplicate the references, otherwise we cannot deobfuscate them independently
+                deduplicateStrings(cls);
+            }
+            else {
+                super.onHeapRecord(tag, reader);
+            }
+        }
+    }
 
     private ClassDumpProcessor classDumpProcessor = new ClassDumpProcessor();
     private Map<Integer, HprofString> strings = new HashMap<Integer, HprofString>();
@@ -98,24 +111,7 @@ public class DataCollectionProcessor extends DiscardProcessor {
     }
 
     private int createNewStringId() {
-        lastStringId++;
-        return lastStringId;
+        return ++lastStringId;
     }
-
-    class ClassDumpProcessor extends HeapDumpDiscardProcessor {
-
-        @Override
-        public void onHeapRecord(int tag, HeapDumpReader reader) throws IOException {
-            if (tag == HeapTag.CLASS_DUMP) {
-                ClassDefinition cls = reader.readClassDumpRecord(classes);
-                // Since the names of obfuscated fields are shared between classes we need to deduplicate the references, otherwise we cannot deobfuscate them independently
-                deduplicateStrings(cls);
-            }
-            else {
-                super.onHeapRecord(tag, reader);
-            }
-        }
-    }
-
 
 }

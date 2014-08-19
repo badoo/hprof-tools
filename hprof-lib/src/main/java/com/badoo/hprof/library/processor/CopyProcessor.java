@@ -8,7 +8,7 @@ import com.badoo.hprof.library.HprofWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import static com.badoo.hprof.library.StreamUtil.copy;
+import static com.badoo.hprof.library.util.StreamUtil.copy;
 
 /**
  * Created by Erik Andre on 13/07/2014.

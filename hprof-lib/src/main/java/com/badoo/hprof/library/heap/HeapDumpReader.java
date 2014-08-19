@@ -13,10 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.badoo.hprof.library.StreamUtil.read;
-import static com.badoo.hprof.library.StreamUtil.readByte;
-import static com.badoo.hprof.library.StreamUtil.readInt;
-import static com.badoo.hprof.library.StreamUtil.readShort;
+import static com.badoo.hprof.library.util.StreamUtil.read;
+import static com.badoo.hprof.library.util.StreamUtil.readByte;
+import static com.badoo.hprof.library.util.StreamUtil.readInt;
+import static com.badoo.hprof.library.util.StreamUtil.readShort;
 
 /**
  * Created by Erik Andre on 16/07/2014.

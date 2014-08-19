@@ -1,4 +1,4 @@
-package com.badoo.hprof.library;
+package com.badoo.hprof.library.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

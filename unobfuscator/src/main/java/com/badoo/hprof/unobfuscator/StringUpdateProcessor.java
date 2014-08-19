@@ -23,6 +23,25 @@ import java.util.Map;
  */
 public class StringUpdateProcessor extends CopyProcessor {
 
+    private class ClassDefinitionRemoverProcessor extends HeapDumpBaseProcessor {
+
+        private final OutputStream out;
+
+        public ClassDefinitionRemoverProcessor(OutputStream out) {
+            this.out = out;
+        }
+
+        @Override
+        public void onHeapRecord(int tag, HeapDumpReader reader) throws IOException {
+            if (tag == HeapTag.CLASS_DUMP) {
+                skipHeapRecord(tag, reader.getInputStream()); // Discard all class definitions since we are writing an updated version instead
+            }
+            else {
+                copyHeapRecord(tag, reader.getInputStream(), out);
+            }
+        }
+    }
+
     private final Collection<HprofString> strings;
     private final Map<Integer, ClassDefinition> classes;
     private boolean writeUpdatedClassDefinitions = true;
@@ -80,22 +99,4 @@ public class StringUpdateProcessor extends CopyProcessor {
         out.write(data);
     }
 
-    private class ClassDefinitionRemoverProcessor extends HeapDumpBaseProcessor {
-
-        private final OutputStream out;
-
-        public ClassDefinitionRemoverProcessor(OutputStream out) {
-            this.out = out;
-        }
-
-        @Override
-        public void onHeapRecord(int tag, HeapDumpReader reader) throws IOException {
-            if (tag == HeapTag.CLASS_DUMP) {
-                skipHeapRecord(tag, reader.getInputStream()); // Discard all class definitions since we are writing an updated version instead
-            }
-            else {
-                copyHeapRecord(tag, reader.getInputStream(), out);
-            }
-        }
-    }
 }
