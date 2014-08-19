@@ -1,4 +1,4 @@
-package com.badoo.hprof.unobfuscator;
+package com.badoo.hprof.deobfuscator;
 
 import com.badoo.hprof.library.HprofReader;
 import com.badoo.hprof.library.Tag;

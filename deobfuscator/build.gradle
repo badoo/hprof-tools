@@ -3,10 +3,16 @@ apply plugin: 'application'
 
 sourceCompatibility = 1.5
 version = '1.0'
-mainClassName = "com.badoo.hprof.unobfuscator.HprofUnobfuscator"
+mainClassName = "com.badoo.hprof.deobfuscator.HprofDeobfuscator"
 
 repositories {
     mavenCentral()
+}
+
+run {
+    if(project.hasProperty('args')){
+        args project.args.split('\\s+')
+    }
 }
 
 dependencies {

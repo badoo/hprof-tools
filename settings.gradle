@@ -2,5 +2,5 @@ rootProject.name = 'badoo-hprof'
 
 include 'hprof-lib'
 
-include 'unobfuscator'
+include 'deobfuscator'
 

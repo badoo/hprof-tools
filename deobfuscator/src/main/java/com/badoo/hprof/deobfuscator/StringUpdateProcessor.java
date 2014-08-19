@@ -1,4 +1,4 @@
-package com.badoo.hprof.unobfuscator;
+package com.badoo.hprof.deobfuscator;
 
 import com.badoo.hprof.library.HprofReader;
 import com.badoo.hprof.library.HprofWriter;
@@ -15,7 +15,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
