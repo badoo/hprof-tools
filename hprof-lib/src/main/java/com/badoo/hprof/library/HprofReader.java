@@ -7,6 +7,8 @@ import com.badoo.hprof.library.util.StreamUtil;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.naming.OperationNotSupportedException;
+
 import static com.badoo.hprof.library.util.StreamUtil.readInt;
 import static com.badoo.hprof.library.util.StreamUtil.readString;
 
@@ -57,7 +59,7 @@ public class HprofReader {
      */
     public void next() throws IOException {
         if (readCount == 0) { // The header is always assumed to come first
-            readHeader();
+            readHprofFileHeader();
         }
         else {
             readRecord();
@@ -114,9 +116,12 @@ public class HprofReader {
         processor.onRecord(tagValue, time, size, this);
     }
 
-    private void readHeader() throws IOException {
+    private void readHprofFileHeader() throws IOException {
         String text = StreamUtil.readNullTerminatedString(in);
         int idSize = readInt(in);
+        if (idSize != 4) { // Currently only 4-byte ids are supported
+            throw new UnsupportedOperationException("Only hprof files with 4-byte ids can be read! This file has ids of " + idSize + " bytes");
+        }
         int timeHigh = readInt(in);
         int timeLow = readInt(in);
         processor.onHeader(text, idSize, timeHigh, timeLow);
