@@ -7,14 +7,41 @@ package com.badoo.hprof.library.model;
  */
 public enum BasicType {
 
+    /**
+     * Tag identifying an Object reference.
+     */
     OBJECT(2, 4),
+    /**
+     * Tag identifying a boolean primitive.
+     */
     BOOLEAN(4, 1),
+    /**
+     * Tag identifying a char primitive.
+     */
     CHAR(5, 2),
+    /**
+     * Tag identifying a float primitive.
+      */
     FLOAT(6, 4),
+    /**
+     * Tag identifying a double primitive.
+     */
     DOUBLE(7, 8),
+    /**
+     * Tag identifying a byte primitive.
+     */
     BYTE(8, 1),
+    /**
+     * Tag identifying a short primitive.
+     */
     SHORT(9, 2),
+    /**
+     * Tag identifying a int primitive.
+     */
     INT(10, 4),
+    /**
+     * Tag identifying a long primitive.
+     */
     LONG(11, 8);
 
     /**

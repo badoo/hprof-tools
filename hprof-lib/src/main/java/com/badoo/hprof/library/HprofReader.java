@@ -56,7 +56,7 @@ public class HprofReader {
      * @throws IOException
      */
     public void next() throws IOException {
-        if (readCount == 0) { // Read header first
+        if (readCount == 0) { // The header is always assumed to come first
             readHeader();
         }
         else {

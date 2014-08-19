@@ -19,6 +19,18 @@ import static com.badoo.hprof.library.util.StreamUtil.readInt;
 import static com.badoo.hprof.library.util.StreamUtil.readShort;
 
 /**
+ * Class for reading records contained in a HEAP_DUMP or HEAP_DUMP_SECTION record.
+ * <p/>
+ * <p></p><h3>Usage</h3></p>
+ * <p/>
+ * <pre>
+ *     // InputStream positioned at the beginning of the HEAP_DUMP or HEAP_DUMP section
+ *     HeapDumpReader reader = new HeapDumpReader(in, length, processor);
+ *     while (reader.hasNext()) {
+ *         reader.next(); // Will result in a callback to the provided processor
+ *     }
+ * </pre>
+ * <p/>
  * Created by Erik Andre on 16/07/2014.
  */
 public class HeapDumpReader {

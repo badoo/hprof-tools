@@ -22,7 +22,7 @@ public interface HprofProcessor {
     /**
      * Callback method invoked when a record is read.
      *
-     * @param tag       A tag indicating what type of record it is
+     * @param tag       A tag indicating what type of record it is (See Tag)
      * @param timestamp Number of microseconds since the timestamp in the header
      * @param length    Number of bytes in the record (excluding the record header)
      * @param reader    The reader from which the rest of the record can be read

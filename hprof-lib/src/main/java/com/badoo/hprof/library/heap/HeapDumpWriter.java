@@ -14,6 +14,8 @@ import static com.badoo.hprof.library.util.StreamUtil.writeInt;
 import static com.badoo.hprof.library.util.StreamUtil.writeShort;
 
 /**
+ * Class containing methods for writing the sub records of a HEAP_DUMP or HEAP_DUMP_SECTION record.
+ * <p/>
  * Created by Erik Andre on 15/08/2014.
  */
 public class HeapDumpWriter {
