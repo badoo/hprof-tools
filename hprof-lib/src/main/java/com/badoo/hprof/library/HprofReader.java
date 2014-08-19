@@ -11,6 +11,22 @@ import static com.badoo.hprof.library.util.StreamUtil.readInt;
 import static com.badoo.hprof.library.util.StreamUtil.readString;
 
 /**
+ * Class for reading hprof files.
+ * <p/>
+ * Based on documentation from: https://java.net/downloads/heap-snapshot/hprof-binary-format.html
+ * <p/>
+ * <p></p><h3>Usage</h3></p>
+ * <p>
+ * Create an instance of the class and give it an input stream that is positioned at the first byte of the hprof file and a HprofProcessor
+ * instance to receive callbacks when records are read. To read the hprof records, keep calling next() while hasNext() returns true.
+ * </p>
+ * <pre>
+ *     HprofReader reader = new HprofReader(in, processor);
+ *     while (reader.hasNext()) {
+ *         reader.next();
+ *     }
+ * </pre>
+ * <p/>
  * Created by Erik Andre on 12/07/2014.
  */
 public class HprofReader {
@@ -49,6 +65,11 @@ public class HprofReader {
         readCount++;
     }
 
+    /**
+     * Returns the InputStream that this HprofReader is reading its data from.
+     *
+     * @return The InputStream
+     */
     public InputStream getInputStream() {
         return in;
     }
@@ -72,6 +93,20 @@ public class HprofReader {
         return cls;
     }
 
+    /**
+     * Read a STRING record and create a HprofString based on its contents.
+     *
+     * @param recordLength Length of the record, part of the record header provided to HprofProcessor.onRecord()
+     * @param timestamp    Timestamp of the record, part of the record header provided to HprofProcessor.onRecord()
+     * @return A HprofString containing the string data
+     * @throws IOException
+     */
+    public HprofString readStringRecord(int recordLength, int timestamp) throws IOException {
+        int id = readInt(in);
+        String string = readString(in, recordLength - 4);
+        return new HprofString(id, string, timestamp);
+    }
+
     private void readRecord() throws IOException {
         int tagValue = in.read(); // 1 byte tag, see definitions in Tag
         int time = readInt(in);
@@ -87,9 +122,4 @@ public class HprofReader {
         processor.onHeader(text, idSize, timeHigh, timeLow);
     }
 
-    public HprofString readStringRecord(int recordLength, int timestamp) throws IOException {
-        int id = readInt(in);
-        String string = readString(in, recordLength - 4);
-        return new HprofString(id, string, timestamp);
-    }
 }

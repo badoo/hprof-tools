@@ -7,12 +7,11 @@ import com.badoo.hprof.library.HprofReader;
 import java.io.IOException;
 
 /**
+ * A HprofProcessor implementation that reads and discards all records.
+ * <p/>
  * Created by Erik Andre on 13/07/2014.
  */
-public class DiscardProcessor implements HprofProcessor {
-
-    public DiscardProcessor() {
-    }
+public abstract class DiscardProcessor implements HprofProcessor {
 
     @Override
     public void onHeader(String text, int idSize, int timeHigh, int timeLow) throws IOException {

@@ -1,6 +1,8 @@
 package com.badoo.hprof.library;
 
 /**
+ * Tags (types) of hprof records. The tag parameter in HprofProcessor.onRecord() will be one of these values.
+ * <p/>
  * Created by Erik Andre on 20/06/2014.
  */
 public final class Tag {

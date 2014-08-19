@@ -11,6 +11,8 @@ import java.io.OutputStream;
 import static com.badoo.hprof.library.util.StreamUtil.copy;
 
 /**
+ * A HprofProcessor implementation that reads all records and writes them to an OutputStream without modification.
+ * <p/>
  * Created by Erik Andre on 13/07/2014.
  */
 public class CopyProcessor implements HprofProcessor {

@@ -11,8 +11,16 @@ import static com.badoo.hprof.library.util.StreamUtil.writeInt;
 import static com.badoo.hprof.library.util.StreamUtil.writeNullTerminatedString;
 
 /**
- * Class containing methods for writing hprof files
+ * Class containing methods for writing hprof files. To write a HEAP_DUMP or HEAP_DUMP_SEGMENT see HeapDumpWriter.
  * <p/>
+ * <p></p><h3>Usage</h3></p>
+ * <pre>
+ *     HprofWriter writer = new HprofWrite(out);
+ *     writer.writeHprofFileHeader("JAVA PROFILE 1.0.1", 4, 0, 0); // Always write the file header first!
+ *     for (...) {
+ *         // Write hprof records
+ *     }
+ * </pre>
  * Created by Erik Andre on 13/07/2014.
  */
 public class HprofWriter {
@@ -56,7 +64,7 @@ public class HprofWriter {
     /**
      * Write a STRING record.
      *
-     * @param string    The string
+     * @param string The string to write
      */
     public void writeStringRecord(HprofString string) throws IOException {
         byte[] stringData = string.getValue().getBytes();
