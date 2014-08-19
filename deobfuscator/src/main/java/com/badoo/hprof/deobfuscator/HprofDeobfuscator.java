@@ -35,7 +35,8 @@ public class HprofDeobfuscator {
     private Map<Integer, HprofString> hprofStrings;
     private boolean debug;
 
-    public HprofDeobfuscator(String mappingFile, String hprofFile, String outFile) {
+    public HprofDeobfuscator(String mappingFile, String hprofFile, String outFile, boolean debug) {
+        this.debug = debug;
         MappingReader mappingReader = new MappingReader(new File(mappingFile));
         Mapping mapping = new Mapping(); // The mapping between obfuscated and original names
         try {
@@ -81,11 +82,28 @@ public class HprofDeobfuscator {
     }
 
     public static void main(String args[]) {
-        for (String s : args) {
-            System.out.println("Arg: " + s);
+        if (args.length < 3) {
+
         }
-        //TODO Remove hard coded strings
-        new HprofDeobfuscator("/Users/erikandre/temp/hprof/mapping.txt", "/Users/erikandre/temp/hprof/obfuscated.hprof", "/Users/erikandre/temp/hprof/out.hprof");
+        String mappingFile;
+        String hprofIn;
+        String hprofOut;
+        boolean debug = false;
+        if (args.length == 4 && args[0].equals("-v")) {
+            debug = true;
+            mappingFile = args[1];
+            hprofIn = args[2];
+            hprofOut = args[3];
+        } else if (args.length == 3) {
+            mappingFile = args[0];
+            hprofIn = args[1];
+            hprofOut = args[2];
+        } else {
+            System.err.println("Usage:");
+            System.err.println("java -jar deobfuscator.jar [-v] <mapping file> <obfuscated hprof file> <output hprof file>");
+            return;
+        }
+        new HprofDeobfuscator(mappingFile, hprofIn, hprofOut, debug);
     }
 
     private void deobfuscateClassName(ClassDefinition cls, Mapping mapping) {

@@ -31,4 +31,8 @@ public class HprofString extends Record {
         this.value = value;
     }
 
+    @Override
+    public String toString() {
+        return value + " (" + id + ")";
+    }
 }

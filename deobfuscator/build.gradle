@@ -15,6 +15,15 @@ run {
     }
 }
 
+task jarWithDependencies(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'com.badoo.hprof.deobfuscator.HprofDeobfuscator'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
 dependencies {
     compile project(':hprof-lib')
     compile 'net.sf.proguard:proguard-base:4.11'
