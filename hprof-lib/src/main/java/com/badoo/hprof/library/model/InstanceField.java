@@ -1,6 +1,8 @@
 package com.badoo.hprof.library.model;
 
 /**
+ * Class containing the definition of an instance field (part of CLASS_DUMP) but not the actual field value itself (part of INSTANCE_DUMP).
+ * <p/>
  * Created by Erik Andre on 24/06/2014.
  */
 public class InstanceField implements NamedField {

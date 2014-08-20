@@ -1,7 +1,7 @@
 package com.badoo.hprof.library.model;
 
 /**
- * Class containing the data of a class instance dump.
+ * Class containing the data of a class instance dump (INSTANCE_DUMP) heap record.
  *
  * Created by Erik Andre on 17/07/2014.
  */

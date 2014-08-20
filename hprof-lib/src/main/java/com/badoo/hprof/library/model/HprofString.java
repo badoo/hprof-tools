@@ -1,6 +1,8 @@
 package com.badoo.hprof.library.model;
 
 /**
+ * Class containing the data associated with a hprof STRING_RECORD.
+ *
  * Created by Erik Andre on 15/08/2014.
  */
 public class HprofString extends Record {
@@ -8,8 +10,7 @@ public class HprofString extends Record {
     private int id;
     private String value;
 
-
-    public HprofString(int id, java.lang.String value, int timestamp) {
+    public HprofString(int id, String value, int timestamp) {
         this.id = id;
         this.value = value;
         setTimestamp(timestamp);

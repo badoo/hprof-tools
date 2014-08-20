@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Model for a Java class.
+ * Model for a Java class. ClassDefinition contains data from two different hprof records, LOAD_CLASS and CLASS_DUMP (Heap dump record).
  * <p/>
  * Created by Erik Andre on 17/07/2014.
  */
