@@ -4,9 +4,7 @@ Introduction
 Hprof-deobfuscator is a tool for deobfuscating HPROF memory dump files that are created from builds obfuscated with either ProGuard or DexGuard.
 
 
-![Before](/docs/before.png) <br><i>Before running hprof-deobfuscator</i>
-
-![After](/docs/after.png) <br><i>After running hprof-deobfuscator</i>
+![Before and after](/docs/before_and_after.png) <br><i>Before and after running hprof-deobfuscator</i>
 
 Building
 ========
