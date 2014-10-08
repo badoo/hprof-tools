@@ -30,6 +30,10 @@ After building the application you can execute it with the following command:
 ./deobfuscator/build/libs/deobfuscator-all-1.0.jar \<mapping file\> \<input hprof\> \<output hprof\>
 </code>
 
+Credits
+-------
+Hprof-obfuscator is brought to you by [Badoo Trading Limited](http://corp.badoo.com) and it is released under the [MIT License](http://opensource.org/licenses/MIT).
 
+Created by [Erik Andre](https://github.com/erikandre)
 
 
