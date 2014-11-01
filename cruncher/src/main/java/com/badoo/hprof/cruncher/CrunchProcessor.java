@@ -10,6 +10,8 @@ import com.sun.istack.internal.Nullable;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Erik Andre on 22/10/14.
@@ -40,6 +42,7 @@ public class CrunchProcessor extends DiscardProcessor {
 
     private final CrunchBdmWriter writer;
     private int nextStringId;
+    private Map<Integer, Integer> stringIds = new HashMap<Integer, Integer>(); // Maps original to updated string ids
 
     public CrunchProcessor(OutputStream out) {
         this.writer = new CrunchBdmWriter(out);
@@ -50,6 +53,8 @@ public class CrunchProcessor extends DiscardProcessor {
         switch (tag) {
             case Tag.STRING:
                 HprofString string = reader.readStringRecord(length, timestamp);
+                // We replace the original string id with one starting from 0 as these are more efficient to store
+                stringIds.put(string.getId(), nextStringId); // Save the original id so we can update references later
                 string.setId(nextStringId);
                 nextStringId++;
                 System.out.println("Read string: " + string.getId());
