@@ -6,6 +6,7 @@ import com.badoo.hprof.library.HprofReader;
 import com.badoo.hprof.library.Tag;
 import com.badoo.hprof.library.model.HprofString;
 import com.badoo.hprof.library.processor.DiscardProcessor;
+import com.badoo.hprof.library.util.StreamUtil;
 import com.sun.istack.internal.Nullable;
 
 import java.io.IOException;
@@ -38,6 +39,12 @@ public class CrunchProcessor extends DiscardProcessor {
                 writeByteArrayWithLength(string.getValue().getBytes());
             }
         }
+
+        public void writeLegacyRecord(int tag, byte[] data) throws IOException {
+            writeInt32(BmdTag.LEGACY_HPROF_RECORD);
+            writeInt32(tag);
+            writeRawBytes(data);
+        }
     }
 
     private final CrunchBdmWriter writer;
@@ -57,12 +64,21 @@ public class CrunchProcessor extends DiscardProcessor {
                 stringIds.put(string.getId(), nextStringId); // Save the original id so we can update references later
                 string.setId(nextStringId);
                 nextStringId++;
-                System.out.println("Read string: " + string.getId());
                 writer.writeString(string, true);
                 break;
-            default:
-                //TODO Wrap into legacy record
+            case Tag.HEAP_DUMP:
+            case Tag.HEAP_DUMP_SEGMENT:
+                // TODO Process
                 super.onRecord(tag, timestamp, length, reader);
+                break;
+            case Tag.UNLOAD_CLASS:
+            case Tag.HEAP_DUMP_END:
+                super.onRecord(tag, timestamp, length, reader); // These records can be discarded
+                break;
+            default:
+                byte[] data = StreamUtil.read(reader.getInputStream(), length);
+                writer.writeLegacyRecord(tag, data);
+                break;
         }
     }
 
