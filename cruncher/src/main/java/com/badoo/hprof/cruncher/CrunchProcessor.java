@@ -146,6 +146,11 @@ public class CrunchProcessor extends DiscardProcessor {
             }
         }
 
+        public void writeRootObject(int originalObjectId) throws IOException {
+            writeInt32(BmdTag.ROOT_OBJECT);
+            writeInt32(mapObjectId(originalObjectId));
+        }
+
         private void writeFieldValue(BasicType type, byte[] data) throws IOException {
             switch (type) {
                 case OBJECT:
@@ -213,7 +218,6 @@ public class CrunchProcessor extends DiscardProcessor {
                     ClassDefinition def = reader.readClassDumpRecord(classesByOriginalId);
                     writer.writeClassDefinition(def);
                     break;
-                // TODO: Write root records!
                 default:
                     super.onHeapRecord(tag, reader);
             }
@@ -226,16 +230,69 @@ public class CrunchProcessor extends DiscardProcessor {
 
         @Override
         public void onHeapRecord(int tag, HeapDumpReader reader) throws IOException {
+            InputStream in = reader.getInputStream();
             switch (tag) {
                 case HeapTag.INSTANCE_DUMP:
                     Instance instance = reader.readInstanceDump();
                     writer.writeInstanceDump(instance);
                     break;
                 case HeapTag.OBJECT_ARRAY_DUMP:
-                    readObjectArray(reader.getInputStream());
+                    readObjectArray(in);
                     break;
                 case HeapTag.PRIMITIVE_ARRAY_DUMP:
-                    readPrimitiveArray(reader.getInputStream());
+                    readPrimitiveArray(in);
+                    break;
+                case HeapTag.ROOT_UNKNOWN:
+                    writer.writeRootObject(readInt(in));
+                    break;
+                case HeapTag.ROOT_JNI_GLOBAL:
+                    writer.writeRootObject(readInt(in));
+                    in.skip(4); // JNI global ref
+                    break;
+                case HeapTag.ROOT_JNI_LOCAL:
+                    writer.writeRootObject(readInt(in));
+                    in.skip(8); // Thread serial + frame number
+                    break;
+                case HeapTag.ROOT_JAVA_FRAME:
+                    writer.writeRootObject(readInt(in));
+                    in.skip(8); // Thread serial + frame number
+                    break;
+                case HeapTag.ROOT_NATIVE_STACK:
+                    writer.writeRootObject(readInt(in));
+                    in.skip(4); // Thread serial
+                    break;
+                case HeapTag.ROOT_STICKY_CLASS:
+                    writer.writeRootObject(readInt(in));
+                    break;
+                case HeapTag.ROOT_THREAD_BLOCK:
+                    writer.writeRootObject(readInt(in));
+                    in.skip(4); // Thread serial
+                    break;
+                case HeapTag.ROOT_MONITOR_USED:
+                    writer.writeRootObject(readInt(in));
+                    break;
+                case HeapTag.ROOT_THREAD_OBJECT:
+                    writer.writeRootObject(readInt(in));
+                    in.skip(8); // Thread serial + stack serial
+                    break;
+                case HeapTag.HPROF_ROOT_INTERNED_STRING:
+                    writer.writeRootObject(readInt(in));
+                    break;
+                case HeapTag.HPROF_ROOT_FINALIZING:
+                    writer.writeRootObject(readInt(in));
+                    break;
+                case HeapTag.HPROF_ROOT_DEBUGGER:
+                    writer.writeRootObject(readInt(in));
+                    break;
+                case HeapTag.HPROF_ROOT_REFERENCE_CLEANUP:
+                    writer.writeRootObject(readInt(in));
+                    break;
+                case HeapTag.HPROF_ROOT_VM_INTERNAL:
+                    writer.writeRootObject(readInt(in));
+                    break;
+                case HeapTag.HPROF_ROOT_JNI_MONITOR:
+                    writer.writeRootObject(readInt(in));
+                    in.skip(8); // Data
                     break;
                 default:
                     super.onHeapRecord(tag, reader);
