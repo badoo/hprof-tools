@@ -33,6 +33,7 @@ public class HprofCruncher {
             while (reader.hasNext()) {
                 reader.next();
             }
+            processor.finish();
         }
         catch (FileNotFoundException e) {
             e.printStackTrace();

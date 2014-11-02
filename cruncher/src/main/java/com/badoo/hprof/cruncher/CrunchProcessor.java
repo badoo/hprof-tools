@@ -23,8 +23,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -146,9 +148,12 @@ public class CrunchProcessor extends DiscardProcessor {
             }
         }
 
-        public void writeRootObject(int originalObjectId) throws IOException {
+        public void writeRootObjects(List<Integer> roots) throws IOException {
             writeInt32(BmdTag.ROOT_OBJECT);
-            writeInt32(mapObjectId(originalObjectId));
+            writeInt32(roots.size());
+            for (int i = 0; i < roots.size(); i++) {
+                writeInt32(mapObjectId(roots.get(i)));
+            }
         }
 
         private void writeFieldValue(BasicType type, byte[] data) throws IOException {
@@ -242,56 +247,57 @@ public class CrunchProcessor extends DiscardProcessor {
                 case HeapTag.PRIMITIVE_ARRAY_DUMP:
                     readPrimitiveArray(in);
                     break;
+                // Roots
                 case HeapTag.ROOT_UNKNOWN:
-                    writer.writeRootObject(readInt(in));
+                    roots.add(readInt(in));
                     break;
                 case HeapTag.ROOT_JNI_GLOBAL:
-                    writer.writeRootObject(readInt(in));
+                    roots.add(readInt(in));
                     in.skip(4); // JNI global ref
                     break;
                 case HeapTag.ROOT_JNI_LOCAL:
-                    writer.writeRootObject(readInt(in));
+                    roots.add(readInt(in));
                     in.skip(8); // Thread serial + frame number
                     break;
                 case HeapTag.ROOT_JAVA_FRAME:
-                    writer.writeRootObject(readInt(in));
+                    roots.add(readInt(in));
                     in.skip(8); // Thread serial + frame number
                     break;
                 case HeapTag.ROOT_NATIVE_STACK:
-                    writer.writeRootObject(readInt(in));
+                    roots.add(readInt(in));
                     in.skip(4); // Thread serial
                     break;
                 case HeapTag.ROOT_STICKY_CLASS:
-                    writer.writeRootObject(readInt(in));
+                    roots.add(readInt(in));
                     break;
                 case HeapTag.ROOT_THREAD_BLOCK:
-                    writer.writeRootObject(readInt(in));
+                    roots.add(readInt(in));
                     in.skip(4); // Thread serial
                     break;
                 case HeapTag.ROOT_MONITOR_USED:
-                    writer.writeRootObject(readInt(in));
+                    roots.add(readInt(in));
                     break;
                 case HeapTag.ROOT_THREAD_OBJECT:
-                    writer.writeRootObject(readInt(in));
+                    roots.add(readInt(in));
                     in.skip(8); // Thread serial + stack serial
                     break;
                 case HeapTag.HPROF_ROOT_INTERNED_STRING:
-                    writer.writeRootObject(readInt(in));
+                    roots.add(readInt(in));
                     break;
                 case HeapTag.HPROF_ROOT_FINALIZING:
-                    writer.writeRootObject(readInt(in));
+                    roots.add(readInt(in));
                     break;
                 case HeapTag.HPROF_ROOT_DEBUGGER:
-                    writer.writeRootObject(readInt(in));
+                    roots.add(readInt(in));
                     break;
                 case HeapTag.HPROF_ROOT_REFERENCE_CLEANUP:
-                    writer.writeRootObject(readInt(in));
+                    roots.add(readInt(in));
                     break;
                 case HeapTag.HPROF_ROOT_VM_INTERNAL:
-                    writer.writeRootObject(readInt(in));
+                    roots.add(readInt(in));
                     break;
                 case HeapTag.HPROF_ROOT_JNI_MONITOR:
-                    writer.writeRootObject(readInt(in));
+                    roots.add(readInt(in));
                     in.skip(8); // Data
                     break;
                 default:
@@ -330,6 +336,7 @@ public class CrunchProcessor extends DiscardProcessor {
     private Map<Integer, Integer> objectIds = new HashMap<Integer, Integer>(); // Maps original to updated object/class ids
     private Map<Integer, ClassDefinition> classesByOriginalId = new HashMap<Integer, ClassDefinition>(); // Maps original class id to the class definition
     private boolean readObjects;
+    private List<Integer> roots = new ArrayList<Integer>();
 
     public CrunchProcessor(OutputStream out) {
         this.writer = new CrunchBdmWriter(out);
@@ -337,6 +344,11 @@ public class CrunchProcessor extends DiscardProcessor {
 
     public void allClassesRead() {
         readObjects = true;
+    }
+
+    public void finish() throws IOException {
+        // Write roots
+        writer.writeRootObjects(roots);
     }
 
     @Override
