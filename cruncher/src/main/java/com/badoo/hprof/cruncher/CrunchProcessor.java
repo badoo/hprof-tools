@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Processor for reading a HPROF file and outputting a BMD file.
+ *
  * Created by Erik Andre on 22/10/14.
  */
 public class CrunchProcessor extends DiscardProcessor {
@@ -96,7 +98,7 @@ public class CrunchProcessor extends DiscardProcessor {
         private void writeFieldValue(BasicType type, byte[] data) throws IOException {
             switch (type) {
                 case OBJECT:
-                    writeInt32(CodingUtil.readInt(data));
+                    writeInt32(mapObjectId(CodingUtil.readInt(data)));
                     break;
                 case SHORT:
                     writeInt32(CodingUtil.readShort(data));
@@ -166,7 +168,6 @@ public class CrunchProcessor extends DiscardProcessor {
                 break;
             case Tag.LOAD_CLASS:
                 ClassDefinition classDef = reader.readLoadClassRecord();
-                nextObjectId++;
                 classes.put(classDef.getObjectId(), classDef);
                 break;
             case Tag.HEAP_DUMP:
