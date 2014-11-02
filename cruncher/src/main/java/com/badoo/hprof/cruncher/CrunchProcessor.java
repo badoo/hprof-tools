@@ -17,7 +17,6 @@ import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.library.model.InstanceField;
 import com.badoo.hprof.library.model.StaticField;
 import com.badoo.hprof.library.processor.DiscardProcessor;
-import com.google.common.io.CountingInputStream;
 import com.sun.istack.internal.Nullable;
 
 import java.io.ByteArrayInputStream;
@@ -31,7 +30,6 @@ import java.util.Set;
 
 import static com.badoo.hprof.library.util.StreamUtil.read;
 import static com.badoo.hprof.library.util.StreamUtil.readInt;
-import static com.badoo.hprof.library.util.StreamUtil.writeInt;
 
 /**
  * Processor for reading a HPROF file and outputting a BMD file.
@@ -40,6 +38,7 @@ import static com.badoo.hprof.library.util.StreamUtil.writeInt;
  */
 public class CrunchProcessor extends DiscardProcessor {
 
+    @SuppressWarnings({"ResultOfMethodCallIgnored", "ForLoopReplaceableByForEach"})
     private class CrunchBdmWriter extends DataWriter {
 
         protected CrunchBdmWriter(OutputStream out) {
@@ -137,6 +136,16 @@ public class CrunchProcessor extends DiscardProcessor {
             writeInt32(count);
         }
 
+        public void writeObjectArray(int originalObjectId, int originalClassId, int[] elements) throws IOException {
+            writeInt32(BmdTag.OBJECT_ARRAY);
+            writeInt32(mapObjectId(originalObjectId));
+            writeInt32(mapObjectId(originalClassId));
+            writeInt32(elements.length);
+            for (int i = 0; i < elements.length; i++) {
+                writeInt32(mapObjectId(elements[i]));
+            }
+        }
+
         private void writeFieldValue(BasicType type, byte[] data) throws IOException {
             switch (type) {
                 case OBJECT:
@@ -212,6 +221,7 @@ public class CrunchProcessor extends DiscardProcessor {
 
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private class ObjectDumpProcessor extends HeapDumpDiscardProcessor {
 
         @Override
@@ -222,7 +232,7 @@ public class CrunchProcessor extends DiscardProcessor {
                     writer.writeInstanceDump(instance);
                     break;
                 case HeapTag.OBJECT_ARRAY_DUMP:
-                    super.onHeapRecord(tag, reader);
+                    readObjectArray(reader.getInputStream());
                     break;
                 case HeapTag.PRIMITIVE_ARRAY_DUMP:
                     readPrimitiveArray(reader.getInputStream());
@@ -230,6 +240,18 @@ public class CrunchProcessor extends DiscardProcessor {
                 default:
                     super.onHeapRecord(tag, reader);
             }
+        }
+
+        private void readObjectArray(InputStream in) throws IOException {
+            int originalObjectId = readInt(in);
+            in.skip(4); // Stack trace serial
+            int count = readInt(in);
+            int originalElementClassId = readInt(in);
+            int[] elements = new int[count];
+            for (int i = 0; i < count; i++) {
+                elements[i] = readInt(in);
+            }
+            writer.writeObjectArray(originalObjectId, originalElementClassId, elements);
         }
 
         private void readPrimitiveArray(InputStream in) throws IOException {
@@ -250,7 +272,6 @@ public class CrunchProcessor extends DiscardProcessor {
     private Set<Integer> mappedIds = new HashSet<Integer>();
     private Map<Integer, Integer> objectIds = new HashMap<Integer, Integer>(); // Maps original to updated object/class ids
     private Map<Integer, ClassDefinition> classesByOriginalId = new HashMap<Integer, ClassDefinition>(); // Maps original class id to the class definition
-    private Map<Integer, ClassDefinition> classesByUpdatedId = new HashMap<Integer, ClassDefinition>(); // Maps updated class id to the class definition
     private boolean readObjects;
 
     public CrunchProcessor(OutputStream out) {
@@ -276,8 +297,6 @@ public class CrunchProcessor extends DiscardProcessor {
                 case Tag.LOAD_CLASS:
                     ClassDefinition classDef = reader.readLoadClassRecord();
                     classesByOriginalId.put(classDef.getObjectId(), classDef);
-                    int updatedId = mapObjectId(classDef.getObjectId());
-                    classesByUpdatedId.put(updatedId, classDef);
                     break;
                 case Tag.HEAP_DUMP:
                 case Tag.HEAP_DUMP_SEGMENT:

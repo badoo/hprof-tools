@@ -17,7 +17,7 @@ public class HprofCruncher {
     public static void main(String[] args) {
         OutputStream out = null;
         try {
-            out = new FileOutputStream("out.hprof");
+            out = new FileOutputStream("out.bmd");
             CrunchProcessor processor = new CrunchProcessor(out);
             // Start first pass
             InputStream in = new FileInputStream("in.hprof");
