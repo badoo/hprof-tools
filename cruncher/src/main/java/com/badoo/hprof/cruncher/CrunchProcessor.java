@@ -2,6 +2,7 @@ package com.badoo.hprof.cruncher;
 
 import com.badoo.hprof.cruncher.bmd.BmdTag;
 import com.badoo.hprof.cruncher.bmd.DataWriter;
+import com.badoo.hprof.cruncher.util.CodingUtil;
 import com.badoo.hprof.library.HprofReader;
 import com.badoo.hprof.library.Tag;
 import com.badoo.hprof.library.heap.HeapDumpReader;
@@ -35,15 +36,16 @@ public class CrunchProcessor extends DiscardProcessor {
 
         public void writeHeader(int version, @Nullable byte[] metadata) throws IOException {
             writeInt32(version);
-            writeByteArrayWithLength(metadata != null? metadata : new byte[]{});
+            writeByteArrayWithLength(metadata != null ? metadata : new byte[]{});
         }
 
         public void writeString(HprofString string, boolean hashed) throws IOException {
-            writeInt32(hashed? BmdTag.HASHED_STRING : BmdTag.STRING);
+            writeInt32(hashed ? BmdTag.HASHED_STRING : BmdTag.STRING);
             writeInt32(string.getId());
             if (hashed) {
                 writeInt32(string.getValue().hashCode());
-            } else {
+            }
+            else {
                 writeByteArrayWithLength(string.getValue().getBytes());
             }
         }
@@ -56,8 +58,8 @@ public class CrunchProcessor extends DiscardProcessor {
 
         public void writeClassDefinition(ClassDefinition classDef) throws IOException {
             writeInt32(BmdTag.CLASS_DEFINITION);
-            writeInt32(classDef.getObjectId());
-            writeInt32(classDef.getSuperClassObjectId());
+            writeInt32(mapObjectId(classDef.getObjectId()));
+            writeInt32(mapObjectId(classDef.getSuperClassObjectId()));
             // Write constants and static fields (not filtered)
             int constantFieldCount = classDef.getConstantFields().size();
             writeInt32(constantFieldCount);
@@ -65,7 +67,7 @@ public class CrunchProcessor extends DiscardProcessor {
                 ConstantField field = classDef.getConstantFields().get(i);
                 writeInt32(field.getPoolIndex());
                 writeInt32(field.getType().type);
-                writeRawBytes(field.getValue());
+                writeFieldValue(field.getType(), field.getValue());
             }
             int staticFieldCount = classDef.getStaticFields().size();
             writeInt32(staticFieldCount);
@@ -73,7 +75,7 @@ public class CrunchProcessor extends DiscardProcessor {
                 StaticField field = classDef.getStaticFields().get(i);
                 writeInt32(stringIds.get(field.getFieldNameId()));
                 writeInt32(field.getType().type);
-                writeRawBytes(field.getValue());
+                writeFieldValue(field.getType(), field.getValue());
             }
             // Filter instance fields before writing them
             int skippedFieldSize = 0;
@@ -89,6 +91,38 @@ public class CrunchProcessor extends DiscardProcessor {
             }
             writeInt32(0); // End marker for instance fields
             writeInt32(skippedFieldSize);
+        }
+
+        private void writeFieldValue(BasicType type, byte[] data) throws IOException {
+            switch (type) {
+                case OBJECT:
+                    writeInt32(CodingUtil.readInt(data));
+                    break;
+                case SHORT:
+                    writeInt32(CodingUtil.readShort(data));
+                    break;
+                case INT:
+                    writeInt32(CodingUtil.readInt(data));
+                    break;
+                case LONG:
+                    writeInt64(CodingUtil.readLong(data));
+                    break;
+                case FLOAT:
+                    writeFloat(Float.intBitsToFloat(CodingUtil.readInt(data)));
+                    break;
+                case DOUBLE:
+                    writeDouble(Double.longBitsToDouble(CodingUtil.readLong(data)));
+                    break;
+                case BOOLEAN:
+                    writeRawBytes(data);
+                    break;
+                case BYTE:
+                    writeRawBytes(data);
+                    break;
+                case CHAR:
+                    writeRawBytes(data);
+                    break;
+            }
         }
     }
 
@@ -111,6 +145,8 @@ public class CrunchProcessor extends DiscardProcessor {
     private final CrunchBdmWriter writer;
     private int nextStringId = 1; // Skipping 0 since this is used as a marker in some cases
     private Map<Integer, Integer> stringIds = new HashMap<Integer, Integer>(); // Maps original to updated string ids
+    private int nextObjectId = 1;
+    private Map<Integer, Integer> objectIds = new HashMap<Integer, Integer>(); // Maps original to updated object/class ids
     private Map<Integer, ClassDefinition> classes = new HashMap<Integer, ClassDefinition>();
 
     public CrunchProcessor(OutputStream out) {
@@ -130,6 +166,7 @@ public class CrunchProcessor extends DiscardProcessor {
                 break;
             case Tag.LOAD_CLASS:
                 ClassDefinition classDef = reader.readLoadClassRecord();
+                nextObjectId++;
                 classes.put(classDef.getObjectId(), classDef);
                 break;
             case Tag.HEAP_DUMP:
@@ -154,5 +191,13 @@ public class CrunchProcessor extends DiscardProcessor {
     @Override
     public void onHeader(String text, int idSize, int timeHigh, int timeLow) throws IOException {
         writer.writeHeader(1, text.getBytes());
+    }
+
+    private int mapObjectId(int id) {
+        if (!objectIds.containsKey(id)) {
+            objectIds.put(id, nextObjectId);
+            nextObjectId++;
+        }
+        return objectIds.get(id);
     }
 }
