@@ -4,6 +4,11 @@ import com.badoo.hprof.cruncher.bmd.BmdTag;
 import com.badoo.hprof.cruncher.bmd.DataWriter;
 import com.badoo.hprof.library.HprofReader;
 import com.badoo.hprof.library.Tag;
+import com.badoo.hprof.library.heap.HeapDumpProcessor;
+import com.badoo.hprof.library.heap.HeapDumpReader;
+import com.badoo.hprof.library.heap.HeapTag;
+import com.badoo.hprof.library.heap.processor.HeapDumpDiscardProcessor;
+import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.HprofString;
 import com.badoo.hprof.library.processor.DiscardProcessor;
 import com.badoo.hprof.library.util.StreamUtil;
@@ -47,9 +52,25 @@ public class CrunchProcessor extends DiscardProcessor {
         }
     }
 
+    private class ClassDumpProcessor extends HeapDumpDiscardProcessor {
+
+        @Override
+        public void onHeapRecord(int tag, HeapDumpReader reader) throws IOException {
+            switch (tag) {
+                case HeapTag.CLASS_DUMP:
+                    ClassDefinition def = reader.readClassDumpRecord(classes);
+                    System.out.println("Reading class " + def.getObjectId());
+                    break;
+                default:
+                    super.onHeapRecord(tag, reader);
+            }
+        }
+    }
+
     private final CrunchBdmWriter writer;
     private int nextStringId;
     private Map<Integer, Integer> stringIds = new HashMap<Integer, Integer>(); // Maps original to updated string ids
+    private Map<Integer, ClassDefinition> classes = new HashMap<Integer, ClassDefinition>();
 
     public CrunchProcessor(OutputStream out) {
         this.writer = new CrunchBdmWriter(out);
@@ -66,10 +87,17 @@ public class CrunchProcessor extends DiscardProcessor {
                 nextStringId++;
                 writer.writeString(string, true);
                 break;
+            case Tag.LOAD_CLASS:
+                ClassDefinition classDef = reader.readLoadClassRecord();
+                classes.put(classDef.getObjectId(), classDef);
+                break;
             case Tag.HEAP_DUMP:
             case Tag.HEAP_DUMP_SEGMENT:
-                // TODO Process
-                super.onRecord(tag, timestamp, length, reader);
+                ClassDumpProcessor dumpProcessor = new ClassDumpProcessor();
+                HeapDumpReader dumpReader = new HeapDumpReader(reader.getInputStream(), length, dumpProcessor);
+                while (dumpReader.hasNext()) {
+                    dumpReader.next();
+                }
                 break;
             case Tag.UNLOAD_CLASS:
             case Tag.HEAP_DUMP_END:
