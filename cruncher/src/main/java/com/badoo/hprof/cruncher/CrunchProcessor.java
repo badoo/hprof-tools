@@ -1,8 +1,8 @@
 package com.badoo.hprof.cruncher;
 
-import com.badoo.hprof.cruncher.bmd.BmdTag;
-import com.badoo.hprof.cruncher.bmd.DataWriter;
-import com.badoo.hprof.cruncher.bmd.model.BmdBasicType;
+import com.badoo.bmd.BmdTag;
+import com.badoo.bmd.DataWriter;
+import com.badoo.bmd.model.BmdBasicType;
 import com.badoo.hprof.cruncher.util.CodingUtil;
 import com.badoo.hprof.library.HprofReader;
 import com.badoo.hprof.library.Tag;

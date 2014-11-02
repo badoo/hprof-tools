@@ -26,5 +26,6 @@ task jarWithDependencies(type: Jar) {
 
 dependencies {
     compile project(':hprof-lib')
+    compile project(':bmd-lib')
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }

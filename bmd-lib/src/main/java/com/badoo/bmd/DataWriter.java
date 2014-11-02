@@ -33,7 +33,7 @@
  * Modified by Badoo 2014
  */
 
-package com.badoo.hprof.cruncher.bmd;
+package com.badoo.bmd;
 
 import java.io.IOException;
 import java.io.OutputStream;

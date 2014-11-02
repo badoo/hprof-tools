@@ -1,4 +1,4 @@
-package com.badoo.hprof.cruncher.bmd.model;
+package com.badoo.bmd.model;
 
 /**
  * Created by erikandre on 23/10/14.

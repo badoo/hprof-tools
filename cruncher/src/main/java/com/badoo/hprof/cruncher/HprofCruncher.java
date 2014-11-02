@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
+ * Application for converting HPROF files to the BMD format
  * Created by Erik Andre on 22/10/14.
  */
 public class HprofCruncher {

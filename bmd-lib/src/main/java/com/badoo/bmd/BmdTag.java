@@ -1,4 +1,4 @@
-package com.badoo.hprof.cruncher.bmd;
+package com.badoo.bmd;
 
 /**
  * Created by Erik Andre on 22/10/14.
