@@ -5,3 +5,5 @@ include 'deobfuscator'
 include 'cruncher'
 include 'bmd-lib'
 
+include 'decruncher'
+
