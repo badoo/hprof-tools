@@ -3,6 +3,7 @@ package com.badoo.hprof.library.heap;
 import com.badoo.hprof.library.model.BasicType;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.ConstantField;
+import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.library.model.InstanceField;
 import com.badoo.hprof.library.model.StaticField;
 import com.google.common.io.CountingInputStream;
@@ -132,5 +133,18 @@ public class HeapDumpReader {
             instanceFields.add(new InstanceField(type, nameId));
         }
         return cls;
+    }
+
+    /**
+     * Reads and returns an instance dump record.
+     * @return An Instance object containing all data from the record.
+     */
+    public Instance readInstanceDump() throws IOException {
+        int objectId = readInt(in);
+        int stackTraceSerial = readInt(in);
+        int classId = readInt(in);
+        int length = readInt(in);
+        byte[] data = read(in, length);
+        return new Instance(objectId, stackTraceSerial, classId, data);
     }
 }

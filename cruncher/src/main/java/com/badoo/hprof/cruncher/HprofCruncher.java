@@ -1,6 +1,5 @@
 package com.badoo.hprof.cruncher;
 
-import com.badoo.hprof.library.HprofProcessor;
 import com.badoo.hprof.library.HprofReader;
 
 import java.io.FileInputStream;
@@ -20,8 +19,17 @@ public class HprofCruncher {
         try {
             out = new FileOutputStream("out.hprof");
             CrunchProcessor processor = new CrunchProcessor(out);
+            // Start first pass
             InputStream in = new FileInputStream("in.hprof");
             HprofReader reader = new HprofReader(in, processor);
+            while (reader.hasNext()) {
+                reader.next();
+            }
+            processor.allClassesRead();
+            in.close();
+            // Start second pass
+            in = new FileInputStream("in.hprof");
+            reader = new HprofReader(in, processor);
             while (reader.hasNext()) {
                 reader.next();
             }
