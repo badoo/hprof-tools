@@ -2,6 +2,7 @@ package com.badoo.hprof.cruncher;
 
 import com.badoo.hprof.cruncher.bmd.BmdTag;
 import com.badoo.hprof.cruncher.bmd.DataWriter;
+import com.badoo.hprof.cruncher.bmd.model.BmdBasicType;
 import com.badoo.hprof.cruncher.util.CodingUtil;
 import com.badoo.hprof.library.HprofReader;
 import com.badoo.hprof.library.Tag;
@@ -77,7 +78,7 @@ public class CrunchProcessor extends DiscardProcessor {
             for (int i = 0; i < constantFieldCount; i++) {
                 ConstantField field = classDef.getConstantFields().get(i);
                 writeInt32(field.getPoolIndex());
-                writeInt32(field.getType().type);
+                writeInt32(convertType(field.getType()).id);
                 writeFieldValue(field.getType(), field.getValue());
             }
             int staticFieldCount = classDef.getStaticFields().size();
@@ -85,7 +86,7 @@ public class CrunchProcessor extends DiscardProcessor {
             for (int i = 0; i < staticFieldCount; i++) {
                 StaticField field = classDef.getStaticFields().get(i);
                 writeInt32(stringIds.get(field.getFieldNameId()));
-                writeInt32(field.getType().type);
+                writeInt32(convertType(field.getType()).id);
                 writeFieldValue(field.getType(), field.getValue());
             }
             // Filter instance fields before writing them
@@ -98,7 +99,7 @@ public class CrunchProcessor extends DiscardProcessor {
                     continue;
                 }
                 writeInt32(stringIds.get(field.getFieldNameId()));
-                writeInt32(field.getType().type);
+                writeInt32(convertType(field.getType()).id);
             }
             writeInt32(0); // End marker for instance fields
             writeInt32(skippedFieldSize);
@@ -127,6 +128,13 @@ public class CrunchProcessor extends DiscardProcessor {
             if (in.available() != 0) {
                 throw new IllegalStateException("Did not read the expected number of bytes. Available: " + in.available());
             }
+        }
+
+        public void writePrimitiveArray(int originalObjectId, BasicType type, int count) throws IOException {
+            writeInt32(BmdTag.PRIMITIVE_ARRAY_PLACEHOLDER);
+            writeInt32(mapObjectId(originalObjectId));
+            writeInt32(convertType(type).id);
+            writeInt32(count);
         }
 
         private void writeFieldValue(BasicType type, byte[] data) throws IOException {
@@ -158,6 +166,31 @@ public class CrunchProcessor extends DiscardProcessor {
                 case CHAR:
                     writeRawBytes(data);
                     break;
+            }
+        }
+
+        private BmdBasicType convertType(BasicType type) {
+            switch (type) {
+                case OBJECT:
+                    return BmdBasicType.OBJECT;
+                case BOOLEAN:
+                    return BmdBasicType.BOOLEAN;
+                case BYTE:
+                    return BmdBasicType.BYTE;
+                case CHAR:
+                    return BmdBasicType.CHAR;
+                case SHORT:
+                    return BmdBasicType.SHORT;
+                case INT:
+                    return BmdBasicType.INT;
+                case LONG:
+                    return BmdBasicType.LONG;
+                case FLOAT:
+                    return BmdBasicType.FLOAT;
+                case DOUBLE:
+                    return BmdBasicType.DOUBLE;
+                default:
+                    throw new IllegalArgumentException("Invalid type:" + type);
             }
         }
     }
@@ -192,11 +225,20 @@ public class CrunchProcessor extends DiscardProcessor {
                     super.onHeapRecord(tag, reader);
                     break;
                 case HeapTag.PRIMITIVE_ARRAY_DUMP:
-                    super.onHeapRecord(tag, reader);
+                    readPrimitiveArray(reader.getInputStream());
                     break;
                 default:
                     super.onHeapRecord(tag, reader);
             }
+        }
+
+        private void readPrimitiveArray(InputStream in) throws IOException {
+            int originalObjectId = readInt(in);
+            in.skip(4); // Stack trace serial
+            int count = readInt(in);
+            BasicType type = BasicType.fromType(in.read());
+            in.skip(count * type.size);
+            writer.writePrimitiveArray(originalObjectId, type, count);
         }
 
     }

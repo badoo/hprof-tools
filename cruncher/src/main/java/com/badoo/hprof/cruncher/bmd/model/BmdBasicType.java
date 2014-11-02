@@ -15,7 +15,7 @@ public enum BmdBasicType {
     LONG(7),
     SHORT(8);
 
-    private final int id;
+    public final int id;
 
     BmdBasicType(int id) {
         this.id = id;
