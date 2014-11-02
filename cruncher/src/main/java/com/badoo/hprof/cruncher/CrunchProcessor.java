@@ -4,12 +4,15 @@ import com.badoo.hprof.cruncher.bmd.BmdTag;
 import com.badoo.hprof.cruncher.bmd.DataWriter;
 import com.badoo.hprof.library.HprofReader;
 import com.badoo.hprof.library.Tag;
-import com.badoo.hprof.library.heap.HeapDumpProcessor;
 import com.badoo.hprof.library.heap.HeapDumpReader;
 import com.badoo.hprof.library.heap.HeapTag;
 import com.badoo.hprof.library.heap.processor.HeapDumpDiscardProcessor;
+import com.badoo.hprof.library.model.BasicType;
 import com.badoo.hprof.library.model.ClassDefinition;
+import com.badoo.hprof.library.model.ConstantField;
 import com.badoo.hprof.library.model.HprofString;
+import com.badoo.hprof.library.model.InstanceField;
+import com.badoo.hprof.library.model.StaticField;
 import com.badoo.hprof.library.processor.DiscardProcessor;
 import com.badoo.hprof.library.util.StreamUtil;
 import com.sun.istack.internal.Nullable;
@@ -50,6 +53,43 @@ public class CrunchProcessor extends DiscardProcessor {
             writeInt32(tag);
             writeRawBytes(data);
         }
+
+        public void writeClassDefinition(ClassDefinition classDef) throws IOException {
+            writeInt32(BmdTag.CLASS_DEFINITION);
+            writeInt32(classDef.getObjectId());
+            writeInt32(classDef.getSuperClassObjectId());
+            // Write constants and static fields (not filtered)
+            int constantFieldCount = classDef.getConstantFields().size();
+            writeInt32(constantFieldCount);
+            for (int i = 0; i < constantFieldCount; i++) {
+                ConstantField field = classDef.getConstantFields().get(i);
+                writeInt32(field.getPoolIndex());
+                writeInt32(field.getType().type);
+                writeRawBytes(field.getValue());
+            }
+            int staticFieldCount = classDef.getStaticFields().size();
+            writeInt32(staticFieldCount);
+            for (int i = 0; i < staticFieldCount; i++) {
+                StaticField field = classDef.getStaticFields().get(i);
+                writeInt32(stringIds.get(field.getFieldNameId()));
+                writeInt32(field.getType().type);
+                writeRawBytes(field.getValue());
+            }
+            // Filter instance fields before writing them
+            int skippedFieldSize = 0;
+            int instanceFieldCount = classDef.getInstanceFields().size();
+            for (int i = 0; i < instanceFieldCount; i++) {
+                InstanceField field = classDef.getInstanceFields().get(i);
+                if (field.getType() != BasicType.OBJECT) {
+                    skippedFieldSize += field.getType().size;
+                    continue;
+                }
+                writeInt32(stringIds.get(field.getFieldNameId()));
+                writeInt32(field.getType().type);
+            }
+            writeInt32(0); // End marker for instance fields
+            writeInt32(skippedFieldSize);
+        }
     }
 
     private class ClassDumpProcessor extends HeapDumpDiscardProcessor {
@@ -59,16 +99,17 @@ public class CrunchProcessor extends DiscardProcessor {
             switch (tag) {
                 case HeapTag.CLASS_DUMP:
                     ClassDefinition def = reader.readClassDumpRecord(classes);
-                    System.out.println("Reading class " + def.getObjectId());
+                    writer.writeClassDefinition(def);
                     break;
                 default:
                     super.onHeapRecord(tag, reader);
             }
         }
+
     }
 
     private final CrunchBdmWriter writer;
-    private int nextStringId;
+    private int nextStringId = 1; // Skipping 0 since this is used as a marker in some cases
     private Map<Integer, Integer> stringIds = new HashMap<Integer, Integer>(); // Maps original to updated string ids
     private Map<Integer, ClassDefinition> classes = new HashMap<Integer, ClassDefinition>();
 
