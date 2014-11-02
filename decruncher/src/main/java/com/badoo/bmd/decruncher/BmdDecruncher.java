@@ -6,6 +6,6 @@ package com.badoo.bmd.decruncher;
 public class BmdDecruncher {
 
     public static void main(String[] args) {
-        
+
     }
 }
