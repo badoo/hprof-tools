@@ -20,4 +20,29 @@ public enum BmdBasicType {
     BmdBasicType(int id) {
         this.id = id;
     }
+
+    public static BmdBasicType fromInt(int id) {
+        switch (id) {
+            case 0:
+                return OBJECT;
+            case 1:
+                return INT;
+            case 2:
+                return BOOLEAN;
+            case 3:
+                return BYTE;
+            case 4:
+                return CHAR;
+            case 5:
+                return FLOAT;
+            case 6:
+                return DOUBLE;
+            case 7:
+                return LONG;
+            case 8:
+                return SHORT;
+            default:
+                throw new IllegalArgumentException("Invalid value for BmdBasicType");
+        }
+    }
 }

@@ -9,5 +9,5 @@ public interface BmdProcessor {
 
     public void onRecord(int tag, BmdReader reader) throws IOException;
 
-    public void onHeader(int version, byte[] data);
+    public void onHeader(int version, byte[] data) throws IOException;
 }

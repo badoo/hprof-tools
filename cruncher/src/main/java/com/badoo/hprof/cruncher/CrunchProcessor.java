@@ -32,6 +32,7 @@ import java.util.Set;
 
 import static com.badoo.hprof.library.util.StreamUtil.read;
 import static com.badoo.hprof.library.util.StreamUtil.readInt;
+import static com.badoo.hprof.library.util.StreamUtil.writeInt;
 
 /**
  * Processor for reading a HPROF file and outputting a BMD file.
@@ -66,6 +67,7 @@ public class CrunchProcessor extends DiscardProcessor {
         public void writeLegacyRecord(int tag, byte[] data) throws IOException {
             writeInt32(BmdTag.LEGACY_HPROF_RECORD);
             writeInt32(tag);
+            writeInt32(data.length);
             writeRawBytes(data);
         }
 
@@ -73,6 +75,7 @@ public class CrunchProcessor extends DiscardProcessor {
             writeInt32(BmdTag.CLASS_DEFINITION);
             writeInt32(mapObjectId(classDef.getObjectId()));
             writeInt32(mapObjectId(classDef.getSuperClassObjectId()));
+            writeInt32(stringIds.get(classDef.getNameStringId()));
             // Write constants and static fields (not filtered)
             int constantFieldCount = classDef.getConstantFields().size();
             writeInt32(constantFieldCount);
@@ -149,7 +152,7 @@ public class CrunchProcessor extends DiscardProcessor {
         }
 
         public void writeRootObjects(List<Integer> roots) throws IOException {
-            writeInt32(BmdTag.ROOT_OBJECT);
+            writeInt32(BmdTag.ROOT_OBJECTS);
             writeInt32(roots.size());
             for (int i = 0; i < roots.size(); i++) {
                 writeInt32(mapObjectId(roots.get(i)));

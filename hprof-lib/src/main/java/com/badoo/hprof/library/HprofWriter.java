@@ -87,4 +87,12 @@ public class HprofWriter {
         writeInt(out, cls.getNameStringId());
     }
 
+    /**
+     * TODO Document
+     *
+      * @return
+     */
+    public OutputStream getOutputStream() {
+        return out;
+    }
 }
