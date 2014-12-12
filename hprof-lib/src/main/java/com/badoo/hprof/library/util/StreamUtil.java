@@ -71,7 +71,7 @@ public class StreamUtil {
     /**
      * Write a byte.
      *
-     * @param out The OutputStream to write the byte to
+     * @param out   The OutputStream to write the byte to
      * @param value The byte to write
      * @throws IOException
      */
@@ -104,15 +104,31 @@ public class StreamUtil {
     /**
      * Write an int.
      *
-     * @param out The OutputStream to write the int to
+     * @param out   The OutputStream to write the int to
      * @param value The int to write
-     * @throws IOException
      */
     public static void writeInt(OutputStream out, int value) throws IOException {
         out.write(value >> 24);
         out.write(value >> 16);
         out.write(value >> 8);
         out.write(value);
+    }
+
+    /**
+     * Write an long.
+     *
+     * @param out   The OutputStream to write the long to
+     * @param value The long to write
+     */
+    public static void writeLong(OutputStream out, long value) throws IOException {
+        out.write((int) (0xff & (value >> 56)));
+        out.write((int) (0xff & (value >> 48)));
+        out.write((int) (0xff & (value >> 40)));
+        out.write((int) (0xff & (value >> 32)));
+        out.write((int) (0xff & (value >> 24)));
+        out.write((int) (0xff & (value >> 16)));
+        out.write((int) (0xff & (value >> 8)));
+        out.write((int) value);
     }
 
     /**
@@ -129,7 +145,7 @@ public class StreamUtil {
     /**
      * Write a short.
      *
-     * @param out The OutputStream to write the short to
+     * @param out   The OutputStream to write the short to
      * @param value The short to write
      * @throws IOException
      */
@@ -141,8 +157,8 @@ public class StreamUtil {
     /**
      * Copy a number of bytes from one stream to another, returning a copy of the bytes read.
      *
-     * @param in The InputStream
-     * @param out The OutputStream
+     * @param in   The InputStream
+     * @param out  The OutputStream
      * @param size Number of bytes to read
      * @return An array containing the bytes read
      * @throws IOException
@@ -157,7 +173,7 @@ public class StreamUtil {
     /**
      * Read a number of bytes.
      *
-     * @param in The InputStream to read from
+     * @param in     The InputStream to read from
      * @param length Number of bytes to read
      * @return An array containing the bytes read
      * @throws IOException
@@ -171,7 +187,7 @@ public class StreamUtil {
     /**
      * Write a number of bytes
      *
-     * @param out The OutputStream to write to
+     * @param out  The OutputStream to write to
      * @param data The bytes to write
      * @throws IOException
      */

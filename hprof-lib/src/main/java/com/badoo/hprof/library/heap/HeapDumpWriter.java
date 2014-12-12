@@ -64,4 +64,21 @@ public class HeapDumpWriter {
         }
     }
 
+    /**
+     * Write an INSTANCE_DUMP record.
+     *
+     * @param objectId         Object id of the instance
+     * @param stackTraceSerial Stack trace serial number
+     * @param classId          Id of the instance's class
+     * @param data             Instance data (packed instance field values)
+     */
+    public void writeInstanceDumpRecord(int objectId, int stackTraceSerial, int classId, byte[] data) throws IOException {
+        out.write(HeapTag.INSTANCE_DUMP);
+        writeInt(out, objectId);
+        writeInt(out, stackTraceSerial);
+        writeInt(out, classId);
+        writeInt(out, data.length);
+        write(out, data);
+    }
+
 }

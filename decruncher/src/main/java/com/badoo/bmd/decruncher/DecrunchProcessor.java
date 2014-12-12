@@ -7,6 +7,7 @@ import com.badoo.bmd.model.BmdBasicType;
 import com.badoo.bmd.model.BmdClassDefinition;
 import com.badoo.bmd.model.BmdConstantField;
 import com.badoo.bmd.model.BmdInstanceDump;
+import com.badoo.bmd.model.BmdInstanceDumpField;
 import com.badoo.bmd.model.BmdInstanceFieldDefinition;
 import com.badoo.bmd.model.BmdLegacyRecord;
 import com.badoo.bmd.model.BmdObjectArray;
@@ -31,8 +32,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.badoo.hprof.library.util.StreamUtil.writeByte;
+import static com.badoo.hprof.library.util.StreamUtil.writeInt;
+import static com.badoo.hprof.library.util.StreamUtil.writeLong;
+import static com.badoo.hprof.library.util.StreamUtil.writeShort;
+
 /**
- * TODO: Document
+ * A BmdProcessor implementation that converts BMD files to HPROF.
+ *
  * Created by Erik Andre on 02/11/14.
  */
 public class DecrunchProcessor implements BmdProcessor {
@@ -60,7 +67,9 @@ public class DecrunchProcessor implements BmdProcessor {
             heapWriter.writeClassDumpRecord(convertClassDefinition(bmdClassDef));
         }
         // Instance dumps
-
+        for (BmdInstanceDump instance : instances) {
+            writeInstanceDump(heapWriter, instance);
+        }
         // Object arrays
 
         // Primitive arrays
@@ -108,7 +117,7 @@ public class DecrunchProcessor implements BmdProcessor {
         }
     }
 
-    private ClassDefinition convertClassDefinition(BmdClassDefinition bmdClassDef) {
+    private ClassDefinition convertClassDefinition(BmdClassDefinition bmdClassDef) throws IOException {
         ClassDefinition classDef = new ClassDefinition();
         classDef.setObjectId(bmdClassDef.getId());
         classDef.setNameStringId(bmdClassDef.getName());
@@ -142,7 +151,8 @@ public class DecrunchProcessor implements BmdProcessor {
                 // Add int
                 instanceFields.add(new InstanceField(BasicType.INT, FILLER_FIELD_NAME));
                 filler -= 4;
-            } else {
+            }
+            else {
                 // Add byte
                 instanceFields.add(new InstanceField(BasicType.BYTE, FILLER_FIELD_NAME));
                 filler -= 1;
@@ -158,6 +168,53 @@ public class DecrunchProcessor implements BmdProcessor {
         return classDef;
     }
 
+    private void writeInstanceDump(HeapDumpWriter writer, BmdInstanceDump instance) throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        int currentClassId = instance.getClassId();
+        for (BmdInstanceDumpField field : instance.getFields()) {
+            if (field.getClassDefinition().getId() != currentClassId) {
+                // Before starting on the fields of the super class we need to write any filler data for the current class
+                int fillerSize = classes.get(currentClassId).getDiscardedFieldSize();
+                for (int i = 0; i < fillerSize; i++) {
+                    buffer.write(0);
+                }
+            }
+            // Write the field data
+            writeFieldValue(buffer, field.getData());
+            currentClassId = field.getClassDefinition().getId();
+        }
+        byte[] data = buffer.toByteArray();
+        writer.writeInstanceDumpRecord(instance.getId(), 0, instance.getClassId(), data);
+    }
+
+    private void writeFieldValue(OutputStream out, Object value) throws IOException {
+        if (value instanceof Boolean) {
+            writeByte(out, (Boolean) value ? 1 : 0);
+        }
+        else if (value instanceof Byte) {
+            writeByte(out, (Byte) value);
+        }
+        else if (value instanceof Character) {
+            int intValue = (Character) value;
+            writeShort(out, (short) intValue);
+        }
+        else if (value instanceof Double) {
+            writeLong(out, Double.doubleToRawLongBits((Double) value));
+        }
+        else if (value instanceof Integer) {
+            writeInt(out, (Integer) value);
+        }
+        else if (value instanceof Float) {
+            writeInt(out, Float.floatToRawIntBits((Float) value));
+        }
+        else if (value instanceof Long) {
+            writeLong(out, (Long) value);
+        }
+        else if (value instanceof Short) {
+            writeShort(out, (Short) value);
+        }
+    }
+
     private void writeLegacyRecord(BmdLegacyRecord record) throws IOException {
         writer.writeRecordHeader(record.getOriginalTag(), 0, record.getData().length);
         writer.getOutputStream().write(record.getData());
@@ -171,7 +228,7 @@ public class DecrunchProcessor implements BmdProcessor {
     }
 
     private void writeString(BmdString string) throws IOException {
-        String stringVal = string.getString() != null? string.getString() : "Hash=" + string.getHash();
+        String stringVal = string.getString() != null ? string.getString() : "Hash=" + string.getHash();
         HprofString hprofString = new HprofString(string.getId(), stringVal, 0);
         writer.writeStringRecord(hprofString);
     }
@@ -182,12 +239,16 @@ public class DecrunchProcessor implements BmdProcessor {
         writer.writeHprofFileHeader(new String(data), 4, 0, 0);
     }
 
-    private byte[] getFieldValue(BmdConstantField field) {
-        return new byte[0]; //TODO Implement
+    private byte[] getFieldValue(BmdConstantField field) throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        writeFieldValue(buffer, field.getValue());
+        return buffer.toByteArray();
     }
 
-    private byte[] getFieldValue(BmdStaticField field) {
-        return new byte[0]; //TODO Implement
+    private byte[] getFieldValue(BmdStaticField field) throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        writeFieldValue(buffer, field.getValue());
+        return buffer.toByteArray();
     }
 
     private BasicType convertType(BmdBasicType type) {
