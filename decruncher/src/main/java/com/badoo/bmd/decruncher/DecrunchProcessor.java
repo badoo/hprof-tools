@@ -71,10 +71,16 @@ public class DecrunchProcessor implements BmdProcessor {
             writeInstanceDump(heapWriter, instance);
         }
         // Object arrays
-
+        for (BmdObjectArray array : objectArrays) {
+            writeObjectArray(heapWriter, array);
+        }
         // Primitive arrays
-
+        for (BmdPrimitiveArray array : primitiveArrays) {
+            writePrimitiveArray(heapWriter, array);
+            System.out.println("Size: " + buffer.size() + " , avail:" + Runtime.getRuntime().freeMemory());
+        }
         // GC roots
+
         byte[] record = buffer.toByteArray();
         writer.writeRecordHeader(Tag.HEAP_DUMP, 0, record.length);
         writer.getOutputStream().write(record);
@@ -166,6 +172,18 @@ public class DecrunchProcessor implements BmdProcessor {
         }
         classDef.setInstanceSize(instanceSize);
         return classDef;
+    }
+
+    private void writePrimitiveArray(HeapDumpWriter writer, BmdPrimitiveArray array) throws IOException {
+        BasicType elementType = convertType(array.getType());
+        writer.writePrimitiveArrayHeader(array.getId(), 0, elementType, array.getElementCount());
+        // Just write 0's to fill the space
+        byte[] data = new byte[elementType.size * array.getElementCount()];
+        writer.getOutputStream().write(data);
+    }
+
+    private void writeObjectArray(HeapDumpWriter writer, BmdObjectArray array) throws IOException {
+        writer.writeObjectArray(array.getId(), 0, array.getElementClassId(), array.getElements());
     }
 
     private void writeInstanceDump(HeapDumpWriter writer, BmdInstanceDump instance) throws IOException {

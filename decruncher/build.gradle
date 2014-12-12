@@ -11,10 +11,13 @@ repositories {
 }
 
 run {
+    minHeapSize = "128m"
+    maxHeapSize = "512m"
     if(project.hasProperty('args')){
         args project.args.split('\\s+')
     }
 }
+
 
 dependencies {
     compile project(':hprof-lib')

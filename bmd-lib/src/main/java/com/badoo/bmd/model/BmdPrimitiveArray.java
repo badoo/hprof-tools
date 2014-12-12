@@ -19,4 +19,11 @@ public class BmdPrimitiveArray {
         return id;
     }
 
+    public BmdBasicType getType() {
+        return type;
+    }
+
+    public int getElementCount() {
+        return elementCount;
+    }
 }
