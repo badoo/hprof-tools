@@ -126,4 +126,13 @@ public class HeapDumpWriter {
         writeByte(out, elementType.type);
     }
 
+    /**
+     * Write an unknown GC (ROOT_UNKNOWN) root.
+     *
+     * @param objectId The object id of the root object.
+     */
+    public void writeUnknownRoot(int objectId) throws IOException {
+        out.write(HeapTag.ROOT_UNKNOWN);
+        writeInt(out, objectId);
+    }
 }

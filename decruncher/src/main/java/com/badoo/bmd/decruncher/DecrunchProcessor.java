@@ -77,10 +77,11 @@ public class DecrunchProcessor implements BmdProcessor {
         // Primitive arrays
         for (BmdPrimitiveArray array : primitiveArrays) {
             writePrimitiveArray(heapWriter, array);
-            System.out.println("Size: " + buffer.size() + " , avail:" + Runtime.getRuntime().freeMemory());
         }
         // GC roots
-
+        for (Integer root : rootObjects) {
+            heapWriter.writeUnknownRoot(root);
+        }
         byte[] record = buffer.toByteArray();
         writer.writeRecordHeader(Tag.HEAP_DUMP, 0, record.length);
         writer.getOutputStream().write(record);
