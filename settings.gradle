@@ -7,3 +7,5 @@ include 'bmd-lib'
 
 include 'decruncher'
 
+include 'hprof-validator'
+

@@ -28,4 +28,40 @@ public final class Tag {
     private Tag() {
     }
 
+    public static String tagToString(int tag) {
+        switch (tag) {
+            case UNKNOWN:
+                return "UNKNOWN";
+            case STRING:
+                return "STRING";
+            case LOAD_CLASS:
+                return "LOAD_CLASS";
+            case UNLOAD_CLASS:
+                return "UNLOAD_CLASS";
+            case STACK_FRAME:
+                return "STACK_FRAME";
+            case STACK_TRACE:
+                return "STACK_TRACE";
+            case ALLOC_SITES:
+                return "ALLOC_SITES";
+            case HEAP_SUMMARY:
+                return "HEAP_SUMMARY";
+            case START_THREAD:
+                return "START_THREAD";
+            case END_THREAD:
+                return "END_THREAD";
+            case HEAP_DUMP:
+                return "HEAP_DUMP";
+            case HEAP_DUMP_SEGMENT:
+                return "HEAP_DUMP_SEGMENT";
+            case HEAP_DUMP_END:
+                return "HEAP_DUMP_END";
+            case CPU_SAMPLES:
+                return "CPU_SAMPLES";
+            case CONTROL_SETTINGS:
+                return "CONTROL_SETTINGS";
+            default:
+                return "Unknown tag";
+        }
+    }
 }

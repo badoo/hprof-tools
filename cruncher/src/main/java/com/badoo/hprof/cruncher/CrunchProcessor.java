@@ -364,7 +364,8 @@ public class CrunchProcessor extends DiscardProcessor {
                     stringIds.put(string.getId(), nextStringId); // Save the original id so we can update references later
                     string.setId(nextStringId);
                     nextStringId++;
-                    writer.writeString(string, true);
+                    boolean hashed = !(string.getValue().startsWith("java.lang")); // Keep real names for some system classes (needed until decruncher can unscramble hashed strings)
+                    writer.writeString(string, hashed);
                     break;
                 case Tag.LOAD_CLASS:
                     ClassDefinition classDef = reader.readLoadClassRecord();
