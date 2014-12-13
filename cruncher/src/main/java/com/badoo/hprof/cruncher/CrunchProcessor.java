@@ -32,7 +32,6 @@ import java.util.Set;
 
 import static com.badoo.hprof.library.util.StreamUtil.read;
 import static com.badoo.hprof.library.util.StreamUtil.readInt;
-import static com.badoo.hprof.library.util.StreamUtil.writeInt;
 
 /**
  * Processor for reading a HPROF file and outputting a BMD file.
@@ -364,7 +363,7 @@ public class CrunchProcessor extends DiscardProcessor {
                     stringIds.put(string.getId(), nextStringId); // Save the original id so we can update references later
                     string.setId(nextStringId);
                     nextStringId++;
-                    boolean hashed = !(string.getValue().startsWith("java.lang")); // Keep real names for some system classes (needed until decruncher can unscramble hashed strings)
+                    boolean hashed = !keepString(string.getValue());
                     writer.writeString(string, hashed);
                     break;
                 case Tag.LOAD_CLASS:
@@ -403,6 +402,13 @@ public class CrunchProcessor extends DiscardProcessor {
                     super.onRecord(tag, timestamp, length, reader); // Skip record
             }
         }
+    }
+
+    private boolean keepString(String string) {
+        // Keep the names of some core system classes (to avoid issues in MAT)
+        return string.startsWith("java.lang") || "V".equals(string) ||  "boolean".equals(string) || "byte".equals(string)
+            || "short".equals(string) || "char".equals(string) || "int".equals(string) || "long".equals(string)
+            || "float".equals(string) || "double".equals(string);
     }
 
     @Override

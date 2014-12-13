@@ -91,7 +91,8 @@ public class ValidatingProcessor extends DiscardProcessor {
             verifySuperClass(classes.get(superId));
         }
         else if (!className.equals("java.lang.Object")) {
-            throw new IllegalStateException("Class " + className + " does not have a super class (" + superId + ")");
+            Log.d(TAG, "Class " + className + " does not have a super class (" + superId + ")");
+//            throw new IllegalStateException("Class " + className + " does not have a super class (" + superId + ")");
         }
     }
 
