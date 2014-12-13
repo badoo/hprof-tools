@@ -411,6 +411,9 @@ public class CrunchProcessor extends DiscardProcessor {
     }
 
     private int mapObjectId(int id) {
+        if (id == 0) {
+            return 0; // Zero is a special case used when there is no value (null), do not map it to a new id
+        }
         if (!objectIds.containsKey(id)) {
             mappedIds.add(nextObjectId);
             objectIds.put(id, nextObjectId);
