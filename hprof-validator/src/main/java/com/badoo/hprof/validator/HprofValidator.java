@@ -6,7 +6,6 @@ import com.google.common.io.CountingInputStream;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * Created by Erik Andre on 12/12/14.
@@ -24,6 +23,7 @@ public class HprofValidator {
             }
             // All data loaded, start to check that it is consistent
             processor.verifyClasses();
+            processor.verifyInstances();
         }
         catch (IOException e) {
            System.err.print("Failed to process file");

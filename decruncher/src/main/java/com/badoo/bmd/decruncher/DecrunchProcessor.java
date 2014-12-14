@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.badoo.hprof.library.util.StreamUtil.write;
 import static com.badoo.hprof.library.util.StreamUtil.writeByte;
 import static com.badoo.hprof.library.util.StreamUtil.writeInt;
 import static com.badoo.hprof.library.util.StreamUtil.writeLong;
@@ -190,17 +191,19 @@ public class DecrunchProcessor implements BmdProcessor {
     private void writeInstanceDump(HeapDumpWriter writer, BmdInstanceDump instance) throws IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         int currentClassId = instance.getClassId();
-        for (BmdInstanceDumpField field : instance.getFields()) {
-            if (field.getClassDefinition().getId() != currentClassId) {
-                // Before starting on the fields of the super class we need to write any filler data for the current class
-                int fillerSize = classes.get(currentClassId).getDiscardedFieldSize();
-                for (int i = 0; i < fillerSize; i++) {
-                    buffer.write(0);
+        while (currentClassId != 0) {
+            BmdClassDefinition currentClass = classes.get(currentClassId);
+            // Write all fields for this class
+            for (BmdInstanceDumpField field : instance.getFields()) {
+                if (field.getClassDefinition().equals(currentClass)) {
+                    writeFieldValue(buffer, field.getData());
                 }
             }
-            // Write the field data
-            writeFieldValue(buffer, field.getData());
-            currentClassId = field.getClassDefinition().getId();
+            // Write filler data for removed fields
+            if (currentClass.getDiscardedFieldSize() > 0) {
+                write(buffer, 0, currentClass.getDiscardedFieldSize());
+            }
+            currentClassId = currentClass.getSuperClassId();
         }
         byte[] data = buffer.toByteArray();
         writer.writeInstanceDumpRecord(instance.getId(), 0, instance.getClassId(), data);

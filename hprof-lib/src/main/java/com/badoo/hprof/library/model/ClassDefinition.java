@@ -145,4 +145,44 @@ public class ClassDefinition extends Record {
     public void setNameStringId(int nameStringId) {
         this.nameStringId = nameStringId;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ClassDefinition that = (ClassDefinition) o;
+
+        if (classLoaderObjectId != that.classLoaderObjectId) return false;
+        if (instanceSize != that.instanceSize) return false;
+        if (nameStringId != that.nameStringId) return false;
+        if (objectId != that.objectId) return false;
+        if (protectionDomainObjectId != that.protectionDomainObjectId) return false;
+        if (serialNumber != that.serialNumber) return false;
+        if (signersObjectId != that.signersObjectId) return false;
+        if (stackTraceSerial != that.stackTraceSerial) return false;
+        if (superClassObjectId != that.superClassObjectId) return false;
+        if (constantFields != null ? !constantFields.equals(that.constantFields) : that.constantFields != null) return false;
+        if (instanceFields != null ? !instanceFields.equals(that.instanceFields) : that.instanceFields != null) return false;
+        if (staticFields != null ? !staticFields.equals(that.staticFields) : that.staticFields != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = serialNumber;
+        result = 31 * result + objectId;
+        result = 31 * result + nameStringId;
+        result = 31 * result + stackTraceSerial;
+        result = 31 * result + superClassObjectId;
+        result = 31 * result + classLoaderObjectId;
+        result = 31 * result + signersObjectId;
+        result = 31 * result + protectionDomainObjectId;
+        result = 31 * result + instanceSize;
+        result = 31 * result + (constantFields != null ? constantFields.hashCode() : 0);
+        result = 31 * result + (staticFields != null ? staticFields.hashCode() : 0);
+        result = 31 * result + (instanceFields != null ? instanceFields.hashCode() : 0);
+        return result;
+    }
 }

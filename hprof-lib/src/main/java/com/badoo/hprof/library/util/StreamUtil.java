@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 /**
  * Utility class containing methods to read and write to streams.
@@ -11,6 +12,8 @@ import java.io.OutputStream;
  * Created by Erik Andre on 13/07/2014.
  */
 public class StreamUtil {
+
+    private static final byte[] buffer = new byte[1024];
 
     /**
      * Read a null-terminated string.
@@ -193,6 +196,26 @@ public class StreamUtil {
      */
     public static void write(OutputStream out, byte[] data) throws IOException {
         out.write(data);
+    }
+
+    /**
+     * Write a repeated byte value.
+     *
+     * @param out   The OutputStream to write to
+     * @param value The value to write
+     * @param count Number of times to write the value
+     */
+    public static void write(OutputStream out, int value, int count) throws IOException {
+        if (count > buffer.length) {
+            // Fallback
+            for (int i = 0; i < count; i++) {
+                writeByte(out, value);
+            }
+        }
+        else {
+            Arrays.fill(buffer, (byte) value);
+            out.write(buffer, 0, count);
+        }
     }
 
 }

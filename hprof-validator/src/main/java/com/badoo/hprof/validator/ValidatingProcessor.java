@@ -30,6 +30,7 @@ public class ValidatingProcessor extends DiscardProcessor {
     private Map<Integer, String> strings = new HashMap<Integer, String>();
     private Map<Integer, ClassDefinition> classes = new HashMap<Integer, ClassDefinition>();
     private List<Instance> instances = new ArrayList<Instance>();
+    private Map<Instance, Long> instancePositions = new HashMap<Instance, Long>();
 
     public ValidatingProcessor(CountingInputStream in) {
         this.in = in;
@@ -64,6 +65,24 @@ public class ValidatingProcessor extends DiscardProcessor {
         HeapDumpReader reader = new HeapDumpReader(in, length, processor);
         while (reader.hasNext()) {
             reader.next();
+        }
+    }
+
+    public void verifyInstances() {
+        for (Instance instance : instances) {
+            ClassDefinition cls = classes.get(instance.getClassObjectId());
+            // Check that the class exists
+            if (cls == null) {
+                throw new IllegalStateException("Object with id " + cls.getObjectId() + " does not have a class (" + instance.getClassObjectId());
+            }
+            String name = strings.get(cls.getNameStringId());
+            // Verify that the instance dump size is correct
+            int expectedSize = getInstanceSize(cls);
+            if (expectedSize != instance.getInstanceFieldData().length) {
+                long location = instancePositions.get(instance);
+                throw new IllegalStateException("Object with name " + name + " at " + location + " has mismatching instance size. Expected "
+                    + expectedSize + " was " + instance.getInstanceFieldData().length);
+            }
         }
     }
 
@@ -104,11 +123,23 @@ public class ValidatingProcessor extends DiscardProcessor {
                 reader.readClassDumpRecord(classes);
             }
             else if (tag == HeapTag.INSTANCE_DUMP) {
-                instances.add(reader.readInstanceDump());
+                long position = in.getCount();
+                Instance instance = reader.readInstanceDump();
+                instances.add(instance);
+                instancePositions.put(instance, position);
             }
             else {
                 super.onHeapRecord(tag, reader);
             }
         }
+    }
+
+    private int getInstanceSize(ClassDefinition cls) {
+        int size = 0;
+        while (cls != null) {
+            size += cls.getInstanceSize();
+            cls = classes.get(cls.getSuperClassObjectId());
+        }
+        return size;
     }
 }
