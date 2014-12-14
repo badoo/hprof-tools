@@ -34,7 +34,14 @@ import static com.badoo.hprof.library.util.StreamUtil.read;
 import static com.badoo.hprof.library.util.StreamUtil.readInt;
 
 /**
- * Processor for reading a HPROF file and outputting a BMD file.
+ * Processor for reading a HPROF file and outputting a BMD file. Operates in two stages:
+ * <p/>
+ * 1. Read all class definitions and write them to the BMD file.
+ * 2. Read all instance dumps and write them to the BMD file.
+ * <p/>
+ * The reason why it's being done in two steps is that in HPROF files the class definition is not guaranteed to come
+ * before the instance dump. In order to process it in one pass you must keep all the class definitions and some instance dumps in memory
+ * until all class dependencies can be resolved.
  * <p/>
  * Created by Erik Andre on 22/10/14.
  */
@@ -122,7 +129,8 @@ public class CrunchProcessor extends DiscardProcessor {
                     if (type == BasicType.OBJECT) {
                         int id = readInt(in);
                         writeInt32(mapObjectId(id));
-                    } else { // Other fields are ignored
+                    }
+                    else { // Other fields are ignored
                         in.skip(type.size);
                     }
                 }
@@ -406,7 +414,7 @@ public class CrunchProcessor extends DiscardProcessor {
 
     private boolean keepString(String string) {
         // Keep the names of some core system classes (to avoid issues in MAT)
-        return string.startsWith("java.lang") || "V".equals(string) ||  "boolean".equals(string) || "byte".equals(string)
+        return string.startsWith("java.lang") || "V".equals(string) || "boolean".equals(string) || "byte".equals(string)
             || "short".equals(string) || "char".equals(string) || "int".equals(string) || "long".equals(string)
             || "float".equals(string) || "double".equals(string);
     }
