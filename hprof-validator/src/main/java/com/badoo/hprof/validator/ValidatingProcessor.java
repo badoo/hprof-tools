@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * A HPROF processor that performs simple verifications to check that the HPROF data is valid.
+ *
  * Created by Erik Andre on 13/12/14.
  */
 public class ValidatingProcessor extends DiscardProcessor {

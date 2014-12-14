@@ -1,11 +1,14 @@
 package com.badoo.bmd;
 
 /**
+ * Class containing a list of all valid tags (an id that specifies the type of a record).
+ * <p/>
  * Created by Erik Andre on 22/10/14.
  */
 public class BmdTag {
 
-    private BmdTag() {}
+    private BmdTag() {
+    }
 
     public static final int STRING = 1;
     public static final int HASHED_STRING = 2;

@@ -15,10 +15,20 @@ public class BmdInstanceFieldDefinition {
         this.type = type;
     }
 
+    /**
+     * Returns the string id of this fields name.
+     *
+     * @return The string id name of the field
+     */
     public int getNameId() {
         return nameId;
     }
 
+    /**
+     * Returns the type of the field.
+     *
+     * @return The type of the field
+     */
     public BmdBasicType getType() {
         return type;
     }

@@ -1,6 +1,8 @@
 package com.badoo.bmd.model;
 
 /**
+ * Enum defining the data types supported by BMD.
+ * <p/>
  * Created by Erik Andre on 23/10/14.
  */
 public enum BmdBasicType {

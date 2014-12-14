@@ -1,6 +1,8 @@
 package com.badoo.bmd.model;
 
 /**
+ * Class containing a BMD string. Consists of a string id and either a string value or a hash code.
+ * <p/>
  * Created by Erik Andre on 23/10/14.
  */
 public class BmdString {
@@ -21,14 +23,29 @@ public class BmdString {
         this.id = id;
     }
 
+    /**
+     * Returns the string data or null if this BmdString only has a hash.
+     *
+     * @return The string data or null if there is none
+     */
     public String getString() {
         return string;
     }
 
+    /**
+     * Returns the string hash if it's defined.
+     *
+     * @return The string hash
+     */
     public int getHash() {
         return hash;
     }
 
+    /**
+     * Returns the string id which globally identifies it.
+     *
+     * @return The string id
+     */
     public int getId() {
         return id;
     }

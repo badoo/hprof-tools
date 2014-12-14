@@ -18,14 +18,29 @@ public class BmdStaticField {
         this.value = value;
     }
 
+    /**
+     * Returns the string id of the fields name.
+     *
+     * @return The name string id.
+     */
     public int getNameId() {
         return nameId;
     }
 
+    /**
+     * Returns the type of the field.
+     *
+     * @return The field type
+     */
     public BmdBasicType getType() {
         return type;
     }
 
+    /**
+     * Returns the field value (how to interpret it depends on the type of the field).
+     *
+     * @return The field value
+     */
     public Object getValue() {
         return value;
     }
