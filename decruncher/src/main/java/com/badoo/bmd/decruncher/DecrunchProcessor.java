@@ -83,6 +83,7 @@ public class DecrunchProcessor implements BmdProcessor {
         for (Integer root : rootObjects) {
             heapWriter.writeUnknownRoot(root);
         }
+        writer.writeStringRecord(new HprofString(FILLER_FIELD_NAME, "field_removed", 0)); // Needed by the decrunched instance dumps
         byte[] record = buffer.toByteArray();
         writer.writeRecordHeader(Tag.HEAP_DUMP, 0, record.length);
         writer.getOutputStream().write(record);
@@ -250,7 +251,7 @@ public class DecrunchProcessor implements BmdProcessor {
     }
 
     private void writeString(BmdString string) throws IOException {
-        String stringVal = string.getString() != null ? string.getString() : "Hash=" + string.getHash();
+        String stringVal = string.getString() != null ? string.getString() : "Hash$" + string.getHash();
         HprofString hprofString = new HprofString(string.getId(), stringVal, 0);
         writer.writeStringRecord(hprofString);
     }
