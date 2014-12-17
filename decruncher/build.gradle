@@ -22,5 +22,7 @@ run {
 dependencies {
     compile project(':hprof-lib')
     compile project(':bmd-lib')
+    compile 'commons-io:commons-io:2.4'
+    compile files('libs/dex-reader-1.15.jar')
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }

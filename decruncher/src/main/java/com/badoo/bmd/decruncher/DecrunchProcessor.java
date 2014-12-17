@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.badoo.hprof.library.util.StreamUtil.write;
 import static com.badoo.hprof.library.util.StreamUtil.writeByte;
@@ -54,13 +55,24 @@ public class DecrunchProcessor implements BmdProcessor {
     private static final int FILLER_FIELD_NAME = Integer.MAX_VALUE;
     private final HprofWriter writer;
     private final Map<Integer, BmdClassDefinition> classes = new HashMap<Integer, BmdClassDefinition>();
+    private final Map<Integer, String> strings;
     private List<BmdInstanceDump> instances = new ArrayList<BmdInstanceDump>();
     private List<BmdObjectArray> objectArrays = new ArrayList<BmdObjectArray>();
     private List<BmdPrimitiveArray> primitiveArrays = new ArrayList<BmdPrimitiveArray>();
     private List<Integer> rootObjects = new ArrayList<Integer>();
 
-    public DecrunchProcessor(OutputStream out) {
+    /**
+     * Create a new DecrunchProcessor.
+     *
+     * @param out The output to write the decrunched data to
+     * @param strings A set of strings from the original app, used to recover strings replaced by hashes in the dump
+     */
+    public DecrunchProcessor(OutputStream out, Set<String> strings) {
         writer = new HprofWriter(out);
+        this.strings = new HashMap<Integer, String>();
+        for (String string : strings) {
+            this.strings.put(string.hashCode(), string);
+        }
     }
 
     /**
@@ -257,7 +269,13 @@ public class DecrunchProcessor implements BmdProcessor {
     }
 
     private void writeString(BmdString string) throws IOException {
-        String stringVal = string.getString() != null ? string.getString() : "Hash$" + string.getHash();
+        String stringVal = string.getString();
+        if (stringVal == null) { // Check if we can recover the string using the hash code
+            stringVal = strings.get(string.getHash());
+        }
+        if (stringVal == null) { // Fall back to using a placeholder
+            stringVal = "Hash$" + string.getHash();
+        }
         HprofString hprofString = new HprofString(string.getId(), stringVal, 0);
         writer.writeStringRecord(hprofString);
     }
