@@ -5,6 +5,7 @@
 *.iml
 *.hprof
 *.bmd
+*.apk
 bin/
 build/
 app/build/

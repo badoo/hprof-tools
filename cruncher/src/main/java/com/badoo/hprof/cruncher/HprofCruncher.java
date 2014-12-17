@@ -22,12 +22,22 @@ import java.io.OutputStream;
 public class HprofCruncher {
 
     public static void main(String[] args) {
+        String inFile;
+        String outFile;
+        if (args != null && args.length >= 2) {
+            inFile = args[0];
+            outFile = args[1];
+        }
+        else {
+            inFile = "in.hprof";
+            outFile = "out.bmd";
+        }
         OutputStream out = null;
         try {
-            out = new FileOutputStream("out.bmd");
+            out = new FileOutputStream(outFile);
             CrunchProcessor processor = new CrunchProcessor(out);
             // Start first pass
-            InputStream in = new FileInputStream("in.hprof");
+            InputStream in = new FileInputStream(inFile);
             HprofReader reader = new HprofReader(in, processor);
             while (reader.hasNext()) {
                 reader.next();
@@ -35,7 +45,7 @@ public class HprofCruncher {
             processor.allClassesRead();
             in.close();
             // Start second pass
-            in = new FileInputStream("in.hprof");
+            in = new FileInputStream(inFile);
             reader = new HprofReader(in, processor);
             while (reader.hasNext()) {
                 reader.next();

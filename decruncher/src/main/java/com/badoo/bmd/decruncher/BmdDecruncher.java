@@ -8,16 +8,27 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * TODO Document
+ * Application for converting BMD files to HPROF.
+ *
  * Created by Erik Andre on 02/11/14.
  */
 public class BmdDecruncher {
 
     public static void main(String[] args) {
+        String inFile;
+        String outFile;
+        if (args != null && args.length >= 2) {
+            inFile = args[0];
+            outFile = args[1];
+        }
+        else {
+            inFile = "in.bmd";
+            outFile = "out.hprof";
+        }
         try {
-            OutputStream out = new FileOutputStream("out.hprof");
+            OutputStream out = new FileOutputStream(outFile);
             DecrunchProcessor processor = new DecrunchProcessor(out);
-            BmdReader reader = new BmdReader(new FileInputStream("in.bmd"), processor);
+            BmdReader reader = new BmdReader(new FileInputStream(inFile), processor);
             while (reader.hasNext()) {
                 reader.next();
             }

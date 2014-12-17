@@ -40,12 +40,18 @@ import static com.badoo.hprof.library.util.StreamUtil.writeShort;
 
 /**
  * A BmdProcessor implementation that converts BMD files to HPROF.
- *
+ * Since BMD contains less data than HPROF some filler data is generated in the process.
+ * <p/>
+ * - Contents of all primitive arrays is filled with zeros.
+ * - Primitive instance fields are recreated (to keep the instance size consistent) as ints and bytes but without a real name
+ * and with zero as content.
+ * - Protection domains, stack trace serials and class loader ids are replaced with 0.
+ * <p/>
  * Created by Erik Andre on 02/11/14.
  */
 public class DecrunchProcessor implements BmdProcessor {
 
-    private static final int FILLER_FIELD_NAME = Integer.MAX_VALUE; //TODO Map this to a real string
+    private static final int FILLER_FIELD_NAME = Integer.MAX_VALUE;
     private final HprofWriter writer;
     private final Map<Integer, BmdClassDefinition> classes = new HashMap<Integer, BmdClassDefinition>();
     private List<BmdInstanceDump> instances = new ArrayList<BmdInstanceDump>();
