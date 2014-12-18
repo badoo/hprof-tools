@@ -6,6 +6,7 @@
 *.hprof
 *.bmd
 *.apk
+android.jar
 bin/
 build/
 app/build/

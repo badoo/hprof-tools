@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -26,7 +27,7 @@ public class BmdDecruncher {
             String outFile;
             List<String> additionalFiles = new ArrayList<String>();
             if (args != null && args.length >= 2) {
-                List<String> argList = Arrays.asList(args);
+                List<String> argList = new LinkedList<String>(Arrays.asList(args));
                 inFile = argList.remove(0); // args[0]
                 outFile = argList.remove(0); // args[1]
                 additionalFiles.addAll(argList);
@@ -38,10 +39,10 @@ public class BmdDecruncher {
             Set<String> strings = new HashSet<String>();
             for (String file : additionalFiles) {
                 if (file.endsWith(".dex") || file.endsWith(".apk")) {
-                    strings.addAll(ApkStringReader.readStrings(new File("app.apk")));
+                    strings.addAll(ApkStringReader.readStrings(new File(file)));
                 }
                 else if (file.endsWith(".jar")) {
-                    //TODO
+                    strings.addAll(JarStringReader.readStrings(new File(file)));
                 }
             }
             OutputStream out = new FileOutputStream(outFile);
