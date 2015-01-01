@@ -8,6 +8,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.badoo.hprof.cruncher.library.HprofCatcher;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +19,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        HprofCatcher.init(this);
         setContentView(R.layout.activity_main);
         findViewById(R.id.fillMemory).setOnClickListener(this);
     }
