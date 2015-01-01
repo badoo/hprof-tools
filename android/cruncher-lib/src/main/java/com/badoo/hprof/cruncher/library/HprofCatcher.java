@@ -24,6 +24,8 @@ public class HprofCatcher {
         UncaughtExceptionHandler oldHandler = Thread.getDefaultUncaughtExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler(new MemoryDumpHandler(context.getApplicationContext(), oldHandler));
         sHandlerInstalled = true;
+        // Check if there are any hprof files to process
+        CruncherService.checkForDumps(context);
     }
 
     private static class MemoryDumpHandler implements UncaughtExceptionHandler {
@@ -38,14 +40,16 @@ public class HprofCatcher {
 
         @Override
         public void uncaughtException(Thread thread, Throwable ex) {
-            try {
-                String fileName = mContext.getFilesDir().getAbsolutePath() + "/" + System.currentTimeMillis() + ".hprof";
-                Log.d(TAG, "Writing memory dump to: " + fileName);
-                Debug.dumpHprofData(fileName);
-            }
-            catch (Throwable t) {
-                // Make sure we don't throw any new exception here!
-                Log.e(TAG, "Failed to write memory dump", t);
+            if (ex instanceof OutOfMemoryError) {
+                try {
+                    String fileName = mContext.getFilesDir().getAbsolutePath() + "/" + System.currentTimeMillis() + ".hprof";
+                    Log.d(TAG, "Writing memory dump to: " + fileName);
+                    Debug.dumpHprofData(fileName);
+                }
+                catch (Throwable t) {
+                    // Make sure we don't throw any new exception here!
+                    Log.e(TAG, "Failed to write memory dump", t);
+                }
             }
             mOldHandler.uncaughtException(thread, ex);
         }

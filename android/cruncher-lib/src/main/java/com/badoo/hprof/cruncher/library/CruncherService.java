@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.badoo.hprof.cruncher.HprofCruncher;
@@ -21,16 +22,28 @@ public class CruncherService extends IntentService {
 
     private static final String TAG = "CruncherService";
     private static final String ACTION_CRUNCH_FILE = "com.badoo.hprof.cruncher.library.action.CRUNCH_FILE";
+    private static final String ACTION_CHECK_FILES = "com.badoo.hprof.cruncher.library.action.CHECK_FILES";
     private static final String EXTRA_INPUT_FILE = "com.badoo.hprof.cruncher.library.extra.INPUT";
     private static final String EXTRA_OUTPUT_FILE = "com.badoo.hprof.cruncher.library.extra.INPUT";
 
     /**
-     * Starts this service to crunch a HPROF file with the given parameters. If
-     * the service is already performing a task this action will be queued.
+     * Starts this service to check if there are any HPROF files to process.
      *
      * @see IntentService
      */
-    public static void crunchFile(Context context, String inputFile, String outputFile) {
+    public static void checkForDumps(@NonNull Context context) {
+        Intent intent = new Intent(context, CruncherService.class);
+        intent.setAction(ACTION_CHECK_FILES);
+        context.startService(intent);
+    }
+
+    /**
+     * Starts this service to crunch a HPROF file with the given parameters.
+     *
+     * @see IntentService
+     */
+    @SuppressWarnings("UnusedDeclaration")
+    public static void crunchFile(@NonNull Context context, @NonNull String inputFile, @NonNull String outputFile) {
         Intent intent = new Intent(context, CruncherService.class);
         intent.setAction(ACTION_CRUNCH_FILE);
         intent.putExtra(EXTRA_INPUT_FILE, inputFile);
@@ -50,6 +63,21 @@ public class CruncherService extends IntentService {
                 final String inputFile = intent.getStringExtra(EXTRA_INPUT_FILE);
                 final String outputFile = intent.getStringExtra(EXTRA_OUTPUT_FILE);
                 crunchFile(inputFile, outputFile);
+            }
+            else if (ACTION_CHECK_FILES.equals(action)) {
+                for (File file : getFilesDir().listFiles()) {
+                    if (file.getName().endsWith(".hprof")) {
+                        Log.d(TAG, "Found HPROF file: " + file + ", size: " + file.length());
+                        String outFile = getFilesDir() + "/" + System.currentTimeMillis() + ".bmd";
+                        crunchFile(file.getAbsolutePath(), outFile);
+                        if (file.delete()) {
+                            Log.d(TAG, "Deleted " + file);
+                        }
+                    }
+                    else if (file.getName().endsWith(".bmd")) {
+                        Log.d(TAG, "Found BMD file: " + file + ", size: " + file.length());
+                    }
+                }
             }
         }
     }
