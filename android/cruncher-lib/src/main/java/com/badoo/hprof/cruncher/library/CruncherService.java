@@ -9,10 +9,12 @@ import android.util.Log;
 
 import com.badoo.hprof.cruncher.HprofCruncher;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -74,7 +76,7 @@ public class CruncherService extends IntentService {
                             Log.d(TAG, "Deleted " + file);
                         }
                     }
-                    else if (file.getName().endsWith(".bmd")) {
+                    else if (file.getName().endsWith(".bmd") || file.getName().endsWith(".bmd.gz")) {
                         Log.d(TAG, "Found BMD file: " + file + ", size: " + file.length());
                     }
                 }
@@ -85,7 +87,7 @@ public class CruncherService extends IntentService {
     private void crunchFile(String inputFile, String outputFile) {
         OutputStream out = null;
         try {
-            out = new FileOutputStream(outputFile);
+            out = new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(outputFile)));
             long startTime = SystemClock.elapsedRealtime();
             HprofCruncher.crunch(new File(inputFile), out);
             Log.d(TAG, "Crunching finished after " + (SystemClock.elapsedRealtime() - startTime) + "ms");

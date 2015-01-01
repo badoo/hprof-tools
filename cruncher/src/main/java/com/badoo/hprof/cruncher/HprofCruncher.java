@@ -2,6 +2,7 @@ package com.badoo.hprof.cruncher;
 
 import com.badoo.hprof.library.HprofReader;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -32,7 +33,7 @@ public class HprofCruncher {
     public static void crunch(File inFile, OutputStream out) throws IOException {
         CrunchProcessor processor = new CrunchProcessor(out);
         // Start first pass
-        InputStream in = new FileInputStream(inFile);
+        InputStream in = new BufferedInputStream(new FileInputStream(inFile));
         HprofReader reader = new HprofReader(in, processor);
         while (reader.hasNext()) {
             reader.next();
@@ -40,7 +41,7 @@ public class HprofCruncher {
         processor.allClassesRead();
         in.close();
         // Start second pass
-        in = new FileInputStream(inFile);
+        in = new BufferedInputStream(new FileInputStream(inFile));
         reader = new HprofReader(in, processor);
         while (reader.hasNext()) {
             reader.next();
