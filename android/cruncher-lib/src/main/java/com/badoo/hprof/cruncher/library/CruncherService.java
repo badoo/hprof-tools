@@ -70,7 +70,7 @@ public class CruncherService extends IntentService {
                 for (File file : getFilesDir().listFiles()) {
                     if (file.getName().endsWith(".hprof")) {
                         Log.d(TAG, "Found HPROF file: " + file + ", size: " + file.length());
-                        String outFile = getFilesDir() + "/" + System.currentTimeMillis() + ".bmd";
+                        String outFile = getFilesDir() + "/" + System.currentTimeMillis() + ".bmd.gz";
                         crunchFile(file.getAbsolutePath(), outFile);
                         if (file.delete()) {
                             Log.d(TAG, "Deleted " + file);
