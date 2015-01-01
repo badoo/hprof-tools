@@ -17,7 +17,6 @@ import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.library.model.InstanceField;
 import com.badoo.hprof.library.model.StaticField;
 import com.badoo.hprof.library.processor.DiscardProcessor;
-import com.sun.istack.internal.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -54,7 +53,7 @@ public class CrunchProcessor extends DiscardProcessor {
             super(out);
         }
 
-        public void writeHeader(int version, @Nullable byte[] metadata) throws IOException {
+        public void writeHeader(int version, byte[] metadata) throws IOException {
             writeInt32(version);
             writeByteArrayWithLength(metadata != null ? metadata : new byte[]{});
         }
