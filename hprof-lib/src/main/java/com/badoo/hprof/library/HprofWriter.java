@@ -88,9 +88,9 @@ public class HprofWriter {
     }
 
     /**
-     * TODO Document
+     * Returns the OutputStream used by this writer.
      *
-      * @return
+     * @return The OutputStream
      */
     public OutputStream getOutputStream() {
         return out;
