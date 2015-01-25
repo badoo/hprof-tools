@@ -207,7 +207,7 @@ public class StreamUtil {
      * @param value The value to write
      * @param count Number of times to write the value
      */
-    public static void write(OutputStream out, int value, int count) throws IOException {
+    public static void write(final OutputStream out, final int value, final int count) throws IOException {
         if (count > buffer.length) {
             // Fallback
             for (int i = 0; i < count; i++) {
@@ -217,6 +217,19 @@ public class StreamUtil {
         else {
             Arrays.fill(buffer, (byte) value);
             out.write(buffer, 0, count);
+        }
+    }
+
+    /**
+     * Skip a number of bytes from an InputStream.
+     *
+     * @param in     The InputStream to read from
+     * @param length The number of bytes to skip
+     */
+    public static void skip(final InputStream in, final int length) throws IOException {
+        int skipped = 0;
+        while (skipped != length) {
+            skipped += in.skip(length - skipped);
         }
     }
 

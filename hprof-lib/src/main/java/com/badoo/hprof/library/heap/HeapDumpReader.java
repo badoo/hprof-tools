@@ -18,6 +18,7 @@ import static com.badoo.hprof.library.util.StreamUtil.read;
 import static com.badoo.hprof.library.util.StreamUtil.readByte;
 import static com.badoo.hprof.library.util.StreamUtil.readInt;
 import static com.badoo.hprof.library.util.StreamUtil.readShort;
+import static com.badoo.hprof.library.util.StreamUtil.skip;
 
 /**
  * Class for reading records contained in a HEAP_DUMP or HEAP_DUMP_SECTION record.
@@ -100,37 +101,43 @@ public class HeapDumpReader {
         cls.setClassLoaderObjectId(readInt(in));
         cls.setSignersObjectId(readInt(in));
         cls.setProtectionDomainObjectId(readInt(in));
-        in.skip(8); // Reserved data
+        skip(in, 8); // Reserved data
         cls.setInstanceSize(readInt(in));
         // Read constants fields
         short constantCount = readShort(in);
-        List<ConstantField> constantFields = constantCount > 0 ? new ArrayList<ConstantField>() : null;
-        cls.setConstantFields(constantFields);
-        for (int i = 0; i < constantCount; i++) {
-            short poolIndex = readShort(in);
-            BasicType type = BasicType.fromType(readByte(in));
-            byte[] value = read(in, type.size);
-            constantFields.add(new ConstantField(poolIndex, type, value));
+        if (constantCount > 0) {
+            List<ConstantField> constantFields = new ArrayList<ConstantField>();
+            cls.setConstantFields(constantFields);
+            for (int i = 0; i < constantCount; i++) {
+                short poolIndex = readShort(in);
+                BasicType type = BasicType.fromType(readByte(in));
+                byte[] value = read(in, type.size);
+                constantFields.add(new ConstantField(poolIndex, type, value));
 
+            }
         }
         // Read static fields
         short staticCount = readShort(in);
-        ArrayList<StaticField> staticFields = staticCount > 0 ? new ArrayList<StaticField>() : null;
-        cls.setStaticFields(staticFields);
-        for (int i = 0; i < staticCount; i++) {
-            int nameId = readInt(in);
-            BasicType type = BasicType.fromType(readByte(in));
-            byte[] value = read(in, type.size);
-            staticFields.add(new StaticField(type, value, nameId));
+        if (staticCount > 0) {
+            ArrayList<StaticField> staticFields = new ArrayList<StaticField>();
+            cls.setStaticFields(staticFields);
+            for (int i = 0; i < staticCount; i++) {
+                int nameId = readInt(in);
+                BasicType type = BasicType.fromType(readByte(in));
+                byte[] value = read(in, type.size);
+                staticFields.add(new StaticField(type, value, nameId));
+            }
         }
         // Read instance fields
         short fieldCount = readShort(in);
-        ArrayList<InstanceField> instanceFields = fieldCount > 0 ? new ArrayList<InstanceField>() : null;
-        cls.setInstanceFields(instanceFields);
-        for (int i = 0; i < fieldCount; i++) {
-            int nameId = readInt(in);
-            BasicType type = BasicType.fromType(readByte(in));
-            instanceFields.add(new InstanceField(type, nameId));
+        if (fieldCount > 0) {
+            ArrayList<InstanceField> instanceFields = new ArrayList<InstanceField>();
+            cls.setInstanceFields(instanceFields);
+            for (int i = 0; i < fieldCount; i++) {
+                int nameId = readInt(in);
+                BasicType type = BasicType.fromType(readByte(in));
+                instanceFields.add(new InstanceField(type, nameId));
+            }
         }
         return cls;
     }

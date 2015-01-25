@@ -31,6 +31,7 @@ import java.util.Set;
 
 import static com.badoo.hprof.library.util.StreamUtil.read;
 import static com.badoo.hprof.library.util.StreamUtil.readInt;
+import static com.badoo.hprof.library.util.StreamUtil.skip;
 
 /**
  * Processor for reading a HPROF file and outputting a BMD file. Operates in two stages:
@@ -46,7 +47,7 @@ import static com.badoo.hprof.library.util.StreamUtil.readInt;
  */
 public class CrunchProcessor extends DiscardProcessor {
 
-    @SuppressWarnings({"ResultOfMethodCallIgnored", "ForLoopReplaceableByForEach"})
+    @SuppressWarnings({"ForLoopReplaceableByForEach"})
     private class CrunchBdmWriter extends DataWriter {
 
         protected CrunchBdmWriter(OutputStream out) {
@@ -132,7 +133,7 @@ public class CrunchProcessor extends DiscardProcessor {
                         writeInt32(mapObjectId(id));
                     }
                     else { // Other fields are ignored
-                        in.skip(type.size);
+                        skip(in, type.size);
                     }
                 }
                 currentClass = classesByOriginalId.get(currentClass.getSuperClassObjectId());
@@ -241,7 +242,6 @@ public class CrunchProcessor extends DiscardProcessor {
 
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private class ObjectDumpProcessor extends HeapDumpDiscardProcessor {
 
         @Override
@@ -264,33 +264,33 @@ public class CrunchProcessor extends DiscardProcessor {
                     break;
                 case HeapTag.ROOT_JNI_GLOBAL:
                     roots.add(readInt(in));
-                    in.skip(4); // JNI global ref
+                    skip(in, 4); // JNI global ref
                     break;
                 case HeapTag.ROOT_JNI_LOCAL:
                     roots.add(readInt(in));
-                    in.skip(8); // Thread serial + frame number
+                    skip(in, 8); // Thread serial + frame number
                     break;
                 case HeapTag.ROOT_JAVA_FRAME:
                     roots.add(readInt(in));
-                    in.skip(8); // Thread serial + frame number
+                    skip(in, 8); // Thread serial + frame number
                     break;
                 case HeapTag.ROOT_NATIVE_STACK:
                     roots.add(readInt(in));
-                    in.skip(4); // Thread serial
+                    skip(in, 4); // Thread serial
                     break;
                 case HeapTag.ROOT_STICKY_CLASS:
                     roots.add(readInt(in));
                     break;
                 case HeapTag.ROOT_THREAD_BLOCK:
                     roots.add(readInt(in));
-                    in.skip(4); // Thread serial
+                    skip(in, 4); // Thread serial
                     break;
                 case HeapTag.ROOT_MONITOR_USED:
                     roots.add(readInt(in));
                     break;
                 case HeapTag.ROOT_THREAD_OBJECT:
                     roots.add(readInt(in));
-                    in.skip(8); // Thread serial + stack serial
+                    skip(in, 8); // Thread serial + stack serial
                     break;
                 case HeapTag.HPROF_ROOT_INTERNED_STRING:
                     roots.add(readInt(in));
@@ -309,7 +309,7 @@ public class CrunchProcessor extends DiscardProcessor {
                     break;
                 case HeapTag.HPROF_ROOT_JNI_MONITOR:
                     roots.add(readInt(in));
-                    in.skip(8); // Data
+                    skip(in, 8); // Data
                     break;
                 default:
                     super.onHeapRecord(tag, reader);
@@ -318,7 +318,7 @@ public class CrunchProcessor extends DiscardProcessor {
 
         private void readObjectArray(InputStream in) throws IOException {
             int originalObjectId = readInt(in);
-            in.skip(4); // Stack trace serial
+            skip(in, 4); // Stack trace serial
             int count = readInt(in);
             int originalElementClassId = readInt(in);
             int[] elements = new int[count];
@@ -330,10 +330,10 @@ public class CrunchProcessor extends DiscardProcessor {
 
         private void readPrimitiveArray(InputStream in) throws IOException {
             int originalObjectId = readInt(in);
-            in.skip(4); // Stack trace serial
+            skip(in, 4); // Stack trace serial
             int count = readInt(in);
             BasicType type = BasicType.fromType(in.read());
-            in.skip(count * type.size);
+            skip(in, count * type.size);
             writer.writePrimitiveArray(originalObjectId, type, count);
         }
 
