@@ -2,6 +2,8 @@ package com.badoo.bmd.decruncher;
 
 import com.badoo.bmd.BmdReader;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -45,14 +47,15 @@ public class BmdDecruncher {
                     strings.addAll(JarStringReader.readStrings(new File(file)));
                 }
             }
-            OutputStream out = new FileOutputStream(outFile);
+            OutputStream out = new BufferedOutputStream(new FileOutputStream(outFile));
             DecrunchProcessor processor = new DecrunchProcessor(out, strings);
-            BmdReader reader = new BmdReader(new FileInputStream(inFile), processor);
+            BmdReader reader = new BmdReader(new BufferedInputStream(new FileInputStream(inFile)), processor);
             while (reader.hasNext()) {
                 reader.next();
             }
             // Write all the heap records collected by the processor
             processor.writeHeapRecords();
+            out.flush();
         }
         catch (IOException e) {
             e.printStackTrace();
