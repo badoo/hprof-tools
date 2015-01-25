@@ -33,7 +33,7 @@ public class HprofCruncher {
     public static void crunch(File inFile, OutputStream out) throws IOException {
         CrunchProcessor processor = new CrunchProcessor(out);
         // Start first pass
-        InputStream in = new BufferedInputStream(new FileInputStream(inFile));
+        InputStream in = new FileInputStream(inFile);
         HprofReader reader = new HprofReader(in, processor);
         while (reader.hasNext()) {
             reader.next();
@@ -41,7 +41,7 @@ public class HprofCruncher {
         processor.allClassesRead();
         in.close();
         // Start second pass
-        in = new BufferedInputStream(new FileInputStream(inFile));
+        in = new FileInputStream(inFile);
         reader = new HprofReader(in, processor);
         while (reader.hasNext()) {
             reader.next();

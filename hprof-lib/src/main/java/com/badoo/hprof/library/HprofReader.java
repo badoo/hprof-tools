@@ -9,6 +9,7 @@ import java.io.InputStream;
 
 import javax.naming.OperationNotSupportedException;
 
+import static com.badoo.hprof.library.util.StreamUtil.readByte;
 import static com.badoo.hprof.library.util.StreamUtil.readInt;
 import static com.badoo.hprof.library.util.StreamUtil.readString;
 
@@ -36,6 +37,7 @@ public class HprofReader {
     private final InputStream in;
     private final HprofProcessor processor;
     private int readCount;
+    private int nextTag;
 
     public HprofReader(InputStream in, HprofProcessor processor) {
         this.in = in;
@@ -49,7 +51,7 @@ public class HprofReader {
      * @throws IOException
      */
     public boolean hasNext() throws IOException {
-        return in.available() > 0;
+        return nextTag != -1;
     }
 
     /**
@@ -65,6 +67,8 @@ public class HprofReader {
             readRecord();
         }
         readCount++;
+        // Check if there are more records
+        nextTag = readByte(in);
     }
 
     /**
@@ -110,7 +114,7 @@ public class HprofReader {
     }
 
     private void readRecord() throws IOException {
-        int tagValue = in.read(); // 1 byte tag, see definitions in Tag
+        int tagValue = nextTag;
         int time = readInt(in);
         int size = readInt(in);
         processor.onRecord(tagValue, time, size, this);

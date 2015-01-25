@@ -11,6 +11,7 @@ import java.util.Arrays;
  * <p/>
  * Created by Erik Andre on 13/07/2014.
  */
+@SuppressWarnings("UnusedDeclaration")
 public class StreamUtil {
 
     private static final byte[] buffer = new byte[1024];
@@ -24,7 +25,7 @@ public class StreamUtil {
      */
     public static String readNullTerminatedString(InputStream in) throws IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        byte b = 0;
+        byte b;
         do {
             b = (byte) in.read();
             if (b != 0) {
@@ -43,8 +44,7 @@ public class StreamUtil {
      * @throws IOException
      */
     public static String readString(InputStream in, int length) throws IOException {
-        byte[] buffer = new byte[length];
-        in.read(buffer);
+        byte[] buffer = read(in, length);
         return new String(buffer);
     }
 
@@ -160,16 +160,15 @@ public class StreamUtil {
     /**
      * Copy a number of bytes from one stream to another, returning a copy of the bytes read.
      *
-     * @param in   The InputStream
-     * @param out  The OutputStream
-     * @param size Number of bytes to read
+     * @param in     The InputStream
+     * @param out    The OutputStream
+     * @param length Number of bytes to read
      * @return An array containing the bytes read
      * @throws IOException
      */
-    public static byte[] copy(InputStream in, OutputStream out, int size) throws IOException {
-        byte buffer[] = new byte[size];
-        in.read(buffer);
-        out.write(buffer);
+    public static byte[] copy(InputStream in, OutputStream out, int length) throws IOException {
+        byte buffer[] = read(in, length);
+        write(out, buffer);
         return buffer;
     }
 
@@ -183,7 +182,10 @@ public class StreamUtil {
      */
     public static byte[] read(InputStream in, int length) throws IOException {
         byte[] data = new byte[length];
-        in.read(data);
+        int read = 0;
+        while (read != length) {
+            read += in.read(data, read, length - read);
+        }
         return data;
     }
 
