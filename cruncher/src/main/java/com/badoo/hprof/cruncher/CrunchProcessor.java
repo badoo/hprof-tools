@@ -61,11 +61,13 @@ public class CrunchProcessor extends DiscardProcessor {
         public void writeString(HprofString string, boolean hashed) throws IOException {
             writeInt32(hashed ? BmdTag.HASHED_STRING : BmdTag.STRING);
             writeInt32(string.getId());
+            byte[] stringData = string.getValue().getBytes();
             if (hashed) {
+                writeRawVarint32(stringData.length);
                 writeInt32(string.getValue().hashCode());
             }
             else {
-                writeByteArrayWithLength(string.getValue().getBytes());
+                writeByteArrayWithLength(stringData);
             }
         }
 

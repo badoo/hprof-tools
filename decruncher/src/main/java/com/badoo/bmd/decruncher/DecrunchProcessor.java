@@ -28,6 +28,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -275,6 +276,13 @@ public class DecrunchProcessor implements BmdProcessor {
         }
         if (stringVal == null) { // Fall back to using a placeholder
             stringVal = "Hash$" + string.getHash();
+            byte[] data = stringVal.getBytes();
+            if (data.length < string.getLength()) {
+                // Need to add filler to get back to the correct length
+                byte[] filler = new byte[string.getLength() - data.length];
+                Arrays.fill(filler, (byte) 43); // Fill with '+' signs
+                stringVal += new String(filler, "UTF-8");
+            }
         }
         HprofString hprofString = new HprofString(string.getId(), stringVal, 0);
         writer.writeStringRecord(hprofString);

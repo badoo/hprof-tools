@@ -84,8 +84,9 @@ public class BmdReader extends DataReader {
      */
     public BmdString readHashedString() throws IOException {
         int id = readInt32();
+        int length = readInt32();
         int hash = readInt32();
-        return new BmdString(id, hash);
+        return new BmdString(id, length, hash);
     }
 
     /**

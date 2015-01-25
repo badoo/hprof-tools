@@ -10,16 +10,19 @@ public class BmdString {
     private final String string;
     private final int hash;
     private final int id;
+    private final int length;
 
     public BmdString(int id, String string) {
         this.string = string;
         this.hash = string.hashCode();
+        this.length = string.getBytes().length;
         this.id = id;
     }
 
-    public BmdString(int id, int hash) {
+    public BmdString(int id, int length, int hash) {
         this.string = null;
         this.hash = hash;
+        this.length = length;
         this.id = id;
     }
 
@@ -48,5 +51,15 @@ public class BmdString {
      */
     public int getId() {
         return id;
+    }
+
+    /**
+     * Returns the length of the string in bytes. If this is a hashed string then the returned value will
+     * the length of the string before it was hashed.
+     *
+     * @return The length of the string in bytes
+     */
+    public int getLength() {
+        return length;
     }
 }
