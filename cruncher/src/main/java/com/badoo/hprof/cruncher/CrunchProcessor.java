@@ -24,10 +24,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static com.badoo.hprof.library.util.StreamUtil.read;
 import static com.badoo.hprof.library.util.StreamUtil.readInt;
@@ -46,6 +44,111 @@ import static com.badoo.hprof.library.util.StreamUtil.skip;
  * Created by Erik Andre on 22/10/14.
  */
 public class CrunchProcessor extends DiscardProcessor {
+
+    private static final int FIRST_ID = 1; // Skipping 0 since this is used as a (null) marker in some cases
+
+    private final CrunchBdmWriter writer;
+    private int nextStringId = FIRST_ID;
+    private Map<Integer, Integer> stringIds = new HashMap<Integer, Integer>(); // Maps original to updated string ids
+    private int nextObjectId = FIRST_ID;
+    private Map<Integer, Integer> objectIds = new HashMap<Integer, Integer>(); // Maps original to updated object/class ids
+    private Map<Integer, ClassDefinition> classesByOriginalId = new HashMap<Integer, ClassDefinition>(); // Maps original class id to the class definition
+    private boolean readObjects;
+    private List<Integer> rootObjectIds = new ArrayList<Integer>();
+
+    public CrunchProcessor(OutputStream out) {
+        this.writer = new CrunchBdmWriter(out);
+    }
+
+    /**
+     * Must be called after the first pass (where class data is processed) is finished, before the second pass is started.
+     */
+    public void startSecondPass() {
+        readObjects = true;
+    }
+
+    /**
+     * Call after the second has has finished to write any remaining BMD data to the output stream and finish the conversion process.
+     */
+    public void finishAndWriteOutput() throws IOException {
+        // Write roots
+        writer.writeRootObjects(rootObjectIds);
+    }
+
+    @Override
+    public void onRecord(int tag, int timestamp, int length, HprofReader reader) throws IOException {
+        if (!readObjects) { // 1st pass: read class definitions and strings
+            switch (tag) {
+                case Tag.STRING:
+                    HprofString string = reader.readStringRecord(length, timestamp);
+                    // We replace the original string id with one starting from 0 as these are more efficient to store
+                    stringIds.put(string.getId(), nextStringId); // Save the original id so we can update references later
+                    string.setId(nextStringId);
+                    nextStringId++;
+                    boolean hashed = !keepString(string.getValue());
+                    writer.writeString(string, hashed);
+                    break;
+                case Tag.LOAD_CLASS:
+                    ClassDefinition classDef = reader.readLoadClassRecord();
+                    classesByOriginalId.put(classDef.getObjectId(), classDef);
+                    break;
+                case Tag.HEAP_DUMP:
+                case Tag.HEAP_DUMP_SEGMENT:
+                    ClassDumpProcessor dumpProcessor = new ClassDumpProcessor();
+                    HeapDumpReader dumpReader = new HeapDumpReader(reader.getInputStream(), length, dumpProcessor);
+                    while (dumpReader.hasNext()) {
+                        dumpReader.next();
+                    }
+                    break;
+                case Tag.UNLOAD_CLASS:
+                case Tag.HEAP_DUMP_END:
+                    super.onRecord(tag, timestamp, length, reader); // These records can be discarded
+                    break;
+                default:
+                    byte[] data = read(reader.getInputStream(), length);
+                    writer.writeLegacyRecord(tag, data);
+                    break;
+            }
+        }
+        else { // 2nd pass: read object dumps
+            switch (tag) {
+                case Tag.HEAP_DUMP:
+                case Tag.HEAP_DUMP_SEGMENT:
+                    ObjectDumpProcessor dumpProcessor = new ObjectDumpProcessor();
+                    HeapDumpReader dumpReader = new HeapDumpReader(reader.getInputStream(), length, dumpProcessor);
+                    while (dumpReader.hasNext()) {
+                        dumpReader.next();
+                    }
+                    break;
+                default:
+                    super.onRecord(tag, timestamp, length, reader); // Skip record
+            }
+        }
+    }
+
+    private boolean keepString(String string) {
+        // Keep the names of some core system classes (to avoid issues in MAT)
+        return string.startsWith("java.lang") || "V".equals(string) || "boolean".equals(string) || "byte".equals(string)
+            || "short".equals(string) || "char".equals(string) || "int".equals(string) || "long".equals(string)
+            || "float".equals(string) || "double".equals(string);
+    }
+
+    @Override
+    public void onHeader(String text, int idSize, int timeHigh, int timeLow) throws IOException {
+        // The text of the HPROF header is written to the BMD header but the timestamp is discarded
+        writer.writeHeader(1, text.getBytes());
+    }
+
+    private int mapObjectId(int id) {
+        if (id == 0) {
+            return 0; // Zero is a special case used when there is no value (null), do not map it to a new id
+        }
+        if (!objectIds.containsKey(id)) {
+            objectIds.put(id, nextObjectId);
+            nextObjectId++;
+        }
+        return objectIds.get(id);
+    }
 
     @SuppressWarnings({"ForLoopReplaceableByForEach"})
     private class CrunchBdmWriter extends DataWriter {
@@ -260,55 +363,55 @@ public class CrunchProcessor extends DiscardProcessor {
                     break;
                 // Roots
                 case HeapTag.ROOT_UNKNOWN:
-                    roots.add(readInt(in));
+                    rootObjectIds.add(readInt(in));
                     break;
                 case HeapTag.ROOT_JNI_GLOBAL:
-                    roots.add(readInt(in));
+                    rootObjectIds.add(readInt(in));
                     skip(in, 4); // JNI global ref
                     break;
                 case HeapTag.ROOT_JNI_LOCAL:
-                    roots.add(readInt(in));
+                    rootObjectIds.add(readInt(in));
                     skip(in, 8); // Thread serial + frame number
                     break;
                 case HeapTag.ROOT_JAVA_FRAME:
-                    roots.add(readInt(in));
+                    rootObjectIds.add(readInt(in));
                     skip(in, 8); // Thread serial + frame number
                     break;
                 case HeapTag.ROOT_NATIVE_STACK:
-                    roots.add(readInt(in));
+                    rootObjectIds.add(readInt(in));
                     skip(in, 4); // Thread serial
                     break;
                 case HeapTag.ROOT_STICKY_CLASS:
-                    roots.add(readInt(in));
+                    rootObjectIds.add(readInt(in));
                     break;
                 case HeapTag.ROOT_THREAD_BLOCK:
-                    roots.add(readInt(in));
+                    rootObjectIds.add(readInt(in));
                     skip(in, 4); // Thread serial
                     break;
                 case HeapTag.ROOT_MONITOR_USED:
-                    roots.add(readInt(in));
+                    rootObjectIds.add(readInt(in));
                     break;
                 case HeapTag.ROOT_THREAD_OBJECT:
-                    roots.add(readInt(in));
+                    rootObjectIds.add(readInt(in));
                     skip(in, 8); // Thread serial + stack serial
                     break;
                 case HeapTag.HPROF_ROOT_INTERNED_STRING:
-                    roots.add(readInt(in));
+                    rootObjectIds.add(readInt(in));
                     break;
                 case HeapTag.HPROF_ROOT_FINALIZING:
-                    roots.add(readInt(in));
+                    rootObjectIds.add(readInt(in));
                     break;
                 case HeapTag.HPROF_ROOT_DEBUGGER:
-                    roots.add(readInt(in));
+                    rootObjectIds.add(readInt(in));
                     break;
                 case HeapTag.HPROF_ROOT_REFERENCE_CLEANUP:
-                    roots.add(readInt(in));
+                    rootObjectIds.add(readInt(in));
                     break;
                 case HeapTag.HPROF_ROOT_VM_INTERNAL:
-                    roots.add(readInt(in));
+                    rootObjectIds.add(readInt(in));
                     break;
                 case HeapTag.HPROF_ROOT_JNI_MONITOR:
-                    roots.add(readInt(in));
+                    rootObjectIds.add(readInt(in));
                     skip(in, 8); // Data
                     break;
                 default:
@@ -337,106 +440,5 @@ public class CrunchProcessor extends DiscardProcessor {
             writer.writePrimitiveArray(originalObjectId, type, count);
         }
 
-    }
-
-    private final CrunchBdmWriter writer;
-    private int nextStringId = 1; // Skipping 0 since this is used as a marker in some cases
-    private Map<Integer, Integer> stringIds = new HashMap<Integer, Integer>(); // Maps original to updated string ids
-    private int nextObjectId = 1;
-    private Set<Integer> mappedIds = new HashSet<Integer>();
-    private Map<Integer, Integer> objectIds = new HashMap<Integer, Integer>(); // Maps original to updated object/class ids
-    private Map<Integer, ClassDefinition> classesByOriginalId = new HashMap<Integer, ClassDefinition>(); // Maps original class id to the class definition
-    private boolean readObjects;
-    private List<Integer> roots = new ArrayList<Integer>();
-
-    public CrunchProcessor(OutputStream out) {
-        this.writer = new CrunchBdmWriter(out);
-    }
-
-    public void allClassesRead() {
-        readObjects = true;
-    }
-
-    public void finish() throws IOException {
-        // Write roots
-        writer.writeRootObjects(roots);
-    }
-
-    @Override
-    public void onRecord(int tag, int timestamp, int length, HprofReader reader) throws IOException {
-        if (!readObjects) { // 1st pass: read class definitions and strings
-            switch (tag) {
-                case Tag.STRING:
-                    HprofString string = reader.readStringRecord(length, timestamp);
-                    // We replace the original string id with one starting from 0 as these are more efficient to store
-                    stringIds.put(string.getId(), nextStringId); // Save the original id so we can update references later
-                    string.setId(nextStringId);
-                    nextStringId++;
-                    boolean hashed = !keepString(string.getValue());
-                    writer.writeString(string, hashed);
-                    break;
-                case Tag.LOAD_CLASS:
-                    ClassDefinition classDef = reader.readLoadClassRecord();
-                    classesByOriginalId.put(classDef.getObjectId(), classDef);
-                    break;
-                case Tag.HEAP_DUMP:
-                case Tag.HEAP_DUMP_SEGMENT:
-                    ClassDumpProcessor dumpProcessor = new ClassDumpProcessor();
-                    HeapDumpReader dumpReader = new HeapDumpReader(reader.getInputStream(), length, dumpProcessor);
-                    while (dumpReader.hasNext()) {
-                        dumpReader.next();
-                    }
-                    break;
-                case Tag.UNLOAD_CLASS:
-                case Tag.HEAP_DUMP_END:
-                    super.onRecord(tag, timestamp, length, reader); // These records can be discarded
-                    break;
-                default:
-                    byte[] data = read(reader.getInputStream(), length);
-                    writer.writeLegacyRecord(tag, data);
-                    break;
-            }
-        }
-        else { // 2nd pass: read object dumps
-            switch (tag) {
-                case Tag.HEAP_DUMP:
-                case Tag.HEAP_DUMP_SEGMENT:
-                    ObjectDumpProcessor dumpProcessor = new ObjectDumpProcessor();
-                    HeapDumpReader dumpReader = new HeapDumpReader(reader.getInputStream(), length, dumpProcessor);
-                    while (dumpReader.hasNext()) {
-                        dumpReader.next();
-                    }
-                    break;
-                default:
-                    super.onRecord(tag, timestamp, length, reader); // Skip record
-            }
-        }
-    }
-
-    private boolean keepString(String string) {
-        // Keep the names of some core system classes (to avoid issues in MAT)
-        return string.startsWith("java.lang") || "V".equals(string) || "boolean".equals(string) || "byte".equals(string)
-            || "short".equals(string) || "char".equals(string) || "int".equals(string) || "long".equals(string)
-            || "float".equals(string) || "double".equals(string);
-    }
-
-    @Override
-    public void onHeader(String text, int idSize, int timeHigh, int timeLow) throws IOException {
-        writer.writeHeader(1, text.getBytes());
-    }
-
-    private int mapObjectId(int id) {
-        if (id == 0) {
-            return 0; // Zero is a special case used when there is no value (null), do not map it to a new id
-        }
-        if (!objectIds.containsKey(id)) {
-            mappedIds.add(nextObjectId);
-            objectIds.put(id, nextObjectId);
-            nextObjectId++;
-        }
-        if (mappedIds.contains(id)) {
-            throw new IllegalArgumentException("Trying to map an already mapped id! " + id);
-        }
-        return objectIds.get(id);
     }
 }

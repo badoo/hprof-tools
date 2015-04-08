@@ -38,7 +38,7 @@ public class HprofCruncher {
         while (reader.hasNext()) {
             reader.next();
         }
-        processor.allClassesRead();
+        processor.startSecondPass();
         in.close();
         // Start second pass
         in = new BufferedInputStream(new FileInputStream(inFile));
@@ -46,7 +46,7 @@ public class HprofCruncher {
         while (reader.hasNext()) {
             reader.next();
         }
-        processor.finish();
+        processor.finishAndWriteOutput();
     }
 
     public static void main(String[] args) {
