@@ -28,6 +28,12 @@ public final class Tag {
     private Tag() {
     }
 
+    /**
+     * Convert an integer HPROF tag value to a readable string representation (used for debugging).
+     *
+     * @param tag the tag to convert
+     * @return
+     */
     public static String tagToString(int tag) {
         switch (tag) {
             case UNKNOWN:

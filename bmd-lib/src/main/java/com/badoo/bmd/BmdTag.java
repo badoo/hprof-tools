@@ -19,6 +19,12 @@ public class BmdTag {
     public static final int PRIMITIVE_ARRAY_PLACEHOLDER = 7;
     public static final int LEGACY_HPROF_RECORD = 8;
 
+    /**
+     * Convert an integer BMD tag value to a readable string representation (used for debugging).
+     *
+     * @param tag the tag to convert
+     * @return
+     */
     public static String tagToString(int tag) {
         switch (tag) {
             case STRING:
