@@ -21,7 +21,7 @@ import java.util.Map;
 
 /**
  * A HPROF processor that performs simple verifications to check that the HPROF data is valid.
- *
+ * <p/>
  * Created by Erik Andre on 13/12/14.
  */
 public class ValidatingProcessor extends DiscardProcessor {
@@ -62,14 +62,9 @@ public class ValidatingProcessor extends DiscardProcessor {
         }
     }
 
-    private void readHeapDump(int length) throws IOException {
-        HeapDumpProcessor processor = new ValidatingHeapDumpProcessor();
-        HeapDumpReader reader = new HeapDumpReader(in, length, processor);
-        while (reader.hasNext()) {
-            reader.next();
-        }
-    }
-
+    /**
+     * Verify that the loaded instance dumps conform with the class definition.
+     */
     public void verifyInstances() {
         for (Instance instance : instances) {
             ClassDefinition cls = classes.get(instance.getClassObjectId());
@@ -88,6 +83,9 @@ public class ValidatingProcessor extends DiscardProcessor {
         }
     }
 
+    /**
+     * Verify that the class inheritance hierarchy is correct and that the name for each class is defined.
+     */
     public void verifyClasses() {
         // Check the special case (java.lang.Class) needed to be preserved by MAT
         if (!strings.values().contains("java.lang.Class")) {
@@ -102,6 +100,14 @@ public class ValidatingProcessor extends DiscardProcessor {
         // Verify class hierarchy
         for (ClassDefinition cls : classes.values()) {
             verifySuperClass(cls);
+        }
+    }
+
+    private void readHeapDump(int length) throws IOException {
+        HeapDumpProcessor processor = new ValidatingHeapDumpProcessor();
+        HeapDumpReader reader = new HeapDumpReader(in, length, processor);
+        while (reader.hasNext()) {
+            reader.next();
         }
     }
 

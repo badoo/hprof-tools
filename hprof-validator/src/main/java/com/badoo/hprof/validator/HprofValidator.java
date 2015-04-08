@@ -8,7 +8,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 /**
- * An application that takes an HPROF file as input and verifies that it contains valid HPROF data.
+ * An application that takes an HPROF file as input and performs a simple verification to check that it contains valid HPROF data.
  *
  * Created by Erik Andre on 12/12/14.
  */
