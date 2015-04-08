@@ -76,38 +76,6 @@ public class DecrunchProcessor implements BmdProcessor {
         }
     }
 
-    /**
-     * Write all heap records (instance dumps, primitive arrays and object arrays) previously collected in the read pass.
-     */
-    public void writeHeapRecords() throws IOException {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        HeapDumpWriter heapWriter = new HeapDumpWriter(buffer);
-        // Write class definitions before any instance dumps
-        for (BmdClassDefinition bmdClassDef : classes.values()) {
-            heapWriter.writeClassDumpRecord(convertClassDefinition(bmdClassDef));
-        }
-        // Instance dumps
-        for (BmdInstanceDump instance : instances) {
-            writeInstanceDump(heapWriter, instance);
-        }
-        // Object arrays
-        for (BmdObjectArray array : objectArrays) {
-            writeObjectArray(heapWriter, array);
-        }
-        // Primitive arrays
-        for (BmdPrimitiveArray array : primitiveArrays) {
-            writePrimitiveArray(heapWriter, array);
-        }
-        // GC roots
-        for (Integer root : rootObjects) {
-            heapWriter.writeUnknownRoot(root);
-        }
-        writer.writeStringRecord(new HprofString(FILLER_FIELD_NAME, "field_removed", 0)); // Needed by the decrunched instance dumps
-        byte[] record = buffer.toByteArray();
-        writer.writeRecordHeader(Tag.HEAP_DUMP, 0, record.length);
-        writer.getOutputStream().write(record);
-    }
-
     @Override
     public void onRecord(int tag, BmdReader reader) throws IOException {
         switch (tag) {
@@ -143,6 +111,38 @@ public class DecrunchProcessor implements BmdProcessor {
                 writeLegacyRecord(legacyRecord);
                 break;
         }
+    }
+
+    /**
+     * Write all heap records (instance dumps, primitive arrays and object arrays) previously collected in the read pass.
+     */
+    public void writeHeapRecords() throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        HeapDumpWriter heapWriter = new HeapDumpWriter(buffer);
+        // Write class definitions before any instance dumps
+        for (BmdClassDefinition bmdClassDef : classes.values()) {
+            heapWriter.writeClassDumpRecord(convertClassDefinition(bmdClassDef));
+        }
+        // Instance dumps
+        for (BmdInstanceDump instance : instances) {
+            writeInstanceDump(heapWriter, instance);
+        }
+        // Object arrays
+        for (BmdObjectArray array : objectArrays) {
+            writeObjectArray(heapWriter, array);
+        }
+        // Primitive arrays
+        for (BmdPrimitiveArray array : primitiveArrays) {
+            writePrimitiveArray(heapWriter, array);
+        }
+        // GC roots
+        for (Integer root : rootObjects) {
+            heapWriter.writeUnknownRoot(root);
+        }
+        writer.writeStringRecord(new HprofString(FILLER_FIELD_NAME, "field_removed", 0)); // Needed by the decrunched instance dumps
+        byte[] record = buffer.toByteArray();
+        writer.writeRecordHeader(Tag.HEAP_DUMP, 0, record.length);
+        writer.getOutputStream().write(record);
     }
 
     private ClassDefinition convertClassDefinition(BmdClassDefinition bmdClassDef) throws IOException {
