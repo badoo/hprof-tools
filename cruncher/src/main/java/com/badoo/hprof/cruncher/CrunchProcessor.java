@@ -206,6 +206,7 @@ public class CrunchProcessor extends DiscardProcessor {
             }
             // Filter instance fields before writing them
             int skippedFieldSize = 0;
+            List<InstanceField> keptFields = new ArrayList<InstanceField>();
             int instanceFieldCount = classDef.getInstanceFields().size();
             for (int i = 0; i < instanceFieldCount; i++) {
                 InstanceField field = classDef.getInstanceFields().get(i);
@@ -213,10 +214,17 @@ public class CrunchProcessor extends DiscardProcessor {
                     skippedFieldSize += field.getType().size;
                     continue;
                 }
+                else {
+                    keptFields.add(field);
+                }
+            }
+            int keptFieldCount = keptFields.size();
+            writeInt32(keptFieldCount);
+            for (int i = 0; i < keptFieldCount; i++) {
+                InstanceField field = keptFields.get(i);
                 writeInt32(stringIds.get(field.getFieldNameId()));
                 writeInt32(convertType(field.getType()).id);
             }
-            writeInt32(0); // End marker for instance fields
             writeInt32(skippedFieldSize);
         }
 

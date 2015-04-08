@@ -108,11 +108,10 @@ public class BmdReader extends DataReader {
         for (int i = 0; i < staticCount; i++) {
             staticFields.add(readStaticField());
         }
+        int instanceCount = readInt32();
         List<BmdInstanceFieldDefinition> instanceFields = new ArrayList<BmdInstanceFieldDefinition>();
-        BmdInstanceFieldDefinition field = readInstanceField();
-        while (field != null) {
-            instanceFields.add(field);
-            field = readInstanceField(); // Read the next field
+        for (int i = 0; i < instanceCount; i++) {
+            instanceFields.add(readInstanceField());
         }
         int discardedFieldSize = readInt32();
         return new BmdClassDefinition(classId, superClassId, name, constantFields, staticFields, instanceFields, discardedFieldSize);
@@ -210,9 +209,6 @@ public class BmdReader extends DataReader {
 
     private BmdInstanceFieldDefinition readInstanceField() throws IOException {
         int nameId = readInt32();
-        if (nameId == 0) {
-            return null;
-        }
         BmdBasicType type = BmdBasicType.fromInt(readInt32());
         return new BmdInstanceFieldDefinition(nameId, type);
     }
