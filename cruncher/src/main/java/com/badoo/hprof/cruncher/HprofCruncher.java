@@ -57,8 +57,9 @@ public class HprofCruncher {
             outFile = args[1];
         }
         else {
-            inFile = "in.hprof";
-            outFile = "out.bmd";
+            System.out.println("Usage:");
+            System.out.println("java -jar cruncher.jar input.hprof output.bmd");
+            return;
         }
         OutputStream out = null;
         try {

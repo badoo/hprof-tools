@@ -36,7 +36,7 @@ public class BmdDecruncher {
             }
             else {
                 System.out.println("Usage:");
-                System.out.println("java -jar BmdDecruncher.jar input.bmd output.hprof [string file1] [string file2] ...");
+                System.out.println("java -jar decruncher.jar input.bmd output.hprof [string file1] [string file2] ...");
                 System.out.println("String input files can be dex, apk or jar");
                 return;
             }
