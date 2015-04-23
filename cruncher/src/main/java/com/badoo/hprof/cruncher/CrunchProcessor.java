@@ -15,6 +15,8 @@ import com.badoo.hprof.library.model.ConstantField;
 import com.badoo.hprof.library.model.HprofString;
 import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.library.model.InstanceField;
+import com.badoo.hprof.library.model.ObjectArray;
+import com.badoo.hprof.library.model.PrimitiveArray;
 import com.badoo.hprof.library.model.StaticField;
 import com.badoo.hprof.library.processor.DiscardProcessor;
 
@@ -139,15 +141,21 @@ public class CrunchProcessor extends DiscardProcessor {
         writer.writeHeader(1, text.getBytes());
     }
 
-    private int mapObjectId(int id) {
-        if (id == 0) {
+    /**
+     * Map an original HPROF object id to an updated object id (that is more efficient to store in BMD format)
+     *
+     * @param originalId the original object id
+     * @return an updated object od
+     */
+    private int mapObjectId(int originalId) {
+        if (originalId == 0) {
             return 0; // Zero is a special case used when there is no value (null), do not map it to a new id
         }
-        if (!objectIds.containsKey(id)) {
-            objectIds.put(id, nextObjectId);
+        if (!objectIds.containsKey(originalId)) {
+            objectIds.put(originalId, nextObjectId);
             nextObjectId++;
         }
-        return objectIds.get(id);
+        return objectIds.get(originalId);
     }
 
     @SuppressWarnings({"ForLoopReplaceableByForEach"})
@@ -212,7 +220,6 @@ public class CrunchProcessor extends DiscardProcessor {
                 InstanceField field = classDef.getInstanceFields().get(i);
                 if (field.getType() != BasicType.OBJECT) {
                     skippedFieldSize += field.getType().size;
-                    continue;
                 }
                 else {
                     keptFields.add(field);
@@ -254,20 +261,20 @@ public class CrunchProcessor extends DiscardProcessor {
             }
         }
 
-        public void writePrimitiveArray(int originalObjectId, BasicType type, int count) throws IOException {
+        public void writePrimitiveArray(PrimitiveArray array) throws IOException {
             writeInt32(BmdTag.PRIMITIVE_ARRAY_PLACEHOLDER);
-            writeInt32(mapObjectId(originalObjectId));
-            writeInt32(convertType(type).id);
-            writeInt32(count);
+            writeInt32(mapObjectId(array.getObjectId()));
+            writeInt32(convertType(array.getType()).id);
+            writeInt32(array.getCount());
         }
 
-        public void writeObjectArray(int originalObjectId, int originalClassId, int[] elements) throws IOException {
+        public void writeObjectArray(ObjectArray array) throws IOException {
             writeInt32(BmdTag.OBJECT_ARRAY);
-            writeInt32(mapObjectId(originalObjectId));
-            writeInt32(mapObjectId(originalClassId));
-            writeInt32(elements.length);
-            for (int i = 0; i < elements.length; i++) {
-                writeInt32(mapObjectId(elements[i]));
+            writeInt32(mapObjectId(array.getObjectId()));
+            writeInt32(mapObjectId(array.getElementClassId()));
+            writeInt32(array.getCount());
+            for (int i = 0; i < array.getCount(); i++) {
+                writeInt32(mapObjectId(array.getElements()[i]));
             }
         }
 
@@ -337,6 +344,7 @@ public class CrunchProcessor extends DiscardProcessor {
         }
     }
 
+    // 1st pass dump processor
     private class ClassDumpProcessor extends HeapDumpDiscardProcessor {
 
         @Override
@@ -353,6 +361,7 @@ public class CrunchProcessor extends DiscardProcessor {
 
     }
 
+    // 1st pass dump processor
     private class ObjectDumpProcessor extends HeapDumpDiscardProcessor {
 
         @Override
@@ -364,10 +373,10 @@ public class CrunchProcessor extends DiscardProcessor {
                     writer.writeInstanceDump(instance);
                     break;
                 case HeapTag.OBJECT_ARRAY_DUMP:
-                    readObjectArray(in);
+                    readObjectArray(reader);
                     break;
                 case HeapTag.PRIMITIVE_ARRAY_DUMP:
-                    readPrimitiveArray(in);
+                    readPrimitiveArray(reader);
                     break;
                 // Roots
                 case HeapTag.ROOT_UNKNOWN:
@@ -427,25 +436,14 @@ public class CrunchProcessor extends DiscardProcessor {
             }
         }
 
-        private void readObjectArray(InputStream in) throws IOException {
-            int originalObjectId = readInt(in);
-            skip(in, 4); // Stack trace serial
-            int count = readInt(in);
-            int originalElementClassId = readInt(in);
-            int[] elements = new int[count];
-            for (int i = 0; i < count; i++) {
-                elements[i] = readInt(in);
-            }
-            writer.writeObjectArray(originalObjectId, originalElementClassId, elements);
+        private void readObjectArray(HeapDumpReader reader) throws IOException {
+            ObjectArray array = reader.readObjectArray();
+            writer.writeObjectArray(array);
         }
 
-        private void readPrimitiveArray(InputStream in) throws IOException {
-            int originalObjectId = readInt(in);
-            skip(in, 4); // Stack trace serial
-            int count = readInt(in);
-            BasicType type = BasicType.fromType(in.read());
-            skip(in, count * type.size);
-            writer.writePrimitiveArray(originalObjectId, type, count);
+        private void readPrimitiveArray(HeapDumpReader reader) throws IOException {
+            PrimitiveArray array = reader.readPrimitiveArray();
+            writer.writePrimitiveArray(array);
         }
 
     }

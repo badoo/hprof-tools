@@ -18,6 +18,7 @@ public class HprofCatcher {
      * @param context Context used to process memory dumps.
      */
     public static void init(@NonNull Context context) {
+
         if (sHandlerInstalled) {
             return;
         }

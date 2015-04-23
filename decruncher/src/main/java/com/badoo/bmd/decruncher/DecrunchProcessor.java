@@ -72,7 +72,12 @@ public class DecrunchProcessor implements BmdProcessor {
         writer = new HprofWriter(out);
         this.strings = new HashMap<Integer, String>();
         for (String string : strings) {
-            this.strings.put(string.hashCode(), string);
+            int hashCode = string.hashCode();
+            if (this.strings.containsKey(hashCode)) {
+                System.err.println("WARN: String input contains strings which maps to the same hash code!");
+                System.err.println("WARN: First: " + this.strings.get(hashCode) + ", second: " + string + ", hash: " + hashCode);
+            }
+            this.strings.put(hashCode, string);
         }
     }
 
@@ -139,7 +144,7 @@ public class DecrunchProcessor implements BmdProcessor {
         for (Integer root : rootObjects) {
             heapWriter.writeUnknownRoot(root);
         }
-        writer.writeStringRecord(new HprofString(FILLER_FIELD_NAME, "field_removed", 0)); // Needed by the decrunched instance dumps
+        writer.writeStringRecord(new HprofString(FILLER_FIELD_NAME, "field_removed", 0)); // This string is used as the name for all discarded instance fields that we have recreated
         byte[] record = buffer.toByteArray();
         writer.writeRecordHeader(Tag.HEAP_DUMP, 0, record.length);
         writer.getOutputStream().write(record);
@@ -183,7 +188,7 @@ public class DecrunchProcessor implements BmdProcessor {
             else {
                 // Add byte
                 instanceFields.add(new InstanceField(BasicType.BYTE, FILLER_FIELD_NAME));
-                filler -= 1;
+                filler--;
             }
         }
         classDef.setInstanceFields(instanceFields);

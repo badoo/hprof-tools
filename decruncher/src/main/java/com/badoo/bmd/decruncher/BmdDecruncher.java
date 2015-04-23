@@ -38,6 +38,8 @@ public class BmdDecruncher {
                 System.out.println("Usage:");
                 System.out.println("java -jar decruncher.jar input.bmd output.hprof [string file1] [string file2] ...");
                 System.out.println("String input files can be dex, apk or jar");
+                System.out.println("Converts BMD to HPROF. String input files are used to restore hashed strings");
+                System.exit(1);
                 return;
             }
             Set<String> strings = new HashSet<String>();
@@ -47,6 +49,9 @@ public class BmdDecruncher {
                 }
                 else if (file.endsWith(".jar")) {
                     strings.addAll(JarStringReader.readStrings(new File(file)));
+                }
+                else {
+                    throw new IllegalArgumentException("Invalid string input file: " + file);
                 }
             }
             OutputStream out = new BufferedOutputStream(new FileOutputStream(outFile));
@@ -58,9 +63,12 @@ public class BmdDecruncher {
             // Write all the heap records collected by the processor
             processor.writeHeapRecords();
             out.flush();
+            out.close();
         }
         catch (IOException e) {
+            System.err.println("Failed to convert HPROF file, " + e.getMessage());
             e.printStackTrace();
+            System.exit(2);
         }
     }
 }

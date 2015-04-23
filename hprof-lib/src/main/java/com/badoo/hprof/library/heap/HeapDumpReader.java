@@ -5,6 +5,8 @@ import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.ConstantField;
 import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.library.model.InstanceField;
+import com.badoo.hprof.library.model.ObjectArray;
+import com.badoo.hprof.library.model.PrimitiveArray;
 import com.badoo.hprof.library.model.StaticField;
 import com.google.common.io.CountingInputStream;
 
@@ -144,6 +146,7 @@ public class HeapDumpReader {
 
     /**
      * Reads and returns an instance dump record.
+     *
      * @return An Instance object containing all data from the record.
      */
     public Instance readInstanceDump() throws IOException {
@@ -154,4 +157,36 @@ public class HeapDumpReader {
         byte[] data = read(in, length);
         return new Instance(objectId, stackTraceSerial, classId, data);
     }
+
+    /**
+     * Reads and returns a primitive array record;
+     *
+     * @return a primitive array record.
+     */
+    public PrimitiveArray readPrimitiveArray() throws IOException {
+        int objectId = readInt(in);
+        int stackTraceSerial = readInt(in);
+        int count = readInt(in);
+        BasicType type = BasicType.fromType(in.read());
+        byte[] arrayData = read(in, count * type.size);
+        return new PrimitiveArray(objectId, stackTraceSerial, type, count, arrayData);
+    }
+
+    /**
+     * Reads and returns an object array record;
+     *
+     * @return an object array record.
+     */
+    public ObjectArray readObjectArray() throws IOException {
+        int objectId = readInt(in);
+        int stackTraceSerial = readInt(in);
+        int count = readInt(in);
+        int elementClassId = readInt(in);
+        int[] elements = new int[count];
+        for (int i = 0; i < count; i++) {
+            elements[i] = readInt(in);
+        }
+        return new ObjectArray(objectId, stackTraceSerial, elementClassId, count, elements);
+    }
+
 }

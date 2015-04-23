@@ -25,6 +25,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     }
 
 
+    @SuppressWarnings({"MismatchedQueryAndUpdateOfCollection", "InfiniteLoopStatement"})
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.fillMemory) {

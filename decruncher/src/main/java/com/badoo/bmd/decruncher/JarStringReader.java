@@ -24,7 +24,7 @@ public class JarStringReader {
                 continue;
             }
             name = name.substring(0, name.length() - 6);
-            strings.add(name.replace("/", "."));
+            strings.add(name.replace(File.pathSeparator, "."));
         }
         return strings;
     }
