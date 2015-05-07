@@ -1,5 +1,6 @@
 package com.badoo.hprof.library.heap;
 
+import com.badoo.hprof.library.model.BasicType;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.ConstantField;
 import com.badoo.hprof.library.model.InstanceField;
@@ -24,6 +25,15 @@ public class HeapDumpWriter {
 
     public HeapDumpWriter(OutputStream out) {
         this.out = out;
+    }
+
+    /**
+     * Returns the underlying OutputStream to which the records are written.
+     *
+     * @return The OutputStream
+     */
+    public OutputStream getOutputStream() {
+        return out;
     }
 
     /**
@@ -64,4 +74,65 @@ public class HeapDumpWriter {
         }
     }
 
+    /**
+     * Write an INSTANCE_DUMP record.
+     *
+     * @param objectId         Object id of the instance
+     * @param stackTraceSerial Stack trace serial number
+     * @param classId          Id of the instance's class
+     * @param data             Instance data (packed instance field values)
+     */
+    public void writeInstanceDumpRecord(int objectId, int stackTraceSerial, int classId, byte[] data) throws IOException {
+        out.write(HeapTag.INSTANCE_DUMP);
+        writeInt(out, objectId);
+        writeInt(out, stackTraceSerial);
+        writeInt(out, classId);
+        writeInt(out, data.length);
+        write(out, data);
+    }
+
+    /**
+     * Write an object array (OBJECT_ARRAY_DUMP) to the heap dump.
+     *
+     * @param objectId         The array object id
+     * @param stackTraceSerial Stack trace serial number
+     * @param elementClassId   Class id of the elements
+     * @param elements         An array containing the object ids of the elements
+     */
+    public void writeObjectArray(int objectId, int stackTraceSerial, int elementClassId, int[] elements) throws IOException {
+        out.write(HeapTag.OBJECT_ARRAY_DUMP);
+        writeInt(out, objectId);
+        writeInt(out, stackTraceSerial);
+        writeInt(out, elements.length);
+        writeInt(out, elementClassId);
+        for (int element : elements) {
+            writeInt(out, element);
+        }
+    }
+
+    /**
+     * Write the header for a primitive array (PRIMITIVE_ARRAY_DUMP) record. This must be followed by the array contents.
+     *
+     * @param objectId         The array object id
+     * @param stackTraceSerial Stack trace serial number
+     * @param elementType      The basic type of the elements in the array
+     * @param length           Length of the array
+     */
+    public void writePrimitiveArrayHeader(int objectId, int stackTraceSerial, BasicType elementType, int length) throws IOException {
+        out.write(HeapTag.PRIMITIVE_ARRAY_DUMP);
+        writeInt(out, objectId);
+        writeInt(out, stackTraceSerial);
+        writeInt(out, length);
+        writeByte(out, elementType.type);
+    }
+
+    /**
+     * Write an unknown GC (ROOT_UNKNOWN) root.
+     *
+     * @param objectId The object id of the root object.
+     */
+    public void writeUnknownRoot(int objectId) throws IOException {
+        out.write(HeapTag.ROOT_UNKNOWN);
+        writeInt(out, objectId);
+    }
 }

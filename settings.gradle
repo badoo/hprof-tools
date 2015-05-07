@@ -1,6 +1,11 @@
 rootProject.name = 'badoo-hprof'
 
 include 'hprof-lib'
-
 include 'deobfuscator'
+include 'cruncher'
+include 'bmd-lib'
+
+include 'decruncher'
+
+include 'hprof-validator'
 

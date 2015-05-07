@@ -87,4 +87,12 @@ public class HprofWriter {
         writeInt(out, cls.getNameStringId());
     }
 
+    /**
+     * Returns the OutputStream used by this writer.
+     *
+     * @return The OutputStream
+     */
+    public OutputStream getOutputStream() {
+        return out;
+    }
 }

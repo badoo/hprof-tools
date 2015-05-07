@@ -1,6 +1,7 @@
 package com.badoo.hprof.library.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -9,10 +10,6 @@ import java.util.List;
  * Created by Erik Andre on 17/07/2014.
  */
 public class ClassDefinition extends Record {
-
-    private static final List<ConstantField> NO_CONSTANT_FIELDS = new ArrayList<ConstantField>(0);
-    private static final List<StaticField> NO_STATIC_FIELDS = new ArrayList<StaticField>(0);
-    private static final List<InstanceField> NO_INSTANCE_FIELDS = new ArrayList<InstanceField>(0);
 
     // Fields from LOAD_CLASS
     private int serialNumber;
@@ -114,7 +111,7 @@ public class ClassDefinition extends Record {
     }
 
     public List<ConstantField> getConstantFields() {
-        return constantFields != null ? constantFields : NO_CONSTANT_FIELDS;
+        return constantFields != null ? constantFields : Collections.<ConstantField>emptyList();
     }
 
     public void setConstantFields(List<ConstantField> constantFields) {
@@ -122,7 +119,7 @@ public class ClassDefinition extends Record {
     }
 
     public List<StaticField> getStaticFields() {
-        return staticFields != null ? staticFields : NO_STATIC_FIELDS;
+        return staticFields != null ? staticFields : Collections.<StaticField>emptyList();
     }
 
     public void setStaticFields(List<StaticField> staticFields) {
@@ -130,7 +127,7 @@ public class ClassDefinition extends Record {
     }
 
     public List<InstanceField> getInstanceFields() {
-        return instanceFields != null ? instanceFields : NO_INSTANCE_FIELDS;
+        return instanceFields != null ? instanceFields : Collections.<InstanceField>emptyList();
     }
 
     public void setInstanceFields(List<InstanceField> instanceFields) {
@@ -147,5 +144,45 @@ public class ClassDefinition extends Record {
 
     public void setNameStringId(int nameStringId) {
         this.nameStringId = nameStringId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ClassDefinition that = (ClassDefinition) o;
+
+        if (classLoaderObjectId != that.classLoaderObjectId) return false;
+        if (instanceSize != that.instanceSize) return false;
+        if (nameStringId != that.nameStringId) return false;
+        if (objectId != that.objectId) return false;
+        if (protectionDomainObjectId != that.protectionDomainObjectId) return false;
+        if (serialNumber != that.serialNumber) return false;
+        if (signersObjectId != that.signersObjectId) return false;
+        if (stackTraceSerial != that.stackTraceSerial) return false;
+        if (superClassObjectId != that.superClassObjectId) return false;
+        if (constantFields != null ? !constantFields.equals(that.constantFields) : that.constantFields != null) return false;
+        if (instanceFields != null ? !instanceFields.equals(that.instanceFields) : that.instanceFields != null) return false;
+        if (staticFields != null ? !staticFields.equals(that.staticFields) : that.staticFields != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = serialNumber;
+        result = 31 * result + objectId;
+        result = 31 * result + nameStringId;
+        result = 31 * result + stackTraceSerial;
+        result = 31 * result + superClassObjectId;
+        result = 31 * result + classLoaderObjectId;
+        result = 31 * result + signersObjectId;
+        result = 31 * result + protectionDomainObjectId;
+        result = 31 * result + instanceSize;
+        result = 31 * result + (constantFields != null ? constantFields.hashCode() : 0);
+        result = 31 * result + (staticFields != null ? staticFields.hashCode() : 0);
+        result = 31 * result + (instanceFields != null ? instanceFields.hashCode() : 0);
+        return result;
     }
 }

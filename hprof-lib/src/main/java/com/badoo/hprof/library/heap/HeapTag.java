@@ -33,4 +33,55 @@ public final class HeapTag {
     private HeapTag() {
     }
 
+    public static String tagToString(int tag) {
+        switch (tag) {
+            case ROOT_UNKNOWN:
+                return "ROOT_UNKNOWN";
+            case ROOT_JNI_GLOBAL:
+                return "ROOT_JNI_GLOBAL";
+            case ROOT_JNI_LOCAL:
+                return "ROOT_JNI_LOCAL";
+            case ROOT_JAVA_FRAME:
+                return "ROOT_JAVA_FRAME";
+            case ROOT_NATIVE_STACK:
+                return "ROOT_NATIVE_STACK";
+            case ROOT_STICKY_CLASS:
+                return "ROOT_STICKY_CLASS";
+            case ROOT_THREAD_BLOCK:
+                return "ROOT_THREAD_BLOCK";
+            case ROOT_MONITOR_USED:
+                return "ROOT_MONITOR_USED";
+            case ROOT_THREAD_OBJECT:
+                return "ROOT_THREAD_OBJECT";
+            case CLASS_DUMP:
+                return "CLASS_DUMP";
+            case INSTANCE_DUMP:
+                return "INSTANCE_DUMP";
+            case OBJECT_ARRAY_DUMP:
+                return "OBJECT_ARRAY_DUMP";
+            case PRIMITIVE_ARRAY_DUMP:
+                return "PRIMITIVE_ARRAY_DUMP";
+            case HPROF_HEAP_DUMP_INFO:
+                return "HPROF_HEAP_DUMP_INFO";
+            case HPROF_ROOT_INTERNED_STRING:
+                return "HPROF_ROOT_INTERNED_STRING";
+            case HPROF_ROOT_FINALIZING:
+                return "HPROF_ROOT_FINALIZING";
+            case HPROF_ROOT_DEBUGGER:
+                return "HPROF_ROOT_DEBUGGER";
+            case HPROF_ROOT_REFERENCE_CLEANUP:
+                return "HPROF_ROOT_REFERENCE_CLEANUP";
+            case HPROF_ROOT_VM_INTERNAL:
+                return "HPROF_ROOT_VM_INTERNAL";
+            case HPROF_ROOT_JNI_MONITOR:
+                return "HPROF_ROOT_JNI_MONITOR";
+            case HPROF_UNREACHABLE:
+                return "HPROF_UNREACHABLE";
+            case HPROF_PRIMITIVE_ARRAY_NODATA_DUMP:
+                return "HPROF_PRIMITIVE_ARRAY_NODATA_DUMP";
+            default:
+                    return "Unknown tag " + tag;
+        }
+    }
+
 }

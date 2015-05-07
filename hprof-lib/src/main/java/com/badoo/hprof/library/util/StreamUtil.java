@@ -4,13 +4,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 /**
  * Utility class containing methods to read and write to streams.
  * <p/>
  * Created by Erik Andre on 13/07/2014.
  */
+@SuppressWarnings("UnusedDeclaration")
 public class StreamUtil {
+
+    private static final byte[] buffer = new byte[1024];
 
     /**
      * Read a null-terminated string.
@@ -21,7 +25,7 @@ public class StreamUtil {
      */
     public static String readNullTerminatedString(InputStream in) throws IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        byte b = 0;
+        byte b;
         do {
             b = (byte) in.read();
             if (b != 0) {
@@ -40,8 +44,7 @@ public class StreamUtil {
      * @throws IOException
      */
     public static String readString(InputStream in, int length) throws IOException {
-        byte[] buffer = new byte[length];
-        in.read(buffer);
+        byte[] buffer = read(in, length);
         return new String(buffer);
     }
 
@@ -71,7 +74,7 @@ public class StreamUtil {
     /**
      * Write a byte.
      *
-     * @param out The OutputStream to write the byte to
+     * @param out   The OutputStream to write the byte to
      * @param value The byte to write
      * @throws IOException
      */
@@ -104,15 +107,31 @@ public class StreamUtil {
     /**
      * Write an int.
      *
-     * @param out The OutputStream to write the int to
+     * @param out   The OutputStream to write the int to
      * @param value The int to write
-     * @throws IOException
      */
     public static void writeInt(OutputStream out, int value) throws IOException {
         out.write(value >> 24);
         out.write(value >> 16);
         out.write(value >> 8);
         out.write(value);
+    }
+
+    /**
+     * Write an long.
+     *
+     * @param out   The OutputStream to write the long to
+     * @param value The long to write
+     */
+    public static void writeLong(OutputStream out, long value) throws IOException {
+        out.write((int) (0xff & (value >> 56)));
+        out.write((int) (0xff & (value >> 48)));
+        out.write((int) (0xff & (value >> 40)));
+        out.write((int) (0xff & (value >> 32)));
+        out.write((int) (0xff & (value >> 24)));
+        out.write((int) (0xff & (value >> 16)));
+        out.write((int) (0xff & (value >> 8)));
+        out.write((int) value);
     }
 
     /**
@@ -129,7 +148,7 @@ public class StreamUtil {
     /**
      * Write a short.
      *
-     * @param out The OutputStream to write the short to
+     * @param out   The OutputStream to write the short to
      * @param value The short to write
      * @throws IOException
      */
@@ -141,42 +160,77 @@ public class StreamUtil {
     /**
      * Copy a number of bytes from one stream to another, returning a copy of the bytes read.
      *
-     * @param in The InputStream
-     * @param out The OutputStream
-     * @param size Number of bytes to read
+     * @param in     The InputStream
+     * @param out    The OutputStream
+     * @param length Number of bytes to read
      * @return An array containing the bytes read
      * @throws IOException
      */
-    public static byte[] copy(InputStream in, OutputStream out, int size) throws IOException {
-        byte buffer[] = new byte[size];
-        in.read(buffer);
-        out.write(buffer);
+    public static byte[] copy(InputStream in, OutputStream out, int length) throws IOException {
+        byte buffer[] = read(in, length);
+        write(out, buffer);
         return buffer;
     }
 
     /**
      * Read a number of bytes.
      *
-     * @param in The InputStream to read from
+     * @param in     The InputStream to read from
      * @param length Number of bytes to read
      * @return An array containing the bytes read
      * @throws IOException
      */
     public static byte[] read(InputStream in, int length) throws IOException {
         byte[] data = new byte[length];
-        in.read(data);
+        int read = 0;
+        while (read != length) {
+            read += in.read(data, read, length - read);
+        }
         return data;
     }
 
     /**
      * Write a number of bytes
      *
-     * @param out The OutputStream to write to
+     * @param out  The OutputStream to write to
      * @param data The bytes to write
      * @throws IOException
      */
     public static void write(OutputStream out, byte[] data) throws IOException {
         out.write(data);
+    }
+
+    /**
+     * Write a repeated byte value.
+     *
+     * @param out   The OutputStream to write to
+     * @param value The value to write
+     * @param count Number of times to write the value
+     */
+    public static void write(final OutputStream out, final int value, final int count) throws IOException {
+        if (count > buffer.length) {
+            // Fallback
+            for (int i = 0; i < count; i++) {
+                writeByte(out, value);
+            }
+        }
+        else {
+            Arrays.fill(buffer, (byte) value);
+            out.write(buffer, 0, count);
+        }
+    }
+
+    /**
+     * Skip a number of bytes from an InputStream.
+     *
+     * @param in     The InputStream to read from
+     * @param length The number of bytes to skip
+     */
+    public static void skip(final InputStream in, final int length) throws IOException {
+        int skipped = 0;
+        while (skipped != length) {
+            skipped += in.skip(length - skipped);
+        }
     }
 
 }
