@@ -1,5 +1,17 @@
 # Badoo HPROF Tools
 
+Badoo HPROF Tools are a collection of libraries and toolswith the goal of makling memory dumps more than just a tool for analyzing OutOfMemoryErrors.
+
+## Modules
+
+* <b>Android example</b>: contains an sample application showing how to use the cruncher library in an Android app
+* <b>bmd-lib</b>: Library for reading and writing BMD files
+* <b>cruncher</b>: Library (and Java application) for converting HPROF files to BMD format
+* <b>decruncher</b>: Library (and Java application) for converting BMD files to HPROF format 
+* <b>deobfuscator</b>: Java application for deobfuscating ProGuard/DexGuard obfuscated HPROF files
+* <b>hprof-lib</b>: Library for reading and writing HPROF files
+* <b>hprof-validator</b>: Simple Java application that reads in a HPROF files and checks that it contains valid data
+
 ## HPROF Deobfuscator
 
 Hprof-deobfuscator is a tool for deobfuscating HPROF memory dump files that are created from builds obfuscated with either ProGuard or DexGuard.
