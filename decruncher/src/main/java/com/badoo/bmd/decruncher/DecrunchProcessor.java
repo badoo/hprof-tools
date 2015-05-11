@@ -70,7 +70,7 @@ public class DecrunchProcessor implements BmdProcessor {
      * @param out The output to write the decrunched data to
      * @param strings A set of strings from the original app, used to recover strings replaced by hashes in the dump
      */
-    public DecrunchProcessor(OutputStream out, Set<String> strings) {
+    public DecrunchProcessor(@Nonnull OutputStream out, @Nonnull Set<String> strings) {
         writer = new HprofWriter(out);
         this.strings = new HashMap<Integer, String>();
         for (String string : strings) {

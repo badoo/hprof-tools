@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import javax.annotation.Nonnull;
+
 /**
  * Utility class for reading strings (class names) from an JAR file.
  * 
@@ -15,7 +17,7 @@ import java.util.jar.JarFile;
  */
 public class JarStringReader {
 
-    public static Set<String> readStrings(File in) throws IOException {
+    public static Set<String> readStrings(@Nonnull File in) throws IOException {
         Set<String> strings = new HashSet<String>();
         JarFile file = new JarFile(in);
         for(JarEntry entry : Collections.list(file.entries())) {

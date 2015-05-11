@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+
 /**
  * Utility class for reading strings (class and field names) from an APK file.
  *
@@ -21,7 +23,8 @@ import java.util.Set;
  */
 public class ApkStringReader {
 
-    public static Set<String> readStrings(File in) throws IOException {
+    @Nonnull
+    public static Set<String> readStrings(@Nonnull File in) throws IOException {
         final Set<String> strings = new HashSet<String>();
         final DexClassVisitor classVisitor = new DexClassVisitor() {
             @Override
