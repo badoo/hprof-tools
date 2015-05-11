@@ -1,9 +1,12 @@
 apply plugin: 'java'
 apply plugin: 'application'
+apply plugin: 'maven-publish'
 
 sourceCompatibility = 1.5
 version = '1.0'
 mainClassName = "com.badoo.hprof.cruncher.HprofCruncher"
+group = 'com.badoo.hprof.cruncher'
+version = '1.0'
 
 repositories {
     mavenCentral()
@@ -22,6 +25,14 @@ task jarWithDependencies(type: Jar) {
     baseName = project.name + '-all'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
 }
 
 dependencies {
