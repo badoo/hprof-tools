@@ -2,6 +2,7 @@ package com.badoo.hprof.cruncher.library;
 
 import android.content.Context;
 import android.os.Debug;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -18,7 +19,9 @@ public class HprofCatcher {
      * @param context Context used to process memory dumps.
      */
     public static void init(@NonNull Context context) {
-
+        if (Thread.currentThread() != Looper.getMainLooper().getThread()) {
+            throw new IllegalStateException("HprofCatcher.init() must be called on the main thread!");
+        }
         if (sHandlerInstalled) {
             return;
         }
@@ -26,7 +29,7 @@ public class HprofCatcher {
         Thread.setDefaultUncaughtExceptionHandler(new MemoryDumpHandler(context.getApplicationContext(), oldHandler));
         sHandlerInstalled = true;
         // Check if there are any hprof files to process
-        CruncherService.checkForDumps(context);
+        CruncherService.processHprofDumps(context);
     }
 
     private static class MemoryDumpHandler implements UncaughtExceptionHandler {
