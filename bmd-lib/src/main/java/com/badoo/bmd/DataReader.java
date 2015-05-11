@@ -37,7 +37,7 @@ import java.io.InputStream;
 
 /**
  * Based on https://protobuf.googlecode.com/svn-history/r530/trunk/java/src/main/java/com/google/protobuf/CodedInputStream.java
- * Modified by Badoo 2014
+ * Modified by Badoo 2014 (Erik Andre)
  */
 
 /**
@@ -45,7 +45,6 @@ import java.io.InputStream;
  *
  * @author kenton@google.com Kenton Varda
  */
-@SuppressWarnings("UnusedDeclaration")
 public class DataReader {
 
     protected final InputStream in;
@@ -64,11 +63,6 @@ public class DataReader {
         return Float.intBitsToFloat(readRawLittleEndian32());
     }
 
-    /** Read a {@code uint64} field value from the stream. */
-    public long readUInt64() throws IOException {
-        return readRawVarint64();
-    }
-
     /** Read an {@code int64} field value from the stream. */
     public long readInt64() throws IOException {
         return readRawVarint64();
@@ -82,21 +76,6 @@ public class DataReader {
     /** Read a {@code bool} field value from the stream. */
     public boolean readBool() throws IOException {
         return readRawVarint64() != 0;
-    }
-
-    /** Read a {@code uint32} field value from the stream. */
-    public int readUInt32() throws IOException {
-        return readRawVarint32();
-    }
-
-    /** Read an {@code sint32} field value from the stream. */
-    public int readSInt32() throws IOException {
-        return decodeZigZag32(readRawVarint32());
-    }
-
-    /** Read an {@code sint64} field value from the stream. */
-    public long readSInt64() throws IOException {
-        return decodeZigZag64(readRawVarint64());
     }
 
     // =================================================================
@@ -152,34 +131,6 @@ public class DataReader {
             shift += 7;
         }
         throw new IOException();
-    }
-
-    /**
-     * Decode a ZigZag-encoded 32-bit value.  ZigZag encodes signed integers
-     * into values that can be efficiently encoded with varint.  (Otherwise,
-     * negative values must be sign-extended to 64 bits to be varint encoded,
-     * thus always taking 10 bytes on the wire.)
-     *
-     * @param n An unsigned 32-bit integer, stored in a signed int because
-     *          Java has no explicit unsigned support.
-     * @return A signed 32-bit integer.
-     */
-    public static int decodeZigZag32(final int n) {
-        return (n >>> 1) ^ -(n & 1);
-    }
-
-    /**
-     * Decode a ZigZag-encoded 64-bit value.  ZigZag encodes signed integers
-     * into values that can be efficiently encoded with varint.  (Otherwise,
-     * negative values must be sign-extended to 64 bits to be varint encoded,
-     * thus always taking 10 bytes on the wire.)
-     *
-     * @param n An unsigned 64-bit integer, stored in a signed int because
-     *          Java has no explicit unsigned support.
-     * @return A signed 64-bit integer.
-     */
-    public static long decodeZigZag64(final long n) {
-        return (n >>> 1) ^ -(n & 1);
     }
 
     /**
