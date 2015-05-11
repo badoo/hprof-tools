@@ -64,6 +64,7 @@ public class BmdDecruncher {
             processor.writeHeapRecords();
             out.flush();
             out.close();
+            System.exit(0);
         }
         catch (IOException e) {
             System.err.println("Failed to convert HPROF file, " + e.getMessage());

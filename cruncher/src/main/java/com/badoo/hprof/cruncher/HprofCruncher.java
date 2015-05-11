@@ -105,17 +105,20 @@ public class HprofCruncher {
             outFile = args[1];
         }
         else {
-            System.out.println("Usage:");
-            System.out.println("java -jar cruncher.jar input.hprof output.bmd");
+            System.err.println("Usage:");
+            System.err.println("java -jar cruncher.jar input.hprof output.bmd");
+            System.exit(1);
             return;
         }
         OutputStream out = null;
         try {
             out = new FileOutputStream(outFile);
             crunch(new File(inFile), out);
+            System.exit(0);
         }
         catch (IOException e) {
             e.printStackTrace();
+            System.exit(1);
         }
         finally {
             if (out != null) {
