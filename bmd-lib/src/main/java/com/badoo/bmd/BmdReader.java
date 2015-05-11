@@ -285,8 +285,8 @@ public class BmdReader extends DataReader {
     }
 
     private void readRecord() throws IOException {
-        int tag = readInt32();
-        processor.onRecord(tag, this);
+        int tagValue = readInt32();
+        processor.onRecord(BmdTag.fromValue(tagValue), this);
     }
 
     private void readHeader() throws IOException {

@@ -213,7 +213,7 @@ public class CrunchProcessor extends DiscardProcessor {
         }
 
         public void writeString(HprofString string, boolean hashed) throws IOException {
-            writeInt32(hashed ? BmdTag.HASHED_STRING : BmdTag.STRING);
+            writeTag(hashed ? BmdTag.HASHED_STRING : BmdTag.STRING);
             writeInt32(string.getId());
             byte[] stringData = string.getValue().getBytes();
             if (hashed) {
@@ -226,7 +226,7 @@ public class CrunchProcessor extends DiscardProcessor {
         }
 
         public void writeLegacyRecord(int tag, byte[] data) throws IOException {
-            writeInt32(BmdTag.LEGACY_HPROF_RECORD);
+            writeInt32(BmdTag.LEGACY_HPROF_RECORD.value);
             writeInt32(tag);
             writeInt32(data.length);
             writeRawBytes(data);
@@ -234,7 +234,7 @@ public class CrunchProcessor extends DiscardProcessor {
 
         public void writeClassDefinition(ClassDefinition classDef) throws IOException {
             final long start = getCurrentPosition();
-            writeInt32(BmdTag.CLASS_DEFINITION);
+            writeTag(BmdTag.CLASS_DEFINITION);
             writeInt32(mapObjectId(classDef.getObjectId()));
             writeInt32(mapObjectId(classDef.getSuperClassObjectId()));
             writeInt32(mapStringId(classDef.getNameStringId()));
@@ -283,7 +283,7 @@ public class CrunchProcessor extends DiscardProcessor {
 
         public void writeInstanceDump(Instance instance) throws IOException {
             final long start = getCurrentPosition();
-            writeInt32(BmdTag.INSTANCE_DUMP);
+            writeTag(BmdTag.INSTANCE_DUMP);
             writeInt32(mapObjectId(instance.getObjectId()));
             writeInt32(mapObjectId(instance.getClassObjectId()));
             ClassDefinition currentClass = classesByOriginalId.get(instance.getClassObjectId());
@@ -313,7 +313,7 @@ public class CrunchProcessor extends DiscardProcessor {
 
         public void writePrimitiveArray(PrimitiveArray array) throws IOException {
             final long start = getCurrentPosition();
-            writeInt32(BmdTag.PRIMITIVE_ARRAY_PLACEHOLDER);
+            writeTag(BmdTag.PRIMITIVE_ARRAY_PLACEHOLDER);
             writeInt32(mapObjectId(array.getObjectId()));
             writeInt32(convertType(array.getType()).id);
             writeInt32(array.getCount());
@@ -324,7 +324,7 @@ public class CrunchProcessor extends DiscardProcessor {
 
         public void writeObjectArray(ObjectArray array) throws IOException {
             final long start = getCurrentPosition();
-            writeInt32(BmdTag.OBJECT_ARRAY);
+            writeTag(BmdTag.OBJECT_ARRAY);
             writeInt32(mapObjectId(array.getObjectId()));
             writeInt32(mapObjectId(array.getElementClassId()));
             writeInt32(array.getCount());
@@ -337,7 +337,7 @@ public class CrunchProcessor extends DiscardProcessor {
         }
 
         public void writeRootObjects(List<Integer> roots) throws IOException {
-            writeInt32(BmdTag.ROOT_OBJECTS);
+            writeTag(BmdTag.ROOT_OBJECTS);
             writeInt32(roots.size());
             for (int i = 0; i < roots.size(); i++) {
                 writeInt32(mapObjectId(roots.get(i)));
@@ -399,6 +399,10 @@ public class CrunchProcessor extends DiscardProcessor {
                 default:
                     throw new IllegalArgumentException("Invalid type:" + type);
             }
+        }
+
+        private void writeTag(BmdTag tag) throws IOException {
+            writeInt32(tag.value);
         }
     }
 

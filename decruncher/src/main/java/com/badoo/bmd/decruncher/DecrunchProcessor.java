@@ -84,36 +84,36 @@ public class DecrunchProcessor implements BmdProcessor {
     }
 
     @Override
-    public void onRecord(int tag, @Nonnull BmdReader reader) throws IOException {
+    public void onRecord(BmdTag tag, @Nonnull BmdReader reader) throws IOException {
         switch (tag) {
-            case BmdTag.STRING:
+            case STRING:
                 writeString(reader.readString());
                 break;
-            case BmdTag.HASHED_STRING:
+            case HASHED_STRING:
                 writeString(reader.readHashedString());
                 break;
-            case BmdTag.CLASS_DEFINITION:
+            case CLASS_DEFINITION:
                 BmdClassDefinition classDef = reader.readClassDefinition();
                 classes.put(classDef.getId(), classDef);
                 // Write the load class record now and the class dump later
                 writeLoadClassRecord(classDef);
                 break;
-            case BmdTag.INSTANCE_DUMP:
+            case INSTANCE_DUMP:
                 instances.add(reader.readInstanceDump(classes));
                 break;
-            case BmdTag.OBJECT_ARRAY:
+            case OBJECT_ARRAY:
                 objectArrays.add(reader.readObjectArray());
                 break;
-            case BmdTag.PRIMITIVE_ARRAY_PLACEHOLDER:
+            case PRIMITIVE_ARRAY_PLACEHOLDER:
                 primitiveArrays.add(reader.readPrimitiveArray());
                 break;
-            case BmdTag.ROOT_OBJECTS:
+            case ROOT_OBJECTS:
                 int rootCount = reader.readInt32();
                 for (int i = 0; i < rootCount; i++) {
                     rootObjects.add(reader.readInt32());
                 }
                 break;
-            case BmdTag.LEGACY_HPROF_RECORD:
+            case LEGACY_HPROF_RECORD:
                 BmdLegacyRecord legacyRecord = reader.readLegacyRecord();
                 writeLegacyRecord(legacyRecord);
                 break;

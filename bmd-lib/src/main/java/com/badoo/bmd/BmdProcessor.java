@@ -14,11 +14,10 @@ public interface BmdProcessor {
     /**
      * Callback method invoked when a record is read. The reader, and stream, are positioned after
      * the record header when this method is invoked.
-     *
-     * @param tag    The tag of the record (as defined in BmdTag)
+     *  @param tag    The tag of the record (as defined in BmdTag)
      * @param reader The reader used to read the BMD data.
      */
-    public void onRecord(int tag, @Nonnull BmdReader reader) throws IOException;
+    public void onRecord(BmdTag tag, @Nonnull BmdReader reader) throws IOException;
 
     /**
      * Callback method invoked when the file header is read. Will only occur once per file.
