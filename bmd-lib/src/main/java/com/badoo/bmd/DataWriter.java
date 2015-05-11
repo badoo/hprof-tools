@@ -63,6 +63,15 @@ public abstract class DataWriter {
     }
 
     /**
+     * Returns the underlying OutputStream.
+     *
+     * @return the OutputStream
+     */
+    public OutputStream getOutputStream() {
+        return out;
+    }
+
+    /**
      * Write a {@code double} field to the stream.
      */
     protected void writeDouble(final double value) throws IOException {

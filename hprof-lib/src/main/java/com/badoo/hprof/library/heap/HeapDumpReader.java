@@ -145,6 +145,15 @@ public class HeapDumpReader {
     }
 
     /**
+     * Returns the current position of the underlying stream (in bytes from the start of the heap dump record).
+     *
+     * @return the current position
+     */
+    public long getCurrentPosition() {
+        return in.getCount();
+    }
+
+    /**
      * Reads and returns an instance dump record.
      *
      * @return An Instance object containing all data from the record.

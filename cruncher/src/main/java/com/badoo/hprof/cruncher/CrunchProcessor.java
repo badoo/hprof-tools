@@ -4,6 +4,7 @@ import com.badoo.bmd.BmdTag;
 import com.badoo.bmd.DataWriter;
 import com.badoo.bmd.model.BmdBasicType;
 import com.badoo.hprof.cruncher.util.CodingUtil;
+import com.badoo.hprof.cruncher.util.Stats;
 import com.badoo.hprof.library.HprofReader;
 import com.badoo.hprof.library.Tag;
 import com.badoo.hprof.library.heap.HeapDumpReader;
@@ -19,6 +20,7 @@ import com.badoo.hprof.library.model.ObjectArray;
 import com.badoo.hprof.library.model.PrimitiveArray;
 import com.badoo.hprof.library.model.StaticField;
 import com.badoo.hprof.library.processor.DiscardProcessor;
+import com.google.common.io.CountingOutputStream;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -50,6 +52,7 @@ public class CrunchProcessor extends DiscardProcessor {
     private static final int FIRST_ID = 1; // Skipping 0 since this is used as a (null) marker in some cases
 
     private final CrunchBdmWriter writer;
+    private final boolean collectStats;
     private int nextStringId = FIRST_ID;
     private Map<Integer, Integer> stringIds = new HashMap<Integer, Integer>(); // Maps original to updated string ids
     private int nextObjectId = FIRST_ID;
@@ -58,8 +61,9 @@ public class CrunchProcessor extends DiscardProcessor {
     private boolean readObjects;
     private List<Integer> rootObjectIds = new ArrayList<Integer>();
 
-    public CrunchProcessor(OutputStream out) {
+    public CrunchProcessor(OutputStream out, boolean collectStats) {
         this.writer = new CrunchBdmWriter(out);
+        this.collectStats = collectStats;
     }
 
     /**
@@ -82,15 +86,12 @@ public class CrunchProcessor extends DiscardProcessor {
         if (!readObjects) { // 1st pass: read class definitions and strings
             switch (tag) {
                 case Tag.STRING:
-                    HprofString string = reader.readStringRecord(length, timestamp);
-                    // We replace the original string id with one starting from 0 as these are more efficient to store
-                    stringIds.put(string.getId(), nextStringId); // Save the original id so we can update references later
-                    string.setId(nextStringId);
-                    nextStringId++;
-                    boolean hashed = !keepString(string.getValue());
-                    writer.writeString(string, hashed);
+                    readStringRecord(timestamp, length, reader);
                     break;
                 case Tag.LOAD_CLASS:
+                    if (collectStats) {
+                        Stats.increment(Stats.StatType.CLASS_HPROF, length + 9);
+                    }
                     ClassDefinition classDef = reader.readLoadClassRecord();
                     classesByOriginalId.put(classDef.getObjectId(), classDef);
                     break;
@@ -128,6 +129,21 @@ public class CrunchProcessor extends DiscardProcessor {
         }
     }
 
+    private void readStringRecord(int timestamp, int length, HprofReader reader) throws IOException {
+        if (collectStats) {
+            Stats.increment(Stats.StatType.STRING_HPROF, length + 9);
+        }
+        HprofString string = reader.readStringRecord(length, timestamp);
+        // We replace the original string id with one starting from 1 as these are more efficient to store
+        string.setId(mapStringId(string.getId()));
+        boolean hashed = !keepString(string.getValue());
+        final long start = writer.getCurrentPosition();
+        writer.writeString(string, hashed);
+        if (collectStats) {
+            Stats.increment(Stats.StatType.STRING_BMD, writer.getCurrentPosition() - start);
+        }
+    }
+
     private boolean keepString(String string) {
         // Keep the names of some core system classes (to avoid issues in MAT)
         return string.startsWith("java.lang") || "V".equals(string) || "boolean".equals(string) || "byte".equals(string)
@@ -145,7 +161,7 @@ public class CrunchProcessor extends DiscardProcessor {
      * Map an original HPROF object id to an updated object id (that is more efficient to store in BMD format)
      *
      * @param originalId the original object id
-     * @return an updated object od
+     * @return an updated object id
      */
     private int mapObjectId(int originalId) {
         if (originalId == 0) {
@@ -158,11 +174,35 @@ public class CrunchProcessor extends DiscardProcessor {
         return objectIds.get(originalId);
     }
 
+    /**
+     * Map an original HPROF string id to an updated string id (that is more efficient to store in BMD format)
+     *
+     * @param originalId the original string id
+     * @return an updated string id
+     */
+    private int mapStringId(int originalId) {
+        if (originalId == 0) {
+            return 0; // Zero is a special case used when there is no value (null), do not map it to a new id
+        }
+        if (!stringIds.containsKey(originalId)) {
+            stringIds.put(originalId, nextStringId);
+            nextStringId++;
+        }
+        return stringIds.get(originalId);
+    }
+
     @SuppressWarnings({"ForLoopReplaceableByForEach"})
     private class CrunchBdmWriter extends DataWriter {
 
+        private CountingOutputStream cOut;
+
         protected CrunchBdmWriter(OutputStream out) {
-            super(out);
+            super(new CountingOutputStream(out));
+            cOut = (CountingOutputStream) getOutputStream();
+        }
+
+        public long getCurrentPosition() {
+            return cOut.getCount();
         }
 
         public void writeHeader(int version, byte[] metadata) throws IOException {
@@ -191,10 +231,11 @@ public class CrunchProcessor extends DiscardProcessor {
         }
 
         public void writeClassDefinition(ClassDefinition classDef) throws IOException {
+            final long start = getCurrentPosition();
             writeInt32(BmdTag.CLASS_DEFINITION);
             writeInt32(mapObjectId(classDef.getObjectId()));
             writeInt32(mapObjectId(classDef.getSuperClassObjectId()));
-            writeInt32(stringIds.get(classDef.getNameStringId()));
+            writeInt32(mapStringId(classDef.getNameStringId()));
             // Write constants and static fields (not filtered)
             int constantFieldCount = classDef.getConstantFields().size();
             writeInt32(constantFieldCount);
@@ -208,7 +249,7 @@ public class CrunchProcessor extends DiscardProcessor {
             writeInt32(staticFieldCount);
             for (int i = 0; i < staticFieldCount; i++) {
                 StaticField field = classDef.getStaticFields().get(i);
-                writeInt32(stringIds.get(field.getFieldNameId()));
+                writeInt32(mapStringId(field.getFieldNameId()));
                 writeInt32(convertType(field.getType()).id);
                 writeFieldValue(field.getType(), field.getValue());
             }
@@ -229,13 +270,17 @@ public class CrunchProcessor extends DiscardProcessor {
             writeInt32(keptFieldCount);
             for (int i = 0; i < keptFieldCount; i++) {
                 InstanceField field = keptFields.get(i);
-                writeInt32(stringIds.get(field.getFieldNameId()));
+                writeInt32(mapStringId(field.getFieldNameId()));
                 writeInt32(convertType(field.getType()).id);
             }
             writeInt32(skippedFieldSize);
+            if (collectStats) {
+                Stats.increment(Stats.StatType.CLASS_BMD, writer.getCurrentPosition() - start);
+            }
         }
 
         public void writeInstanceDump(Instance instance) throws IOException {
+            final long start = getCurrentPosition();
             writeInt32(BmdTag.INSTANCE_DUMP);
             writeInt32(mapObjectId(instance.getObjectId()));
             writeInt32(mapObjectId(instance.getClassObjectId()));
@@ -259,22 +304,33 @@ public class CrunchProcessor extends DiscardProcessor {
             if (in.available() != 0) {
                 throw new IllegalStateException("Did not read the expected number of bytes. Available: " + in.available());
             }
+            if (collectStats) {
+                Stats.increment(Stats.StatType.INSTANCE_BMD, writer.getCurrentPosition() - start);
+            }
         }
 
         public void writePrimitiveArray(PrimitiveArray array) throws IOException {
+            final long start = getCurrentPosition();
             writeInt32(BmdTag.PRIMITIVE_ARRAY_PLACEHOLDER);
             writeInt32(mapObjectId(array.getObjectId()));
             writeInt32(convertType(array.getType()).id);
             writeInt32(array.getCount());
+            if (collectStats) {
+                Stats.increment(Stats.StatType.ARRAY_BMD, writer.getCurrentPosition() - start);
+            }
         }
 
         public void writeObjectArray(ObjectArray array) throws IOException {
+            final long start = getCurrentPosition();
             writeInt32(BmdTag.OBJECT_ARRAY);
             writeInt32(mapObjectId(array.getObjectId()));
             writeInt32(mapObjectId(array.getElementClassId()));
             writeInt32(array.getCount());
             for (int i = 0; i < array.getCount(); i++) {
                 writeInt32(mapObjectId(array.getElements()[i]));
+            }
+            if (collectStats) {
+                Stats.increment(Stats.StatType.ARRAY_BMD, writer.getCurrentPosition() - start);
             }
         }
 
@@ -351,7 +407,12 @@ public class CrunchProcessor extends DiscardProcessor {
         public void onHeapRecord(int tag, HeapDumpReader reader) throws IOException {
             switch (tag) {
                 case HeapTag.CLASS_DUMP:
+                    final long start = reader.getCurrentPosition();
                     ClassDefinition def = reader.readClassDumpRecord(classesByOriginalId);
+                    if (collectStats) {
+                        final long length = reader.getCurrentPosition() - start;
+                        Stats.increment(Stats.StatType.CLASS_HPROF, length);
+                    }
                     writer.writeClassDefinition(def);
                     break;
                 default:
@@ -367,16 +428,30 @@ public class CrunchProcessor extends DiscardProcessor {
         @Override
         public void onHeapRecord(int tag, HeapDumpReader reader) throws IOException {
             InputStream in = reader.getInputStream();
+            long start = reader.getCurrentPosition();
             switch (tag) {
-                case HeapTag.INSTANCE_DUMP:
+                case HeapTag.INSTANCE_DUMP: {
                     Instance instance = reader.readInstanceDump();
                     writer.writeInstanceDump(instance);
+                    if (collectStats) {
+                        final long length = reader.getCurrentPosition() - start;
+                        Stats.increment(Stats.StatType.INSTANCE_HPROF, length);
+                    }
                     break;
+                }
                 case HeapTag.OBJECT_ARRAY_DUMP:
                     readObjectArray(reader);
+                    if (collectStats) {
+                        final long length = reader.getCurrentPosition() - start;
+                        Stats.increment(Stats.StatType.ARRAY_HPROF, length);
+                    }
                     break;
                 case HeapTag.PRIMITIVE_ARRAY_DUMP:
                     readPrimitiveArray(reader);
+                    if (collectStats) {
+                        final long length = reader.getCurrentPosition() - start;
+                        Stats.increment(Stats.StatType.ARRAY_HPROF, length);
+                    }
                     break;
                 // Roots
                 case HeapTag.ROOT_UNKNOWN:
