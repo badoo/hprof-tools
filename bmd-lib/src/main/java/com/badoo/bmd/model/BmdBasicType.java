@@ -1,5 +1,7 @@
 package com.badoo.bmd.model;
 
+import javax.annotation.Nonnull;
+
 /**
  * Enum defining the data types supported by BMD.
  * <p/>
@@ -23,6 +25,7 @@ public enum BmdBasicType {
         this.id = id;
     }
 
+    @Nonnull
     public static BmdBasicType fromInt(int id) {
         switch (id) {
             case 0:

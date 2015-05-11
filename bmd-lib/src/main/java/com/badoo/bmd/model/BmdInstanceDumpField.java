@@ -1,5 +1,7 @@
 package com.badoo.bmd.model;
 
+import javax.annotation.Nonnull;
+
 /**
  * Class containing the data from a instance field in an instance dump.
  * <p/>
@@ -17,7 +19,7 @@ public class BmdInstanceDumpField extends BmdInstanceFieldDefinition {
      * @param fieldDefinition The existing field definition
      * @param data            The actual field data (can be a boxed primitive or an Integer representing an object reference)
      */
-    public BmdInstanceDumpField(BmdClassDefinition classDefinition, BmdInstanceFieldDefinition fieldDefinition, Object data) {
+    public BmdInstanceDumpField(@Nonnull BmdClassDefinition classDefinition, @Nonnull BmdInstanceFieldDefinition fieldDefinition, @Nonnull Object data) {
         super(fieldDefinition.getNameId(), fieldDefinition.getType());
         this.data = data;
         this.classDefinition = classDefinition;
@@ -29,7 +31,8 @@ public class BmdInstanceDumpField extends BmdInstanceFieldDefinition {
      * @param type            Type of the field
      * @param data            The actual field data (can be a boxed primitive or an Integer representing an object reference)
      */
-    public BmdInstanceDumpField(BmdClassDefinition classDefinition, int nameId, BmdBasicType type, Object data) {
+    @SuppressWarnings("UnusedDeclaration")
+    public BmdInstanceDumpField(@Nonnull BmdClassDefinition classDefinition, int nameId, @Nonnull BmdBasicType type, Object data) {
         super(nameId, type);
         this.data = data;
         this.classDefinition = classDefinition;
@@ -40,6 +43,7 @@ public class BmdInstanceDumpField extends BmdInstanceFieldDefinition {
      *
      * @return The class definition
      */
+    @Nonnull
     public BmdClassDefinition getClassDefinition() {
         return classDefinition;
     }
@@ -49,6 +53,7 @@ public class BmdInstanceDumpField extends BmdInstanceFieldDefinition {
      *
      * @return The field value
      */
+    @Nonnull
     public Object getData() {
         return data;
     }

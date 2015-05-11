@@ -1,5 +1,7 @@
 package com.badoo.bmd.model;
 
+import javax.annotation.Nonnull;
+
 /**
  * Data class for static fields in BMD class definitions.
  * <p/>
@@ -12,7 +14,7 @@ public class BmdStaticField {
     private final BmdBasicType type;
     private final Object value;
 
-    public BmdStaticField(int nameId, BmdBasicType type, Object value) {
+    public BmdStaticField(int nameId, @Nonnull BmdBasicType type, @Nonnull Object value) {
         this.nameId = nameId;
         this.type = type;
         this.value = value;
@@ -32,6 +34,7 @@ public class BmdStaticField {
      *
      * @return The field type
      */
+    @Nonnull
     public BmdBasicType getType() {
         return type;
     }
@@ -41,6 +44,7 @@ public class BmdStaticField {
      *
      * @return The field value
      */
+    @Nonnull
     public Object getValue() {
         return value;
     }

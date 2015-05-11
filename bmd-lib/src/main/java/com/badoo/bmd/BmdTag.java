@@ -1,5 +1,7 @@
 package com.badoo.bmd;
 
+import javax.annotation.Nonnull;
+
 /**
  * Class containing a list of all valid tags (an id that specifies the type of a record).
  * <p/>
@@ -25,6 +27,7 @@ public class BmdTag {
      * @param tag the tag to convert
      * @return
      */
+    @Nonnull
     public static String tagToString(int tag) {
         switch (tag) {
             case STRING:

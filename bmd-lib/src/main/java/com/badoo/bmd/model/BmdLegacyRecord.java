@@ -1,5 +1,7 @@
 package com.badoo.bmd.model;
 
+import javax.annotation.Nonnull;
+
 /**
  * Class containing a legacy (HPROF) BMD record.
  * <p/>
@@ -10,7 +12,7 @@ public class BmdLegacyRecord {
     private final int originalTag;
     private final byte[] data;
 
-    public BmdLegacyRecord(int originalTag, byte[] data) {
+    public BmdLegacyRecord(int originalTag, @Nonnull byte[] data) {
         this.originalTag = originalTag;
         this.data = data;
     }
@@ -29,6 +31,7 @@ public class BmdLegacyRecord {
      *
      * @return The record data
      */
+    @Nonnull
     public byte[] getData() {
         return data;
     }

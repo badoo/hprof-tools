@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 /**
  * Class for reading BMD files.
  * <p/>
@@ -38,7 +40,7 @@ public class BmdReader extends DataReader {
     private final BmdProcessor processor;
     private boolean readHeader = true;
 
-    public BmdReader(InputStream in, BmdProcessor processor) {
+    public BmdReader(@Nonnull InputStream in, @Nonnull BmdProcessor processor) {
         super(in);
         this.processor = processor;
     }
@@ -70,6 +72,7 @@ public class BmdReader extends DataReader {
      *
      * @return A BmdString
      */
+    @Nonnull
     public BmdString readString() throws IOException {
         int id = readInt32();
         int length = readInt32();
@@ -82,6 +85,7 @@ public class BmdReader extends DataReader {
      *
      * @return A BmdString
      */
+    @Nonnull
     public BmdString readHashedString() throws IOException {
         int id = readInt32();
         int length = readInt32();
@@ -94,6 +98,7 @@ public class BmdReader extends DataReader {
      *
      * @return A BmdClassDefinition
      */
+    @Nonnull
     public BmdClassDefinition readClassDefinition() throws IOException {
         int classId = readInt32();
         int superClassId = readInt32();
@@ -122,6 +127,7 @@ public class BmdReader extends DataReader {
      *
      * @return An BmdObjectArray
      */
+    @Nonnull
     public BmdObjectArray readObjectArray() throws IOException {
         int objectId = readInt32();
         int elementClassId = readInt32();
@@ -138,6 +144,7 @@ public class BmdReader extends DataReader {
      *
      * @return A BmdPrimitiveArray
      */
+    @Nonnull
     public BmdPrimitiveArray readPrimitiveArray() throws IOException {
         int objectId = readInt32();
         BmdBasicType type = BmdBasicType.fromInt(readInt32());
@@ -151,6 +158,7 @@ public class BmdReader extends DataReader {
      * @param classes A mapping of class ids to loaded class definitions
      * @return A BmdInstanceDump
      */
+    @Nonnull
     public BmdInstanceDump readInstanceDump(Map<Integer, BmdClassDefinition> classes) throws IOException {
         int objectId = readInt32();
         int classId = readInt32();
@@ -200,6 +208,7 @@ public class BmdReader extends DataReader {
      *
      * @return a BmdLegacyRecord
      */
+    @Nonnull
     public BmdLegacyRecord readLegacyRecord() throws IOException {
         int tag = readInt32();
         int length = readInt32();

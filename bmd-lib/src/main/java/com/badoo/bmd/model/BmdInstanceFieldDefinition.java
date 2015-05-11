@@ -1,5 +1,7 @@
 package com.badoo.bmd.model;
 
+import javax.annotation.Nonnull;
+
 /**
  * Data class for instance fields in BMD class definitions.
  * <p/>
@@ -10,7 +12,7 @@ public class BmdInstanceFieldDefinition {
     private final int nameId;
     private final BmdBasicType type;
 
-    public BmdInstanceFieldDefinition(int nameId, BmdBasicType type) {
+    public BmdInstanceFieldDefinition(int nameId, @Nonnull BmdBasicType type) {
         this.nameId = nameId;
         this.type = type;
     }
@@ -29,6 +31,7 @@ public class BmdInstanceFieldDefinition {
      *
      * @return The type of the field
      */
+    @Nonnull
     public BmdBasicType getType() {
         return type;
     }

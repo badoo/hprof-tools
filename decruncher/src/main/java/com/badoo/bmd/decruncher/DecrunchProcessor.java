@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+
 import static com.badoo.hprof.library.util.StreamUtil.write;
 import static com.badoo.hprof.library.util.StreamUtil.writeByte;
 import static com.badoo.hprof.library.util.StreamUtil.writeInt;
@@ -82,7 +84,7 @@ public class DecrunchProcessor implements BmdProcessor {
     }
 
     @Override
-    public void onRecord(int tag, BmdReader reader) throws IOException {
+    public void onRecord(int tag, @Nonnull BmdReader reader) throws IOException {
         switch (tag) {
             case BmdTag.STRING:
                 writeString(reader.readString());
@@ -294,7 +296,7 @@ public class DecrunchProcessor implements BmdProcessor {
     }
 
     @Override
-    public void onHeader(int version, byte[] data) throws IOException {
+    public void onHeader(int version, @Nonnull byte[] data) throws IOException {
         System.out.println("Header version:" + version + ", data=" + new String(data));
         writer.writeHprofFileHeader(new String(data), 4, 0, 0);
     }

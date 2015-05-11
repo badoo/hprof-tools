@@ -1,5 +1,7 @@
 package com.badoo.bmd.model;
 
+import javax.annotation.Nonnull;
+
 /**
  * Class representing an BMD object array. Unlike primitive arrays it retains the element data.
  * <p/>
@@ -11,7 +13,7 @@ public class BmdObjectArray {
     private final int elementClassId;
     private final int[] elements;
 
-    public BmdObjectArray(int id, int elementClassId, int[] elements) {
+    public BmdObjectArray(int id, int elementClassId, @Nonnull int[] elements) {
         this.id = id;
         this.elementClassId = elementClassId;
         this.elements = elements;
@@ -40,6 +42,7 @@ public class BmdObjectArray {
      *
      * @return The elements
      */
+    @Nonnull
     public int[] getElements() {
         return elements;
     }

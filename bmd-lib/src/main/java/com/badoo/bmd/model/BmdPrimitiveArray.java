@@ -1,5 +1,7 @@
 package com.badoo.bmd.model;
 
+import javax.annotation.Nonnull;
+
 /**
  * Class representing an BMD primitive array. Does not contain any element data, only type and the original size.
  * <p/>
@@ -11,7 +13,7 @@ public class BmdPrimitiveArray {
     private final BmdBasicType type;
     private final int elementCount;
 
-    public BmdPrimitiveArray(int id, BmdBasicType type, int elementCount) {
+    public BmdPrimitiveArray(int id, @Nonnull BmdBasicType type, int elementCount) {
         this.id = id;
         this.type = type;
         this.elementCount = elementCount;
@@ -31,6 +33,7 @@ public class BmdPrimitiveArray {
      *
      * @return The element type
      */
+    @Nonnull
     public BmdBasicType getType() {
         return type;
     }

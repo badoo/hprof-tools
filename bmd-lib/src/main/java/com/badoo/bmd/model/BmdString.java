@@ -1,5 +1,8 @@
 package com.badoo.bmd.model;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * Class containing a BMD string. Consists of a string id and either a string value or a hash code.
  * <p/>
@@ -12,7 +15,7 @@ public class BmdString {
     private final int id;
     private final int length;
 
-    public BmdString(int id, String string) {
+    public BmdString(int id, @Nonnull String string) {
         this.string = string;
         this.hash = string.hashCode();
         this.length = string.getBytes().length;
@@ -31,6 +34,7 @@ public class BmdString {
      *
      * @return The string data or null if there is none
      */
+    @Nullable
     public String getString() {
         return string;
     }

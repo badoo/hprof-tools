@@ -2,6 +2,8 @@ package com.badoo.bmd.model;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 /**
  * Class containing the data of an BMD instance dump including the instance id, class id and the values of instance fields.
  * <p/>
@@ -13,7 +15,7 @@ public class BmdInstanceDump {
     private final int classId;
     private final List<BmdInstanceDumpField> fields;
 
-    public BmdInstanceDump(int id, int classId, List<BmdInstanceDumpField> fields) {
+    public BmdInstanceDump(int id, int classId, @Nonnull List<BmdInstanceDumpField> fields) {
         this.id = id;
         this.classId = classId;
         this.fields = fields;
@@ -42,6 +44,7 @@ public class BmdInstanceDump {
      *
      * @return A list of instance fields
      */
+    @Nonnull
     public List<BmdInstanceDumpField> getFields() {
         return fields;
     }
