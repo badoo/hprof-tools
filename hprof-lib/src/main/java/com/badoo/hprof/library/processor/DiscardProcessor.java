@@ -7,6 +7,8 @@ import com.badoo.hprof.library.util.StreamUtil;
 
 import java.io.IOException;
 
+import javax.annotation.Nonnull;
+
 import static com.badoo.hprof.library.util.StreamUtil.*;
 
 /**
@@ -17,11 +19,11 @@ import static com.badoo.hprof.library.util.StreamUtil.*;
 public abstract class DiscardProcessor implements HprofProcessor {
 
     @Override
-    public void onHeader(String text, int idSize, int timeHigh, int timeLow) throws IOException {
+    public void onHeader(@Nonnull String text, int idSize, int timeHigh, int timeLow) throws IOException {
     }
 
     @Override
-    public void onRecord(int tag, int timestamp, int length, HprofReader reader) throws IOException {
+    public void onRecord(int tag, int timestamp, int length, @Nonnull HprofReader reader) throws IOException {
         skip(reader.getInputStream(), length);
     }
 }

@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import javax.annotation.Nonnull;
+
 /**
  * Application for converting HPROF files to the BMD format.
  * <p/>
@@ -34,7 +36,7 @@ public class HprofCruncher {
      * @param out    Output (BMD)
      * @throws IOException If an error occurs while writing the output data
      */
-    public static void crunch(File inFile, OutputStream out) throws IOException {
+    public static void crunch(@Nonnull File inFile, @Nonnull OutputStream out) throws IOException {
         // Wrap in a CountingOutputStream so we can check the final file size later
         CountingOutputStream cOut = new CountingOutputStream(out);
         if (COLLECT_STATS) {

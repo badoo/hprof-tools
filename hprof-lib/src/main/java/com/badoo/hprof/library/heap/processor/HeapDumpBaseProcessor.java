@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import javax.annotation.Nonnull;
+
 import static com.badoo.hprof.library.util.StreamUtil.copy;
 import static com.badoo.hprof.library.util.StreamUtil.readInt;
 import static com.badoo.hprof.library.util.StreamUtil.readShort;
@@ -24,7 +26,7 @@ import static com.badoo.hprof.library.util.StreamUtil.writeShort;
 public abstract class HeapDumpBaseProcessor implements HeapDumpProcessor {
 
     @Override
-    public abstract void onHeapRecord(int tag, HeapDumpReader reader) throws IOException;
+    public abstract void onHeapRecord(int tag, @Nonnull HeapDumpReader reader) throws IOException;
 
     protected void skipHeapRecord(int tag, InputStream in) throws IOException {
         switch (tag) {

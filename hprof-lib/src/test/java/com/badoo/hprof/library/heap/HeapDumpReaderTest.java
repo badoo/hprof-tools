@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.annotation.Nonnull;
+
 import static org.junit.Assert.*;
 
 public class HeapDumpReaderTest {
@@ -45,7 +47,7 @@ public class HeapDumpReaderTest {
         ByteArrayInputStream inBuffer = new ByteArrayInputStream(data);
         HeapDumpProcessor processor = new HeapDumpDiscardProcessor() {
             @Override
-            public void onHeapRecord(int tag, HeapDumpReader reader) throws IOException {
+            public void onHeapRecord(int tag, @Nonnull HeapDumpReader reader) throws IOException {
                 called.set(true);
                 Map<Integer, ClassDefinition> loadedClasses = new HashMap<Integer, ClassDefinition>();
                 loadedClasses.put(OBJECT_ID, new ClassDefinition());

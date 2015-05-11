@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 import static com.badoo.hprof.library.util.StreamUtil.read;
 import static com.badoo.hprof.library.util.StreamUtil.readByte;
 import static com.badoo.hprof.library.util.StreamUtil.readInt;
@@ -51,7 +53,7 @@ public class HeapDumpReader {
      * @param processor A callback interface that is invoked when a new record is encountered
      * @throws IOException
      */
-    public HeapDumpReader(InputStream in, int length, HeapDumpProcessor processor) throws IOException {
+    public HeapDumpReader(@Nonnull InputStream in, int length, @Nonnull HeapDumpProcessor processor) throws IOException {
         this.in = new CountingInputStream(in);
         this.processor = processor;
         this.length = length;
@@ -62,6 +64,7 @@ public class HeapDumpReader {
      *
      * @return The InputStream used by this reader
      */
+    @Nonnull
     public InputStream getInputStream() {
         return in;
     }
@@ -91,6 +94,7 @@ public class HeapDumpReader {
      *
      * @param loadedClasses Map of class ids and loaded classes. The class dump being read must be in this map
      */
+    @Nonnull
     public ClassDefinition readClassDumpRecord(Map<Integer, ClassDefinition> loadedClasses) throws IOException {
         int objectId = readInt(in);
         ClassDefinition cls = loadedClasses.get(objectId);
@@ -158,6 +162,7 @@ public class HeapDumpReader {
      *
      * @return An Instance object containing all data from the record.
      */
+    @Nonnull
     public Instance readInstanceDump() throws IOException {
         int objectId = readInt(in);
         int stackTraceSerial = readInt(in);
@@ -172,6 +177,7 @@ public class HeapDumpReader {
      *
      * @return a primitive array record.
      */
+    @Nonnull
     public PrimitiveArray readPrimitiveArray() throws IOException {
         int objectId = readInt(in);
         int stackTraceSerial = readInt(in);
@@ -186,6 +192,7 @@ public class HeapDumpReader {
      *
      * @return an object array record.
      */
+    @Nonnull
     public ObjectArray readObjectArray() throws IOException {
         int objectId = readInt(in);
         int stackTraceSerial = readInt(in);

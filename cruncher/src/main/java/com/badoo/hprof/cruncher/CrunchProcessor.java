@@ -31,6 +31,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 import static com.badoo.hprof.library.util.StreamUtil.read;
 import static com.badoo.hprof.library.util.StreamUtil.readInt;
 import static com.badoo.hprof.library.util.StreamUtil.skip;
@@ -82,7 +84,7 @@ public class CrunchProcessor extends DiscardProcessor {
     }
 
     @Override
-    public void onRecord(int tag, int timestamp, int length, HprofReader reader) throws IOException {
+    public void onRecord(int tag, int timestamp, int length, @Nonnull HprofReader reader) throws IOException {
         if (!readObjects) { // 1st pass: read class definitions and strings
             switch (tag) {
                 case Tag.STRING:
@@ -152,7 +154,7 @@ public class CrunchProcessor extends DiscardProcessor {
     }
 
     @Override
-    public void onHeader(String text, int idSize, int timeHigh, int timeLow) throws IOException {
+    public void onHeader(@Nonnull String text, int idSize, int timeHigh, int timeLow) throws IOException {
         // The text of the HPROF header is written to the BMD header but the timestamp is discarded
         writer.writeHeader(1, text.getBytes());
     }
@@ -404,7 +406,7 @@ public class CrunchProcessor extends DiscardProcessor {
     private class ClassDumpProcessor extends HeapDumpDiscardProcessor {
 
         @Override
-        public void onHeapRecord(int tag, HeapDumpReader reader) throws IOException {
+        public void onHeapRecord(int tag, @Nonnull HeapDumpReader reader) throws IOException {
             switch (tag) {
                 case HeapTag.CLASS_DUMP:
                     final long start = reader.getCurrentPosition();
@@ -426,7 +428,7 @@ public class CrunchProcessor extends DiscardProcessor {
     private class ObjectDumpProcessor extends HeapDumpDiscardProcessor {
 
         @Override
-        public void onHeapRecord(int tag, HeapDumpReader reader) throws IOException {
+        public void onHeapRecord(int tag, @Nonnull HeapDumpReader reader) throws IOException {
             InputStream in = reader.getInputStream();
             long start = reader.getCurrentPosition();
             switch (tag) {

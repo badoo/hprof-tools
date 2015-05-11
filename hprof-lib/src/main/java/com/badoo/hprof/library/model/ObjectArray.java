@@ -1,5 +1,7 @@
 package com.badoo.hprof.library.model;
 
+import javax.annotation.Nonnull;
+
 /**
  * Model class for HPROF object arrays.
  *
@@ -13,7 +15,7 @@ public class ObjectArray {
     private final int count;
     private final int[] elements;
 
-    public ObjectArray(int objectId, int stackTraceSerial, int elementClassId, int count, int[] elements) {
+    public ObjectArray(int objectId, int stackTraceSerial, int elementClassId, int count, @Nonnull int[] elements) {
         this.objectId = objectId;
         this.stackTraceSerial = stackTraceSerial;
         this.elementClassId = elementClassId;

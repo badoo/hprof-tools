@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 /**
  * A HPROF processor that performs simple verifications to check that the HPROF data is valid.
  * <p/>
@@ -39,12 +41,12 @@ public class ValidatingProcessor extends DiscardProcessor {
     }
 
     @Override
-    public void onHeader(String text, int idSize, int timeHigh, int timeLow) throws IOException {
+    public void onHeader(@Nonnull String text, int idSize, int timeHigh, int timeLow) throws IOException {
         Log.d(TAG, "Header text=" + text + ", idSize=" + idSize + ", timeHigh=" + timeHigh + ", timeLow=" + timeLow);
     }
 
     @Override
-    public void onRecord(int tag, int timestamp, int length, HprofReader reader) throws IOException {
+    public void onRecord(int tag, int timestamp, int length, @Nonnull HprofReader reader) throws IOException {
         //Log.d(TAG, "onRecord pos=" + in.getCount() + ", type=" + Tag.tagToString(tag));
         if (tag == Tag.STRING) {
             HprofString str = reader.readStringRecord(length, timestamp);
@@ -125,7 +127,7 @@ public class ValidatingProcessor extends DiscardProcessor {
     private class ValidatingHeapDumpProcessor extends HeapDumpDiscardProcessor {
 
         @Override
-        public void onHeapRecord(int tag, HeapDumpReader reader) throws IOException {
+        public void onHeapRecord(int tag, @Nonnull HeapDumpReader reader) throws IOException {
             //Log.d(TAG, "onHeapRecord pos=" + in.getCount() + ", type=" + HeapTag.tagToString(tag));
             if (tag == HeapTag.CLASS_DUMP) {
                 reader.readClassDumpRecord(classes);

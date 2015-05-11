@@ -1,5 +1,7 @@
 package com.badoo.hprof.library.model;
 
+import javax.annotation.Nonnull;
+
 /**
  * Model class for HPROF primitive arrays.
  *
@@ -13,7 +15,7 @@ public class PrimitiveArray {
     private final int count;
     private final byte[] arrayData;
 
-    public PrimitiveArray(int objectId, int stackTraceSerial, BasicType type, int count, byte[] arrayData) {
+    public PrimitiveArray(int objectId, int stackTraceSerial, @Nonnull BasicType type, int count, @Nonnull byte[] arrayData) {
         this.objectId = objectId;
         this.stackTraceSerial = stackTraceSerial;
         this.type = type;

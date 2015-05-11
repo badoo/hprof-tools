@@ -1,5 +1,7 @@
 package com.badoo.hprof.library.heap;
 
+import javax.annotation.Nonnull;
+
 /**
  * Created by Erik Andre on 14/08/2014.
  */
@@ -33,6 +35,7 @@ public final class HeapTag {
     private HeapTag() {
     }
 
+    @Nonnull
     public static String tagToString(int tag) {
         switch (tag) {
             case ROOT_UNKNOWN:

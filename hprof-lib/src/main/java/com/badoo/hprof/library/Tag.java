@@ -1,5 +1,7 @@
 package com.badoo.hprof.library;
 
+import javax.annotation.Nonnull;
+
 /**
  * Tags (types) of hprof records. The tag parameter in HprofProcessor.onRecord() will be one of these values.
  * <p/>
@@ -34,6 +36,7 @@ public final class Tag {
      * @param tag the tag to convert
      * @return
      */
+    @Nonnull
     public static String tagToString(int tag) {
         switch (tag) {
             case UNKNOWN:

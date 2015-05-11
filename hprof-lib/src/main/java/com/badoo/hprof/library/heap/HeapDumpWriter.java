@@ -9,6 +9,8 @@ import com.badoo.hprof.library.model.StaticField;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import javax.annotation.Nonnull;
+
 import static com.badoo.hprof.library.util.StreamUtil.write;
 import static com.badoo.hprof.library.util.StreamUtil.writeByte;
 import static com.badoo.hprof.library.util.StreamUtil.writeInt;
@@ -23,7 +25,7 @@ public class HeapDumpWriter {
 
     private final OutputStream out;
 
-    public HeapDumpWriter(OutputStream out) {
+    public HeapDumpWriter(@Nonnull OutputStream out) {
         this.out = out;
     }
 
@@ -32,6 +34,7 @@ public class HeapDumpWriter {
      *
      * @return The OutputStream
      */
+    @Nonnull
     public OutputStream getOutputStream() {
         return out;
     }
@@ -41,7 +44,7 @@ public class HeapDumpWriter {
      *
      * @param cls The class to be dumped
      */
-    public void writeClassDumpRecord(ClassDefinition cls) throws IOException {
+    public void writeClassDumpRecord(@Nonnull ClassDefinition cls) throws IOException {
         out.write(HeapTag.CLASS_DUMP);
         writeInt(out, cls.getObjectId());
         writeInt(out, cls.getStackTraceSerial());
@@ -82,7 +85,7 @@ public class HeapDumpWriter {
      * @param classId          Id of the instance's class
      * @param data             Instance data (packed instance field values)
      */
-    public void writeInstanceDumpRecord(int objectId, int stackTraceSerial, int classId, byte[] data) throws IOException {
+    public void writeInstanceDumpRecord(int objectId, int stackTraceSerial, int classId, @Nonnull byte[] data) throws IOException {
         out.write(HeapTag.INSTANCE_DUMP);
         writeInt(out, objectId);
         writeInt(out, stackTraceSerial);
@@ -99,7 +102,7 @@ public class HeapDumpWriter {
      * @param elementClassId   Class id of the elements
      * @param elements         An array containing the object ids of the elements
      */
-    public void writeObjectArray(int objectId, int stackTraceSerial, int elementClassId, int[] elements) throws IOException {
+    public void writeObjectArray(int objectId, int stackTraceSerial, int elementClassId, @Nonnull int[] elements) throws IOException {
         out.write(HeapTag.OBJECT_ARRAY_DUMP);
         writeInt(out, objectId);
         writeInt(out, stackTraceSerial);
@@ -118,7 +121,7 @@ public class HeapDumpWriter {
      * @param elementType      The basic type of the elements in the array
      * @param length           Length of the array
      */
-    public void writePrimitiveArrayHeader(int objectId, int stackTraceSerial, BasicType elementType, int length) throws IOException {
+    public void writePrimitiveArrayHeader(int objectId, int stackTraceSerial, @Nonnull BasicType elementType, int length) throws IOException {
         out.write(HeapTag.PRIMITIVE_ARRAY_DUMP);
         writeInt(out, objectId);
         writeInt(out, stackTraceSerial);

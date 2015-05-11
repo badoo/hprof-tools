@@ -2,6 +2,8 @@ package com.badoo.hprof.library;
 
 import java.io.IOException;
 
+import javax.annotation.Nonnull;
+
 /**
  * Callback interface used by HprofReader to notify that data is being read.
  * <p/>
@@ -17,7 +19,7 @@ public interface HprofProcessor {
      * @param timeHigh High word of number of milliseconds since 0:00 GMT, 1/1/70
      * @param timeLow  Low word of number of milliseconds since 0:00 GMT, 1/1/70
      */
-    void onHeader(String text, int idSize, int timeHigh, int timeLow) throws IOException;
+    void onHeader(@Nonnull String text, int idSize, int timeHigh, int timeLow) throws IOException;
 
     /**
      * Callback method invoked when a record is read.
@@ -27,6 +29,6 @@ public interface HprofProcessor {
      * @param length    Number of bytes in the record (excluding the record header)
      * @param reader    The reader from which the rest of the record can be read
      */
-    void onRecord(int tag, int timestamp, int length, HprofReader reader) throws IOException;
+    void onRecord(int tag, int timestamp, int length, @Nonnull HprofReader reader) throws IOException;
 
 }

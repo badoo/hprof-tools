@@ -6,6 +6,8 @@ import com.badoo.hprof.library.model.HprofString;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import javax.annotation.Nonnull;
+
 import static com.badoo.hprof.library.util.StreamUtil.write;
 import static com.badoo.hprof.library.util.StreamUtil.writeInt;
 import static com.badoo.hprof.library.util.StreamUtil.writeNullTerminatedString;
@@ -27,7 +29,7 @@ public class HprofWriter {
 
     private final OutputStream out;
 
-    public HprofWriter(OutputStream out) {
+    public HprofWriter(@Nonnull OutputStream out) {
         this.out = out;
     }
 
@@ -40,7 +42,7 @@ public class HprofWriter {
      * @param timeLow  Low four bytes of the file timestamp
      * @throws IOException
      */
-    public void writeHprofFileHeader(String text, int idSize, int timeHigh, int timeLow) throws IOException {
+    public void writeHprofFileHeader(@Nonnull String text, int idSize, int timeHigh, int timeLow) throws IOException {
         writeNullTerminatedString(out, text);
         writeInt(out, idSize);
         writeInt(out, timeHigh);
@@ -66,7 +68,7 @@ public class HprofWriter {
      *
      * @param string The string to write
      */
-    public void writeStringRecord(HprofString string) throws IOException {
+    public void writeStringRecord(@Nonnull HprofString string) throws IOException {
         byte[] stringData = string.getValue().getBytes();
         writeRecordHeader(Tag.STRING, string.getTimestamp(), stringData.length + 4);
         writeInt(out, string.getId());
@@ -79,7 +81,7 @@ public class HprofWriter {
      * @param cls The class definition to write
      * @throws IOException
      */
-    public void writeLoadClassRecord(ClassDefinition cls) throws IOException {
+    public void writeLoadClassRecord(@Nonnull ClassDefinition cls) throws IOException {
         writeRecordHeader(Tag.LOAD_CLASS, cls.getTimestamp(), 16);
         writeInt(out, cls.getSerialNumber());
         writeInt(out, cls.getObjectId());
@@ -92,6 +94,7 @@ public class HprofWriter {
      *
      * @return The OutputStream
      */
+    @Nonnull
     public OutputStream getOutputStream() {
         return out;
     }

@@ -2,6 +2,8 @@ package com.badoo.hprof.library.model;
 
 import java.util.Arrays;
 
+import javax.annotation.Nonnull;
+
 /**
  * Class containing the data of a class instance dump (INSTANCE_DUMP) heap record.
  *
@@ -14,7 +16,7 @@ public class Instance {
     private int classObjectId;
     private byte[] instanceFieldData;
 
-    public Instance(int objectId, int stackTraceSerialId, int classObjectId, byte[] instanceFieldData) {
+    public Instance(int objectId, int stackTraceSerialId, int classObjectId, @Nonnull byte[] instanceFieldData) {
         this.objectId = objectId;
         this.stackTraceSerialId = stackTraceSerialId;
         this.classObjectId = classObjectId;
@@ -45,6 +47,7 @@ public class Instance {
         this.classObjectId = classObjectId;
     }
 
+    @Nonnull
     public byte[] getInstanceFieldData() {
         return instanceFieldData;
     }
