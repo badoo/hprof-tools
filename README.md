@@ -95,6 +95,18 @@ java -jar ./decruncher/build/libs/decruncher-all-1.0.jar \<input bmd file\> \<ou
 
 Where the string source input files can be either<code>.jar</code>,<code>.dex</code>or<code>.apk</code>files.
 
+## Android Examples
+
+The Android Examples module contains a sample app that makes use the cruncher library to collect and convert HPROF files to BMD format, on the device.
+
+### Building
+
+The app can be built as a regular Android app in Android Studio but before doing so you need to make sure that the library dependencies are published to your local Maven repo. This is done by executing the following command while position in the root of the git:
+
+<code>
+./gradlw publishToMavenLocal
+</code>
+
 ## Credits
 
 Hprof-obfuscator, HprofCruncher and HprofDecruncher are brought to you by [Badoo Trading Limited](http://corp.badoo.com) and are released under the [MIT License](http://opensource.org/licenses/MIT).
