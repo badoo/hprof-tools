@@ -72,6 +72,9 @@ public class CrunchProcessor extends DiscardProcessor {
      * Must be called after the first pass (where class data is processed) is finished, before the second pass is started.
      */
     public void startSecondPass() {
+        if (stringIds.isEmpty() || classesByOriginalId.isEmpty()) {
+            throw new IllegalStateException("Second pass started but no strings or classes were read in the first pass!");
+        }
         readObjects = true;
     }
 
