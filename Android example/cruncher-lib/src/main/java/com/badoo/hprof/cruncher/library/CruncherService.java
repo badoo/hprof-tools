@@ -9,6 +9,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.badoo.hprof.cruncher.HprofCruncher;
+import com.badoo.hprof.cruncher.HprofFileSource;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -16,6 +17,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.GZIPOutputStream;
+
+import static com.badoo.hprof.cruncher.HprofCruncher.Config;
 
 /**
  * A Service that processes HPROF files, turning them into BMD files. Since converting from HPROF to BMD can be quite a resource intensive operation it is recommended
@@ -39,7 +42,9 @@ public class CruncherService extends IntentService {
     private static final String TAG = CruncherService.class.getSimpleName();
     private static final String ACTION_CRUNCH_FILE = CruncherService.class.getName() + ".CRUNCH_FILE";
     private static final String ACTION_CHECK_FILES = CruncherService.class.getName() + ".CHECK_FILES";
+
     private static final boolean DEBUG = true;
+    private static final long TIME_LIMIT = 5 * 60 * 1000;
 
     /**
      * Starts this service to check if there are any HPROF files to process and if any are found,
@@ -105,13 +110,15 @@ public class CruncherService extends IntentService {
         try {
             out = new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(outputFilePath)));
             long startTime = SystemClock.elapsedRealtime();
-            HprofCruncher.crunch(inputFile, out);
+            Config config = new Config();
+            config.enableStats(true).setTimeLimit(TIME_LIMIT);
+            HprofCruncher.crunch(new HprofFileSource(inputFile), out, config);
             if (DEBUG) {
                 Log.d(TAG, "Crunching finished after " + (SystemClock.elapsedRealtime() - startTime) + "ms");
             }
             success = true;
         }
-        catch (IOException e) {
+        catch (Exception e) {
             if (DEBUG) {
                 Log.e(TAG, "Failed to crunch file", e);
             }
