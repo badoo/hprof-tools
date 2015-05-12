@@ -1,7 +1,5 @@
 package com.badoo.hprof.cruncher;
 
-import com.badoo.hprof.library.util.StreamUtil;
-
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
@@ -9,13 +7,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.annotation.Nonnull;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
 
 public class HprofCruncherTest {
 
