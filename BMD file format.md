@@ -464,7 +464,7 @@ Contains a standard HPROF record wrapped inside the *Record data *field. Used fo
 </table>
 
 
-## 3.2 Field types
+## 3.3 Field types
 
 <table>
   <tr>
