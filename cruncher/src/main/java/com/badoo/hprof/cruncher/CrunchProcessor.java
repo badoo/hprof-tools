@@ -95,7 +95,7 @@ public class CrunchProcessor extends DiscardProcessor {
                     break;
                 case Tag.LOAD_CLASS:
                     if (collectStats) {
-                        Stats.increment(Stats.StatType.CLASS_HPROF, length + 9);
+                        Stats.increment(Stats.Type.CLASS, Stats.Variant.HPROF, length + 9);
                     }
                     ClassDefinition classDef = reader.readLoadClassRecord();
                     classesByOriginalId.put(classDef.getObjectId(), classDef);
@@ -136,7 +136,7 @@ public class CrunchProcessor extends DiscardProcessor {
 
     private void readStringRecord(int timestamp, int length, HprofReader reader) throws IOException {
         if (collectStats) {
-            Stats.increment(Stats.StatType.STRING_HPROF, length + 9);
+            Stats.increment(Stats.Type.STRING, Stats.Variant.HPROF, length + 9);
         }
         HprofString string = reader.readStringRecord(length, timestamp);
         // We replace the original string id with one starting from 1 as these are more efficient to store
@@ -145,7 +145,7 @@ public class CrunchProcessor extends DiscardProcessor {
         final long start = writer.getCurrentPosition();
         writer.writeString(string, hashed);
         if (collectStats) {
-            Stats.increment(Stats.StatType.STRING_BMD, writer.getCurrentPosition() - start);
+            Stats.increment(Stats.Type.STRING, Stats.Variant.BMD, writer.getCurrentPosition() - start);
         }
     }
 
@@ -280,7 +280,7 @@ public class CrunchProcessor extends DiscardProcessor {
             }
             writeInt32(skippedFieldSize);
             if (collectStats) {
-                Stats.increment(Stats.StatType.CLASS_BMD, writer.getCurrentPosition() - start);
+                Stats.increment(Stats.Type.CLASS, Stats.Variant.BMD, writer.getCurrentPosition() - start);
             }
         }
 
@@ -310,7 +310,7 @@ public class CrunchProcessor extends DiscardProcessor {
                 throw new IllegalStateException("Did not read the expected number of bytes. Available: " + in.available());
             }
             if (collectStats) {
-                Stats.increment(Stats.StatType.INSTANCE_BMD, writer.getCurrentPosition() - start);
+                Stats.increment(Stats.Type.INSTANCE, Stats.Variant.BMD, writer.getCurrentPosition() - start);
             }
         }
 
@@ -321,7 +321,7 @@ public class CrunchProcessor extends DiscardProcessor {
             writeInt32(convertType(array.getType()).id);
             writeInt32(array.getCount());
             if (collectStats) {
-                Stats.increment(Stats.StatType.ARRAY_BMD, writer.getCurrentPosition() - start);
+                Stats.increment(Stats.Type.ARRAY, Stats.Variant.BMD, writer.getCurrentPosition() - start);
             }
         }
 
@@ -335,7 +335,7 @@ public class CrunchProcessor extends DiscardProcessor {
                 writeInt32(mapObjectId(array.getElements()[i]));
             }
             if (collectStats) {
-                Stats.increment(Stats.StatType.ARRAY_BMD, writer.getCurrentPosition() - start);
+                Stats.increment(Stats.Type.ARRAY, Stats.Variant.BMD, writer.getCurrentPosition() - start);
             }
         }
 
@@ -420,7 +420,7 @@ public class CrunchProcessor extends DiscardProcessor {
                     ClassDefinition def = reader.readClassDumpRecord(classesByOriginalId);
                     if (collectStats) {
                         final long length = reader.getCurrentPosition() - start;
-                        Stats.increment(Stats.StatType.CLASS_HPROF, length);
+                        Stats.increment(Stats.Type.CLASS, Stats.Variant.HPROF, length);
                     }
                     writer.writeClassDefinition(def);
                     break;
@@ -444,7 +444,7 @@ public class CrunchProcessor extends DiscardProcessor {
                     writer.writeInstanceDump(instance);
                     if (collectStats) {
                         final long length = reader.getCurrentPosition() - start;
-                        Stats.increment(Stats.StatType.INSTANCE_HPROF, length);
+                        Stats.increment(Stats.Type.INSTANCE, Stats.Variant.HPROF, length);
                     }
                     break;
                 }
@@ -452,14 +452,14 @@ public class CrunchProcessor extends DiscardProcessor {
                     readObjectArray(reader);
                     if (collectStats) {
                         final long length = reader.getCurrentPosition() - start;
-                        Stats.increment(Stats.StatType.ARRAY_HPROF, length);
+                        Stats.increment(Stats.Type.ARRAY, Stats.Variant.HPROF, length);
                     }
                     break;
                 case HeapTag.PRIMITIVE_ARRAY_DUMP:
                     readPrimitiveArray(reader);
                     if (collectStats) {
                         final long length = reader.getCurrentPosition() - start;
-                        Stats.increment(Stats.StatType.ARRAY_HPROF, length);
+                        Stats.increment(Stats.Type.ARRAY, Stats.Variant.HPROF, length);
                     }
                     break;
                 // Roots

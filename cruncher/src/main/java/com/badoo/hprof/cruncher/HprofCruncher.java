@@ -68,6 +68,8 @@ public class HprofCruncher {
         if (config == null) {
             config = new Config();
         }
+        Stats.setEnabled(config.collectStats);
+        Stats.increment(Stats.Type.TOTAL, Stats.Variant.HPROF, source.getDataSize());
         final long start = System.currentTimeMillis();
         final long limit = config.timeLimit != Config.NO_TIME_LIMIT? start + config.timeLimit : Long.MAX_VALUE;
         // Wrap in a CountingOutputStream so we can check the final file size later
@@ -94,47 +96,13 @@ public class HprofCruncher {
         }
         processor.finishAndWriteOutput();
         // Print some stats about the conversion
-        if (config.collectStats) {
-            printStats(source, cOut);
-        }
+        Stats.increment(Stats.Type.TOTAL, Stats.Variant.BMD, cOut.getCount());
+        Stats.printStats();
     }
 
     private static void checkTimeLimit(long limit) throws TimeoutException {
         if (System.currentTimeMillis() > limit) {
             throw new TimeoutException("Crunching operation took too long!");
-        }
-    }
-
-    private static void printStats(HprofSource inFile, CountingOutputStream out) {
-        {
-            final long sizeBefore = inFile.getDataSize();
-            final long sizeAfter = out.getCount();
-            final double ratio = sizeAfter / (double) sizeBefore;
-            System.out.printf("Total size, before: %d, after: %d, ratio: %.3f\n", sizeBefore, sizeAfter, ratio);
-        }
-        {
-            final long sizeBefore = Stats.getStat(Stats.StatType.STRING_HPROF);
-            final long sizeAfter = Stats.getStat(Stats.StatType.STRING_BMD);
-            final double ratio = sizeAfter / (double) sizeBefore;
-            System.out.printf("Strings size, before: %d, after: %d, ratio: %.3f\n", sizeBefore, sizeAfter, ratio);
-        }
-        {
-            final long sizeBefore = Stats.getStat(Stats.StatType.CLASS_HPROF);
-            final long sizeAfter = Stats.getStat(Stats.StatType.CLASS_BMD);
-            final double ratio = sizeAfter / (double) sizeBefore;
-            System.out.printf("Classes size, before: %d, after: %d, ratio: %.3f\n", sizeBefore, sizeAfter, ratio);
-        }
-        {
-            final long sizeBefore = Stats.getStat(Stats.StatType.INSTANCE_HPROF);
-            final long sizeAfter = Stats.getStat(Stats.StatType.INSTANCE_BMD);
-            final double ratio = sizeAfter / (double) sizeBefore;
-            System.out.printf("Instances size, before: %d, after: %d, ratio: %.3f\n", sizeBefore, sizeAfter, ratio);
-        }
-        {
-            final long sizeBefore = Stats.getStat(Stats.StatType.ARRAY_HPROF);
-            final long sizeAfter = Stats.getStat(Stats.StatType.ARRAY_BMD);
-            final double ratio = sizeAfter / (double) sizeBefore;
-            System.out.printf("Arrays size, before: %d, after: %d, ratio: %.3f\n", sizeBefore, sizeAfter, ratio);
         }
     }
 
