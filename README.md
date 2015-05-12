@@ -45,6 +45,8 @@ java -jar ./deobfuscator/build/libs/deobfuscator-all-1.0.jar \<mapping file\> \<
 
 HprofCruncher is a tool that converts HPROF memory dump files to the much more compact BMD file format. A size reduction of up to 97% can be achieved, however some data is lost in the process (including primitive fields and primitive arrays).
 
+A description of the BMD file format can be found [here](BMD file format.md).
+
 ### Building
 
 HprofCruncher is built by executing the following command from the command line, with the root of the git as your current directory.
