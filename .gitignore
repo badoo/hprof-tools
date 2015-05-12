@@ -3,8 +3,6 @@
 .DS_Store
 .idea
 *.iml
-*.hprof
-*.bmd
 *.apk
 android.jar
 bin/

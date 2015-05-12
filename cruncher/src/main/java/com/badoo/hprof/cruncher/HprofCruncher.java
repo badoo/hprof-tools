@@ -28,6 +28,7 @@ import javax.annotation.Nullable;
  */
 public class HprofCruncher {
 
+    @SuppressWarnings("UnusedDeclaration")
     public static class Config {
 
         public static final int NO_TIME_LIMIT = -1;
@@ -99,7 +100,7 @@ public class HprofCruncher {
     }
 
     private static void checkTimeLimit(long limit) throws TimeoutException {
-        if (limit > System.currentTimeMillis()) {
+        if (System.currentTimeMillis() > limit) {
             throw new TimeoutException("Crunching operation took too long!");
         }
     }

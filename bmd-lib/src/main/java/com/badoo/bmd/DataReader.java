@@ -75,7 +75,7 @@ public class DataReader {
 
     /** Read a {@code bool} field value from the stream. */
     public boolean readBool() throws IOException {
-        return readRawVarint64() != 0;
+        return readRawByte() != 0;
     }
 
     // =================================================================

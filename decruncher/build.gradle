@@ -12,7 +12,7 @@ repositories {
 
 run {
     minHeapSize = "128m"
-    maxHeapSize = "512m"
+    maxHeapSize = "1024m"
     if(project.hasProperty('args')){
         args project.args.split('\\s+')
     }

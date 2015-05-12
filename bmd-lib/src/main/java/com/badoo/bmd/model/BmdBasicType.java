@@ -47,7 +47,7 @@ public enum BmdBasicType {
             case 8:
                 return SHORT;
             default:
-                throw new IllegalArgumentException("Invalid value for BmdBasicType");
+                throw new IllegalArgumentException("Invalid value for BmdBasicType: " + id);
         }
     }
 }

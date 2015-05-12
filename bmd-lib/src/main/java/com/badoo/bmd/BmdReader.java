@@ -37,6 +37,8 @@ import javax.annotation.Nonnull;
  */
 public class BmdReader extends DataReader {
 
+    private static final boolean DEBUG = false;
+
     private final BmdProcessor processor;
     private boolean readHeader = true;
 
@@ -101,19 +103,23 @@ public class BmdReader extends DataReader {
     @Nonnull
     public BmdClassDefinition readClassDefinition() throws IOException {
         int classId = readInt32();
+        log("Class: " + classId);
         int superClassId = readInt32();
         int name = readInt32();
         int constantCount = readInt32();
+        log("Constants fields: " + constantCount);
         List<BmdConstantField> constantFields = new ArrayList<BmdConstantField>();
         for (int i = 0; i < constantCount; i++) {
             constantFields.add(readConstantField());
         }
         int staticCount = readInt32();
+        log("Static fields: " + staticCount);
         List<BmdStaticField> staticFields = new ArrayList<BmdStaticField>();
         for (int i = 0; i < staticCount; i++) {
             staticFields.add(readStaticField());
         }
         int instanceCount = readInt32();
+        log("Instance fields: " + instanceCount);
         List<BmdInstanceFieldDefinition> instanceFields = new ArrayList<BmdInstanceFieldDefinition>();
         for (int i = 0; i < instanceCount; i++) {
             instanceFields.add(readInstanceField());
@@ -219,12 +225,14 @@ public class BmdReader extends DataReader {
     private BmdInstanceFieldDefinition readInstanceField() throws IOException {
         int nameId = readInt32();
         BmdBasicType type = BmdBasicType.fromInt(readInt32());
+        log("Field: " + type);
         return new BmdInstanceFieldDefinition(nameId, type);
     }
 
     private BmdStaticField readStaticField() throws IOException {
         int nameId = readInt32();
         BmdBasicType type = BmdBasicType.fromInt(readInt32());
+        log("Field: " + type);
         Object value;
         switch (type) {
             case OBJECT:
@@ -261,6 +269,7 @@ public class BmdReader extends DataReader {
     private BmdConstantField readConstantField() throws IOException {
         int index = readInt32();
         BmdBasicType type = BmdBasicType.fromInt(readInt32());
+        log("Field: " + type);
         switch (type) {
             case OBJECT:
             case INT:
@@ -294,5 +303,11 @@ public class BmdReader extends DataReader {
         int metaDataLength = readInt32();
         byte[] metadata = readRawBytes(metaDataLength);
         processor.onHeader(version, metadata);
+    }
+
+    private void log(String msg) {
+        if (DEBUG) {
+            System.out.println(msg);
+        }
     }
 }

@@ -55,6 +55,7 @@ import static com.badoo.hprof.library.util.StreamUtil.writeShort;
  */
 public class DecrunchProcessor implements BmdProcessor {
 
+    private static final boolean DEBUG = false;
     private static final int FILLER_FIELD_NAME = Integer.MAX_VALUE;
     private final HprofWriter writer;
     private final Map<Integer, BmdClassDefinition> classes = new HashMap<Integer, BmdClassDefinition>();
@@ -85,6 +86,9 @@ public class DecrunchProcessor implements BmdProcessor {
 
     @Override
     public void onRecord(BmdTag tag, @Nonnull BmdReader reader) throws IOException {
+        if (DEBUG) {
+            System.out.println("Record: " + tag);
+        }
         switch (tag) {
             case STRING:
                 writeString(reader.readString());
