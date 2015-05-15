@@ -28,6 +28,9 @@ import javax.annotation.Nullable;
  */
 public class HprofCruncher {
 
+    /**
+     * Configurator for controlling how HrofCruncher converts HPROF files to BMD.
+     */
     @SuppressWarnings("UnusedDeclaration")
     public static class Config {
 
@@ -35,6 +38,7 @@ public class HprofCruncher {
 
         private boolean collectStats;
         private long timeLimit = NO_TIME_LIMIT;
+        private long iterationSleep;
 
         /**
          * Sets whether stats should be collected to measure how well the crunch operation performs
@@ -55,6 +59,22 @@ public class HprofCruncher {
             this.timeLimit = timeLimit;
             return this;
         }
+
+        /**
+         * Set the time the thread performing the crunching will spend sleeping for each iteration. This number will dramatically slow down the operation.
+         * <p/>
+         * Examples:
+         * Nexus 5, 200MB HPROF, sleep=10, crunch time=14min
+         * Nexus 5, 200MB HPROF, sleep=5, crunch time=8.3min
+         * Nexus 5, 200MB HPROF, sleep=1, crunch time=3.5min
+         * Nexus 5, 200MB HPROF, sleep=0, crunch time=1.5min
+         *
+         * @param sleep number of milliseconds to spend sleeping each iteration.
+         */
+        public Config setIterationSleepTime(long sleep) {
+            this.iterationSleep = sleep;
+            return this;
+        }
     }
 
     /**
@@ -71,7 +91,7 @@ public class HprofCruncher {
         Stats.setEnabled(config.collectStats);
         Stats.increment(Stats.Type.TOTAL, Stats.Variant.HPROF, source.getDataSize());
         final long start = System.currentTimeMillis();
-        final long limit = config.timeLimit != Config.NO_TIME_LIMIT? start + config.timeLimit : Long.MAX_VALUE;
+        final long limit = config.timeLimit != Config.NO_TIME_LIMIT ? start + config.timeLimit : Long.MAX_VALUE;
         // Wrap in a CountingOutputStream so we can check the final file size later
         CountingOutputStream cOut = new CountingOutputStream(out);
         if (config.collectStats) {
@@ -84,6 +104,7 @@ public class HprofCruncher {
         while (reader.hasNext()) {
             reader.next();
             checkTimeLimit(limit);
+            iterationSleep(config);
         }
         processor.startSecondPass();
         in.close();
@@ -93,11 +114,24 @@ public class HprofCruncher {
         while (reader.hasNext()) {
             reader.next();
             checkTimeLimit(limit);
+            iterationSleep(config);
         }
         processor.finishAndWriteOutput();
         // Print some stats about the conversion
         Stats.increment(Stats.Type.TOTAL, Stats.Variant.BMD, cOut.getCount());
         Stats.printStats();
+    }
+
+    private static void iterationSleep(Config config) {
+        if (config.iterationSleep == 0) {
+            return;
+        }
+        try {
+            Thread.sleep(config.iterationSleep);
+        }
+        catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void checkTimeLimit(long limit) throws TimeoutException {

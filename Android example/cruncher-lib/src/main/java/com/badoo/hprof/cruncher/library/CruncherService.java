@@ -44,7 +44,7 @@ public class CruncherService extends IntentService {
     private static final String ACTION_CHECK_FILES = CruncherService.class.getName() + ".CHECK_FILES";
 
     private static final boolean DEBUG = true;
-    private static final long TIME_LIMIT = 5 * 60 * 1000;
+    private static final long TIME_LIMIT = 30 * 60 * 1000;
 
     /**
      * Starts this service to check if there are any HPROF files to process and if any are found,
@@ -112,6 +112,7 @@ public class CruncherService extends IntentService {
             long startTime = SystemClock.elapsedRealtime();
             Config config = new Config();
             config.enableStats(true).setTimeLimit(TIME_LIMIT);
+            config.setIterationSleepTime(1);
             HprofCruncher.crunch(new HprofFileSource(inputFile), out, config);
             if (DEBUG) {
                 Log.d(TAG, "Crunching finished after " + (SystemClock.elapsedRealtime() - startTime) + "ms");
