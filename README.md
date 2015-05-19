@@ -12,6 +12,14 @@ Badoo HPROF Tools are a collection of libraries and toolswith the goal of maklin
 * <b>hprof-lib</b>: Library for reading and writing HPROF files
 * <b>hprof-validator</b>: Simple Java application that reads in a HPROF files and checks that it contains valid data
 
+JavaDoc describing the APIs provided by the modules can be generated using the following gradle task:
+
+<code>
+./gradlew javaDoc
+</code>
+
+The generated documentation will be located under <module>/build/docs.
+
 ## HPROF Deobfuscator
 
 Hprof-deobfuscator is a tool for deobfuscating HPROF memory dump files that are created from builds obfuscated with either ProGuard or DexGuard.
