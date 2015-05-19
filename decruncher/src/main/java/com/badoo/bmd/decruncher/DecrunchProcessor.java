@@ -57,18 +57,21 @@ public class DecrunchProcessor implements BmdProcessor {
 
     private static final boolean DEBUG = false;
     private static final int FILLER_FIELD_NAME = Integer.MAX_VALUE;
+    private static final InstanceField BYTE_FILLER_FIELD = new InstanceField(BasicType.BYTE, FILLER_FIELD_NAME);
+    private static final InstanceField INT_FILLER_FIELD = new InstanceField(BasicType.INT, FILLER_FIELD_NAME);
+
     private final HprofWriter writer;
     private final Map<Integer, BmdClassDefinition> classes = new HashMap<Integer, BmdClassDefinition>();
     private final Map<Integer, String> strings;
-    private List<BmdInstanceDump> instances = new ArrayList<BmdInstanceDump>();
-    private List<BmdObjectArray> objectArrays = new ArrayList<BmdObjectArray>();
-    private List<BmdPrimitiveArray> primitiveArrays = new ArrayList<BmdPrimitiveArray>();
-    private List<Integer> rootObjects = new ArrayList<Integer>();
+    private final List<BmdInstanceDump> instances = new ArrayList<BmdInstanceDump>();
+    private final List<BmdObjectArray> objectArrays = new ArrayList<BmdObjectArray>();
+    private final List<BmdPrimitiveArray> primitiveArrays = new ArrayList<BmdPrimitiveArray>();
+    private final List<Integer> rootObjects = new ArrayList<Integer>();
 
     /**
      * Create a new DecrunchProcessor.
      *
-     * @param out The output to write the decrunched data to
+     * @param out     The output to write the decrunched data to
      * @param strings A set of strings from the original app, used to recover strings replaced by hashes in the dump
      */
     public DecrunchProcessor(@Nonnull OutputStream out, @Nonnull Set<String> strings) {
@@ -186,16 +189,9 @@ public class DecrunchProcessor implements BmdProcessor {
         // Add extra instance fields replacing removed fields
         int filler = bmdClassDef.getDiscardedFieldSize();
         while (filler > 0) {
-            if (filler >= 4) {
-                // Add int
-                instanceFields.add(new InstanceField(BasicType.INT, FILLER_FIELD_NAME));
-                filler -= 4;
-            }
-            else {
-                // Add byte
-                instanceFields.add(new InstanceField(BasicType.BYTE, FILLER_FIELD_NAME));
-                filler--;
-            }
+            InstanceField fillerField = filler >= 4 ? INT_FILLER_FIELD : BYTE_FILLER_FIELD;
+            instanceFields.add(fillerField);
+            filler -= fillerField.getType().size;
         }
         classDef.setInstanceFields(instanceFields);
         // Calculate instance size

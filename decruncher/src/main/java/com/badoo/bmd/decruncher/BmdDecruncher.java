@@ -53,15 +53,19 @@ public class BmdDecruncher {
         if (!(in instanceof BufferedInputStream)) {
             in = new BufferedInputStream(in);
         }
-        DecrunchProcessor processor = new DecrunchProcessor(out, strings);
-        BmdReader reader = new BmdReader(in, processor);
-        while (reader.hasNext()) {
-            reader.next();
+        try {
+            DecrunchProcessor processor = new DecrunchProcessor(out, strings);
+            BmdReader reader = new BmdReader(in, processor);
+            while (reader.hasNext()) {
+                reader.next();
+            }
+            // Write all the heap records collected by the processor
+            processor.writeHeapRecords();
+            out.flush();
         }
-        // Write all the heap records collected by the processor
-        processor.writeHeapRecords();
-        out.flush();
-        out.close();
+        finally {
+            out.close();
+        }
     }
 
     public static void main(String[] args) {
