@@ -100,26 +100,36 @@ public class HprofCruncher {
         CrunchProcessor processor = new CrunchProcessor(out, true);
         // Start first pass
         InputStream in = new BufferedInputStream(source.open());
-        HprofReader reader = new HprofReader(in, processor);
-        while (reader.hasNext()) {
-            reader.next();
-            checkTimeLimit(limit);
-            iterationSleep(config);
+        try {
+            HprofReader reader = new HprofReader(in, processor);
+            while (reader.hasNext()) {
+                reader.next();
+                checkTimeLimit(limit);
+                iterationSleep(config);
+            }
+            processor.startSecondPass();
         }
-        processor.startSecondPass();
-        in.close();
+        finally {
+            in.close();
+        }
         // Start second pass
         in = new BufferedInputStream(source.open());
-        reader = new HprofReader(in, processor);
-        while (reader.hasNext()) {
-            reader.next();
-            checkTimeLimit(limit);
-            iterationSleep(config);
+        try {
+            HprofReader reader = new HprofReader(in, processor);
+            while (reader.hasNext()) {
+                reader.next();
+                checkTimeLimit(limit);
+                iterationSleep(config);
+            }
+            processor.finishAndWriteOutput();
         }
-        processor.finishAndWriteOutput();
+        finally {
+            in.close();
+        }
         // Print some stats about the conversion
         Stats.increment(Stats.Type.TOTAL, Stats.Variant.BMD, cOut.getCount());
         Stats.printStats();
+
     }
 
     private static void iterationSleep(Config config) {

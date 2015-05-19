@@ -44,8 +44,8 @@ public class CodingUtil {
      * @return a short value
      */
     public static short readShort(byte[] buffer) {
-        return (short) (((buffer[0] & 0xff)) |
-            ((buffer[1] & 0xff) << 8));
+        return (short) (((buffer[1] & 0xff)) |
+            ((buffer[0] & 0xff) << 8));
     }
 
 }

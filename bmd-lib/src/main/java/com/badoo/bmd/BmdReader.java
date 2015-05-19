@@ -75,7 +75,7 @@ public class BmdReader extends DataReader {
      * @return A BmdString
      */
     @Nonnull
-    public BmdString readString() throws IOException {
+    public BmdString readStringRecord() throws IOException {
         int id = readInt32();
         int length = readInt32();
         byte[] data = readRawBytes(length);
@@ -88,7 +88,7 @@ public class BmdReader extends DataReader {
      * @return A BmdString
      */
     @Nonnull
-    public BmdString readHashedString() throws IOException {
+    public BmdString readHashedStringRecord() throws IOException {
         int id = readInt32();
         int length = readInt32();
         int hash = readInt32();
@@ -101,26 +101,26 @@ public class BmdReader extends DataReader {
      * @return A BmdClassDefinition
      */
     @Nonnull
-    public BmdClassDefinition readClassDefinition() throws IOException {
+    public BmdClassDefinition readClassDefinitionRecord() throws IOException {
         int classId = readInt32();
         log("Class: " + classId);
         int superClassId = readInt32();
         int name = readInt32();
         int constantCount = readInt32();
         log("Constants fields: " + constantCount);
-        List<BmdConstantField> constantFields = new ArrayList<BmdConstantField>();
+        List<BmdConstantField> constantFields = new ArrayList<BmdConstantField>(constantCount);
         for (int i = 0; i < constantCount; i++) {
             constantFields.add(readConstantField());
         }
         int staticCount = readInt32();
         log("Static fields: " + staticCount);
-        List<BmdStaticField> staticFields = new ArrayList<BmdStaticField>();
+        List<BmdStaticField> staticFields = new ArrayList<BmdStaticField>(staticCount);
         for (int i = 0; i < staticCount; i++) {
             staticFields.add(readStaticField());
         }
         int instanceCount = readInt32();
         log("Instance fields: " + instanceCount);
-        List<BmdInstanceFieldDefinition> instanceFields = new ArrayList<BmdInstanceFieldDefinition>();
+        List<BmdInstanceFieldDefinition> instanceFields = new ArrayList<BmdInstanceFieldDefinition>(instanceCount);
         for (int i = 0; i < instanceCount; i++) {
             instanceFields.add(readInstanceField());
         }
@@ -134,7 +134,7 @@ public class BmdReader extends DataReader {
      * @return An BmdObjectArray
      */
     @Nonnull
-    public BmdObjectArray readObjectArray() throws IOException {
+    public BmdObjectArray readObjectArrayRecord() throws IOException {
         int objectId = readInt32();
         int elementClassId = readInt32();
         int count = readInt32();
@@ -151,7 +151,7 @@ public class BmdReader extends DataReader {
      * @return A BmdPrimitiveArray
      */
     @Nonnull
-    public BmdPrimitiveArray readPrimitiveArray() throws IOException {
+    public BmdPrimitiveArray readPrimitiveArrayRecord() throws IOException {
         int objectId = readInt32();
         BmdBasicType type = BmdBasicType.fromInt(readInt32());
         int count = readInt32();
@@ -165,7 +165,7 @@ public class BmdReader extends DataReader {
      * @return A BmdInstanceDump
      */
     @Nonnull
-    public BmdInstanceDump readInstanceDump(Map<Integer, BmdClassDefinition> classes) throws IOException {
+    public BmdInstanceDump readInstanceDumpRecord(@Nonnull Map<Integer, BmdClassDefinition> classes) throws IOException {
         int objectId = readInt32();
         int classId = readInt32();
         BmdClassDefinition classDef = classes.get(classId);

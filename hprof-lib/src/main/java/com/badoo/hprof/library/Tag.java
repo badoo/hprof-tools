@@ -34,7 +34,6 @@ public final class Tag {
      * Convert an integer HPROF tag value to a readable string representation (used for debugging).
      *
      * @param tag the tag to convert
-     * @return
      */
     @Nonnull
     public static String tagToString(int tag) {

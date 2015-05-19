@@ -91,25 +91,25 @@ public class DecrunchProcessor implements BmdProcessor {
         }
         switch (tag) {
             case STRING:
-                writeString(reader.readString());
+                writeString(reader.readStringRecord());
                 break;
             case HASHED_STRING:
-                writeString(reader.readHashedString());
+                writeString(reader.readHashedStringRecord());
                 break;
             case CLASS_DEFINITION:
-                BmdClassDefinition classDef = reader.readClassDefinition();
+                BmdClassDefinition classDef = reader.readClassDefinitionRecord();
                 classes.put(classDef.getId(), classDef);
                 // Write the load class record now and the class dump later
                 writeLoadClassRecord(classDef);
                 break;
             case INSTANCE_DUMP:
-                instances.add(reader.readInstanceDump(classes));
+                instances.add(reader.readInstanceDumpRecord(classes));
                 break;
             case OBJECT_ARRAY:
-                objectArrays.add(reader.readObjectArray());
+                objectArrays.add(reader.readObjectArrayRecord());
                 break;
             case PRIMITIVE_ARRAY_PLACEHOLDER:
-                primitiveArrays.add(reader.readPrimitiveArray());
+                primitiveArrays.add(reader.readPrimitiveArrayRecord());
                 break;
             case ROOT_OBJECTS:
                 int rootCount = reader.readInt32();

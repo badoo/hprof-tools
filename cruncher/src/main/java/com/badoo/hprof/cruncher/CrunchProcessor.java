@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static com.badoo.hprof.library.util.StreamUtil.read;
 import static com.badoo.hprof.library.util.StreamUtil.readInt;
@@ -40,7 +41,7 @@ import static com.badoo.hprof.library.util.StreamUtil.skip;
 /**
  * Processor for reading a HPROF file and outputting a BMD file. Operates in two stages:
  * <p/>
- * 1. Read all class definitions and write them to the BMD file.
+ * 1. Read all class definitions & strings and write them to the BMD file.
  * 2. Read all instance dumps and write them to the BMD file.
  * <p/>
  * The reason why it's being done in two steps is that in HPROF files the class definition is not guaranteed to come
@@ -53,15 +54,15 @@ public class CrunchProcessor extends DiscardProcessor {
 
     private static final int FIRST_ID = 1; // Skipping 0 since this is used as a (null) marker in some cases
 
+    private boolean firstPass = true;
     private final CrunchBdmWriter writer;
     private final boolean collectStats;
     private int nextStringId = FIRST_ID;
-    private Map<Integer, Integer> stringIds = new HashMap<Integer, Integer>(); // Maps original to updated string ids
+    private final Map<Integer, Integer> stringIds = new HashMap<Integer, Integer>(); // Maps original to updated string ids
     private int nextObjectId = FIRST_ID;
-    private Map<Integer, Integer> objectIds = new HashMap<Integer, Integer>(); // Maps original to updated object/class ids
-    private Map<Integer, ClassDefinition> classesByOriginalId = new HashMap<Integer, ClassDefinition>(); // Maps original class id to the class definition
-    private boolean readObjects;
-    private List<Integer> rootObjectIds = new ArrayList<Integer>();
+    private final Map<Integer, Integer> objectIds = new HashMap<Integer, Integer>(); // Maps original to updated object/class ids
+    private final Map<Integer, ClassDefinition> classesByOriginalId = new HashMap<Integer, ClassDefinition>(); // Maps original class id to the class definition
+    private final List<Integer> rootObjectIds = new ArrayList<Integer>();
 
     public CrunchProcessor(OutputStream out, boolean collectStats) {
         this.writer = new CrunchBdmWriter(out);
@@ -75,7 +76,7 @@ public class CrunchProcessor extends DiscardProcessor {
         if (stringIds.isEmpty() || classesByOriginalId.isEmpty()) {
             throw new IllegalStateException("Second pass started but no strings or classes were read in the first pass!");
         }
-        readObjects = true;
+        firstPass = false;
     }
 
     /**
@@ -88,14 +89,14 @@ public class CrunchProcessor extends DiscardProcessor {
 
     @Override
     public void onRecord(int tag, int timestamp, int length, @Nonnull HprofReader reader) throws IOException {
-        if (!readObjects) { // 1st pass: read class definitions and strings
+        if (firstPass) { // 1st pass: read class definitions and strings
             switch (tag) {
                 case Tag.STRING:
                     readStringRecord(timestamp, length, reader);
                     break;
                 case Tag.LOAD_CLASS:
                     if (collectStats) {
-                        Stats.increment(Stats.Type.CLASS, Stats.Variant.HPROF, length + 9);
+                        Stats.increment(Stats.Type.CLASS, Stats.Variant.HPROF, length + 9); //TODO Document!
                     }
                     ClassDefinition classDef = reader.readLoadClassRecord();
                     classesByOriginalId.put(classDef.getObjectId(), classDef);
@@ -150,6 +151,7 @@ public class CrunchProcessor extends DiscardProcessor {
     }
 
     private boolean keepString(String string) {
+        // TODO Document!
         // Keep the names of some core system classes (to avoid issues in MAT)
         return string.startsWith("java.lang") || "V".equals(string) || "boolean".equals(string) || "byte".equals(string)
             || "short".equals(string) || "char".equals(string) || "int".equals(string) || "long".equals(string)
@@ -199,6 +201,8 @@ public class CrunchProcessor extends DiscardProcessor {
     @SuppressWarnings({"ForLoopReplaceableByForEach"})
     private class CrunchBdmWriter extends DataWriter {
 
+        private final byte[] EMPTY = new byte[]{};
+
         private CountingOutputStream cOut;
 
         protected CrunchBdmWriter(OutputStream out) {
@@ -210,12 +214,12 @@ public class CrunchProcessor extends DiscardProcessor {
             return cOut.getCount();
         }
 
-        public void writeHeader(int version, byte[] metadata) throws IOException {
+        public void writeHeader(int version, @Nullable byte[] metadata) throws IOException {
             writeInt32(version);
-            writeByteArrayWithLength(metadata != null ? metadata : new byte[]{});
+            writeByteArrayWithLength(metadata != null ? metadata : EMPTY);
         }
 
-        public void writeString(HprofString string, boolean hashed) throws IOException {
+        public void writeString(@Nonnull HprofString string, boolean hashed) throws IOException {
             writeTag(hashed ? BmdTag.HASHED_STRING : BmdTag.STRING);
             writeInt32(string.getId());
             byte[] stringData = string.getValue().getBytes();
@@ -228,14 +232,14 @@ public class CrunchProcessor extends DiscardProcessor {
             }
         }
 
-        public void writeLegacyRecord(int tag, byte[] data) throws IOException {
+        public void writeLegacyRecord(int tag, @Nonnull byte[] data) throws IOException {
             writeInt32(BmdTag.LEGACY_HPROF_RECORD.value);
             writeInt32(tag);
             writeInt32(data.length);
             writeRawBytes(data);
         }
 
-        public void writeClassDefinition(ClassDefinition classDef) throws IOException {
+        public void writeClassDefinition(@Nonnull ClassDefinition classDef) throws IOException {
             final long start = getCurrentPosition();
             writeTag(BmdTag.CLASS_DEFINITION);
             writeInt32(mapObjectId(classDef.getObjectId()));
@@ -284,7 +288,7 @@ public class CrunchProcessor extends DiscardProcessor {
             }
         }
 
-        public void writeInstanceDump(Instance instance) throws IOException {
+        public void writeInstanceDump(@Nonnull Instance instance) throws IOException {
             final long start = getCurrentPosition();
             writeTag(BmdTag.INSTANCE_DUMP);
             writeInt32(mapObjectId(instance.getObjectId()));
@@ -431,7 +435,7 @@ public class CrunchProcessor extends DiscardProcessor {
 
     }
 
-    // 1st pass dump processor
+    // 2st pass dump processor
     private class ObjectDumpProcessor extends HeapDumpDiscardProcessor {
 
         @Override
