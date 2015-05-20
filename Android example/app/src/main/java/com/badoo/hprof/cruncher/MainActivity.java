@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import com.badoo.hprof.cruncher.library.HprofCatcher;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 
 public class MainActivity extends ActionBarActivity implements View.OnClickListener {
@@ -75,8 +77,18 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         if (v.getId() == R.id.fillMemory) {
             List<Bitmap> data = new ArrayList<>();
             while (true) {
-                data.add(Bitmap.createBitmap(1024, 1024, Bitmap.Config.ARGB_8888));
+                data.add(generateBitmap());
             }
         }
     }
+
+    private Bitmap generateBitmap() {
+        Random rand = new Random();
+        int[] pixels = new int[1024 * 1024];
+        for (int i = 0; i < pixels.length; i++) {
+            pixels[i] = rand.nextInt();
+        }
+        return Bitmap.createBitmap(pixels, 1024, 1024, Bitmap.Config.ARGB_8888);
+    }
+
 }
