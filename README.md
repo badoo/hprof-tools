@@ -1,6 +1,6 @@
 # Badoo HPROF Tools
 
-Badoo HPROF Tools are a collection of libraries and toolswith the goal of makling memory dumps more than just a tool for analyzing OutOfMemoryErrors.
+Badoo HPROF Tools are a collection of libraries and tools with the goal of making memory dumps more than just a tool for analyzing OutOfMemoryErrors.
 
 ## Modules
 
