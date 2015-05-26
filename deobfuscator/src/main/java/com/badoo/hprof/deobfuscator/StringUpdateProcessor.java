@@ -10,6 +10,7 @@ import com.badoo.hprof.library.heap.processor.HeapDumpBaseProcessor;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.HprofString;
 import com.badoo.hprof.library.processor.CopyProcessor;
+import com.badoo.hprof.library.util.StreamUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -17,7 +18,13 @@ import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
+import static com.badoo.hprof.library.util.StreamUtil.*;
+
 /**
+ * HprofProcessor class for replacing existing strings.
+ *
  * Created by Erik Andre on 14/08/2014.
  */
 public class StringUpdateProcessor extends CopyProcessor {
@@ -31,7 +38,7 @@ public class StringUpdateProcessor extends CopyProcessor {
         }
 
         @Override
-        public void onHeapRecord(int tag, HeapDumpReader reader) throws IOException {
+        public void onHeapRecord(int tag, @Nonnull HeapDumpReader reader) throws IOException {
             if (tag == HeapTag.CLASS_DUMP) {
                 skipHeapRecord(tag, reader.getInputStream()); // Discard all class definitions since we are writing an updated version instead
             }
@@ -51,7 +58,7 @@ public class StringUpdateProcessor extends CopyProcessor {
     }
 
     @Override
-    public void onHeader(String text, int idSize, int timeHigh, int timeLow) throws IOException {
+    public void onHeader(@Nonnull String text, int idSize, int timeHigh, int timeLow) throws IOException {
         super.onHeader(text, idSize, timeHigh, timeLow);
         // Write all updated strings
         HprofWriter writer = new HprofWriter(out);
@@ -61,9 +68,9 @@ public class StringUpdateProcessor extends CopyProcessor {
     }
 
     @Override
-    public void onRecord(int tag, int timestamp, int length, HprofReader reader) throws IOException {
+    public void onRecord(int tag, int timestamp, int length, @Nonnull HprofReader reader) throws IOException {
         if (tag == Tag.STRING) {
-            reader.getInputStream().skip(length); // Discard all the original strings
+            skip(reader.getInputStream(), length); // Discard all the original strings
         }
         else if (tag == Tag.HEAP_DUMP || tag == Tag.HEAP_DUMP_SEGMENT) {
             if (writeUpdatedClassDefinitions) {

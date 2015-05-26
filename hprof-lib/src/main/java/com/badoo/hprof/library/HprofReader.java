@@ -7,8 +7,10 @@ import com.badoo.hprof.library.util.StreamUtil;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.annotation.Nonnull;
 import javax.naming.OperationNotSupportedException;
 
+import static com.badoo.hprof.library.util.StreamUtil.readByte;
 import static com.badoo.hprof.library.util.StreamUtil.readInt;
 import static com.badoo.hprof.library.util.StreamUtil.readString;
 
@@ -36,8 +38,9 @@ public class HprofReader {
     private final InputStream in;
     private final HprofProcessor processor;
     private int readCount;
+    private int nextTag;
 
-    public HprofReader(InputStream in, HprofProcessor processor) {
+    public HprofReader(@Nonnull InputStream in, @Nonnull HprofProcessor processor) {
         this.in = in;
         this.processor = processor;
     }
@@ -49,7 +52,7 @@ public class HprofReader {
      * @throws IOException
      */
     public boolean hasNext() throws IOException {
-        return in.available() > 0;
+        return nextTag != -1;
     }
 
     /**
@@ -65,6 +68,8 @@ public class HprofReader {
             readRecord();
         }
         readCount++;
+        // Check if there are more records
+        nextTag = readByte(in);
     }
 
     /**
@@ -72,6 +77,7 @@ public class HprofReader {
      *
      * @return The InputStream
      */
+    @Nonnull
     public InputStream getInputStream() {
         return in;
     }
@@ -82,6 +88,7 @@ public class HprofReader {
      * @return A ClassDefinition with some fields filled in (Serial number, class object id, stack trace serial & class name string id)
      * @throws IOException
      */
+    @Nonnull
     public ClassDefinition readLoadClassRecord() throws IOException {
         int serialNumber = readInt(in);
         int classObjectId = readInt(in);
@@ -103,6 +110,7 @@ public class HprofReader {
      * @return A HprofString containing the string data
      * @throws IOException
      */
+    @Nonnull
     public HprofString readStringRecord(int recordLength, int timestamp) throws IOException {
         int id = readInt(in);
         String string = readString(in, recordLength - 4);
@@ -110,7 +118,7 @@ public class HprofReader {
     }
 
     private void readRecord() throws IOException {
-        int tagValue = in.read(); // 1 byte tag, see definitions in Tag
+        int tagValue = nextTag;
         int time = readInt(in);
         int size = readInt(in);
         processor.onRecord(tagValue, time, size, this);

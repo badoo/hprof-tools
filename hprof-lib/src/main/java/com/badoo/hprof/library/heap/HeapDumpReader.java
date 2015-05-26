@@ -3,7 +3,10 @@ package com.badoo.hprof.library.heap;
 import com.badoo.hprof.library.model.BasicType;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.ConstantField;
+import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.library.model.InstanceField;
+import com.badoo.hprof.library.model.ObjectArray;
+import com.badoo.hprof.library.model.PrimitiveArray;
 import com.badoo.hprof.library.model.StaticField;
 import com.google.common.io.CountingInputStream;
 
@@ -13,10 +16,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 import static com.badoo.hprof.library.util.StreamUtil.read;
 import static com.badoo.hprof.library.util.StreamUtil.readByte;
 import static com.badoo.hprof.library.util.StreamUtil.readInt;
 import static com.badoo.hprof.library.util.StreamUtil.readShort;
+import static com.badoo.hprof.library.util.StreamUtil.skip;
 
 /**
  * Class for reading records contained in a HEAP_DUMP or HEAP_DUMP_SECTION record.
@@ -47,7 +53,7 @@ public class HeapDumpReader {
      * @param processor A callback interface that is invoked when a new record is encountered
      * @throws IOException
      */
-    public HeapDumpReader(InputStream in, int length, HeapDumpProcessor processor) throws IOException {
+    public HeapDumpReader(@Nonnull InputStream in, int length, @Nonnull HeapDumpProcessor processor) throws IOException {
         this.in = new CountingInputStream(in);
         this.processor = processor;
         this.length = length;
@@ -58,6 +64,7 @@ public class HeapDumpReader {
      *
      * @return The InputStream used by this reader
      */
+    @Nonnull
     public InputStream getInputStream() {
         return in;
     }
@@ -87,6 +94,7 @@ public class HeapDumpReader {
      *
      * @param loadedClasses Map of class ids and loaded classes. The class dump being read must be in this map
      */
+    @Nonnull
     public ClassDefinition readClassDumpRecord(Map<Integer, ClassDefinition> loadedClasses) throws IOException {
         int objectId = readInt(in);
         ClassDefinition cls = loadedClasses.get(objectId);
@@ -99,38 +107,102 @@ public class HeapDumpReader {
         cls.setClassLoaderObjectId(readInt(in));
         cls.setSignersObjectId(readInt(in));
         cls.setProtectionDomainObjectId(readInt(in));
-        in.skip(8); // Reserved data
+        skip(in, 8); // Reserved data
         cls.setInstanceSize(readInt(in));
         // Read constants fields
         short constantCount = readShort(in);
-        List<ConstantField> constantFields = constantCount > 0 ? new ArrayList<ConstantField>() : null;
-        cls.setConstantFields(constantFields);
-        for (int i = 0; i < constantCount; i++) {
-            short poolIndex = readShort(in);
-            BasicType type = BasicType.fromType(readByte(in));
-            byte[] value = read(in, type.size);
-            constantFields.add(new ConstantField(poolIndex, type, value));
+        if (constantCount > 0) {
+            List<ConstantField> constantFields = new ArrayList<ConstantField>();
+            cls.setConstantFields(constantFields);
+            for (int i = 0; i < constantCount; i++) {
+                short poolIndex = readShort(in);
+                BasicType type = BasicType.fromType(readByte(in));
+                byte[] value = read(in, type.size);
+                constantFields.add(new ConstantField(poolIndex, type, value));
 
+            }
         }
         // Read static fields
         short staticCount = readShort(in);
-        ArrayList<StaticField> staticFields = staticCount > 0 ? new ArrayList<StaticField>() : null;
-        cls.setStaticFields(staticFields);
-        for (int i = 0; i < staticCount; i++) {
-            int nameId = readInt(in);
-            BasicType type = BasicType.fromType(readByte(in));
-            byte[] value = read(in, type.size);
-            staticFields.add(new StaticField(type, value, nameId));
+        if (staticCount > 0) {
+            ArrayList<StaticField> staticFields = new ArrayList<StaticField>();
+            cls.setStaticFields(staticFields);
+            for (int i = 0; i < staticCount; i++) {
+                int nameId = readInt(in);
+                BasicType type = BasicType.fromType(readByte(in));
+                byte[] value = read(in, type.size);
+                staticFields.add(new StaticField(type, value, nameId));
+            }
         }
         // Read instance fields
         short fieldCount = readShort(in);
-        ArrayList<InstanceField> instanceFields = fieldCount > 0 ? new ArrayList<InstanceField>() : null;
-        cls.setInstanceFields(instanceFields);
-        for (int i = 0; i < fieldCount; i++) {
-            int nameId = readInt(in);
-            BasicType type = BasicType.fromType(readByte(in));
-            instanceFields.add(new InstanceField(type, nameId));
+        if (fieldCount > 0) {
+            ArrayList<InstanceField> instanceFields = new ArrayList<InstanceField>();
+            cls.setInstanceFields(instanceFields);
+            for (int i = 0; i < fieldCount; i++) {
+                int nameId = readInt(in);
+                BasicType type = BasicType.fromType(readByte(in));
+                instanceFields.add(new InstanceField(type, nameId));
+            }
         }
         return cls;
     }
+
+    /**
+     * Returns the current position of the underlying stream (in bytes from the start of the heap dump record).
+     *
+     * @return the current position
+     */
+    public long getCurrentPosition() {
+        return in.getCount();
+    }
+
+    /**
+     * Reads and returns an instance dump record.
+     *
+     * @return An Instance object containing all data from the record.
+     */
+    @Nonnull
+    public Instance readInstanceDump() throws IOException {
+        int objectId = readInt(in);
+        int stackTraceSerial = readInt(in);
+        int classId = readInt(in);
+        int length = readInt(in);
+        byte[] data = read(in, length);
+        return new Instance(objectId, stackTraceSerial, classId, data);
+    }
+
+    /**
+     * Reads and returns a primitive array record;
+     *
+     * @return a primitive array record.
+     */
+    @Nonnull
+    public PrimitiveArray readPrimitiveArray() throws IOException {
+        int objectId = readInt(in);
+        int stackTraceSerial = readInt(in);
+        int count = readInt(in);
+        BasicType type = BasicType.fromType(in.read());
+        byte[] arrayData = read(in, count * type.size);
+        return new PrimitiveArray(objectId, stackTraceSerial, type, count, arrayData);
+    }
+
+    /**
+     * Reads and returns an object array record;
+     *
+     * @return an object array record.
+     */
+    @Nonnull
+    public ObjectArray readObjectArray() throws IOException {
+        int objectId = readInt(in);
+        int stackTraceSerial = readInt(in);
+        int count = readInt(in);
+        int elementClassId = readInt(in);
+        int[] elements = new int[count];
+        for (int i = 0; i < count; i++) {
+            elements[i] = readInt(in);
+        }
+        return new ObjectArray(objectId, stackTraceSerial, elementClassId, count, elements);
+    }
+
 }

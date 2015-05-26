@@ -1,5 +1,7 @@
 package com.badoo.hprof.library.model;
 
+import javax.annotation.Nonnull;
+
 /**
  * Definitions of the basic types supported by Java.
  * <p/>
@@ -65,6 +67,7 @@ public enum BasicType {
      * @param type The type value
      * @return A BasicType matching the type value
      */
+    @Nonnull
     public static BasicType fromType(int type) {
         switch (type) {
             case 2:

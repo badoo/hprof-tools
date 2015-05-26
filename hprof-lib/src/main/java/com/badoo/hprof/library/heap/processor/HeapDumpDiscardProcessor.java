@@ -4,6 +4,8 @@ import com.badoo.hprof.library.heap.HeapDumpReader;
 
 import java.io.IOException;
 
+import javax.annotation.Nonnull;
+
 /**
  * A HeapDumpProcessor that reads each record and discards the data
  * <p/>
@@ -12,7 +14,7 @@ import java.io.IOException;
 public class HeapDumpDiscardProcessor extends HeapDumpBaseProcessor {
 
     @Override
-    public void onHeapRecord(int tag, HeapDumpReader reader) throws IOException {
+    public void onHeapRecord(int tag, @Nonnull HeapDumpReader reader) throws IOException {
         skipHeapRecord(tag, reader.getInputStream());
     }
 }

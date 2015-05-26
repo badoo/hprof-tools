@@ -2,6 +2,8 @@ package com.badoo.hprof.library.heap;
 
 import java.io.IOException;
 
+import javax.annotation.Nonnull;
+
 /**
  * Callback interface to be used together with the HeapDumpReader. When HeapDumpReader.next() is called it will read the first byte
  * of the heap dump record (tag) and then call onHeapRecord().
@@ -17,6 +19,6 @@ public interface HeapDumpProcessor {
      * @param reader A reference to the reader being used
      * @throws IOException
      */
-    void onHeapRecord(int tag, HeapDumpReader reader) throws IOException;
+    void onHeapRecord(int tag, @Nonnull HeapDumpReader reader) throws IOException;
 
 }

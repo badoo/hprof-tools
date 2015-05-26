@@ -1,5 +1,7 @@
 package com.badoo.hprof.library.model;
 
+import javax.annotation.Nonnull;
+
 /**
  * Class containing the data associated with a hprof STRING_RECORD.
  *
@@ -10,7 +12,7 @@ public class HprofString extends Record {
     private int id;
     private String value;
 
-    public HprofString(int id, String value, int timestamp) {
+    public HprofString(int id, @Nonnull String value, int timestamp) {
         this.id = id;
         this.value = value;
         setTimestamp(timestamp);
@@ -23,12 +25,12 @@ public class HprofString extends Record {
     public void setId(int id) {
         this.id = id;
     }
-
-    public java.lang.String getValue() {
+    @Nonnull
+    public String getValue() {
         return value;
     }
 
-    public void setValue(java.lang.String value) {
+    public void setValue(@Nonnull String value) {
         this.value = value;
     }
 

@@ -1,5 +1,7 @@
 package com.badoo.hprof.library.model;
 
+import javax.annotation.Nonnull;
+
 /**
  * Class containing the definition of an instance field (part of CLASS_DUMP) but not the actual field value itself (part of INSTANCE_DUMP).
  * <p/>
@@ -10,11 +12,12 @@ public class InstanceField implements NamedField {
     private BasicType type;
     private int nameId;
 
-    public InstanceField(BasicType type, int nameId) {
+    public InstanceField(@Nonnull BasicType type, int nameId) {
         this.type = type;
         this.nameId = nameId;
     }
 
+    @Nonnull
     public BasicType getType() {
         return type;
     }

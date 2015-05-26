@@ -20,6 +20,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+
 import static com.badoo.hprof.library.util.StreamUtil.read;
 
 /**
@@ -30,7 +32,7 @@ public class DataCollectionProcessor extends DiscardProcessor {
     class ClassDumpProcessor extends HeapDumpDiscardProcessor {
 
         @Override
-        public void onHeapRecord(int tag, HeapDumpReader reader) throws IOException {
+        public void onHeapRecord(int tag, @Nonnull HeapDumpReader reader) throws IOException {
             if (tag == HeapTag.CLASS_DUMP) {
                 ClassDefinition cls = reader.readClassDumpRecord(classes);
                 // Since the names of obfuscated fields are shared between classes we need to deduplicate the references, otherwise we cannot deobfuscate them independently
@@ -57,7 +59,7 @@ public class DataCollectionProcessor extends DiscardProcessor {
     }
 
     @Override
-    public void onRecord(int tag, int timestamp, int length, HprofReader reader) throws IOException {
+    public void onRecord(int tag, int timestamp, int length, @Nonnull HprofReader reader) throws IOException {
         InputStream in = reader.getInputStream();
         if (tag == Tag.HEAP_DUMP || tag == Tag.HEAP_DUMP_SEGMENT) {
             byte[] record = read(in, length);

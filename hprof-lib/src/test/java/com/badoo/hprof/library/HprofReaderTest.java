@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.annotation.Nonnull;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -46,7 +48,7 @@ public class HprofReaderTest {
         final AtomicBoolean called = new AtomicBoolean(false);
         HprofProcessor processor = new DiscardProcessor() {
             @Override
-            public void onHeader(String text, int idSize, int timeHigh, int timeLow) throws IOException {
+            public void onHeader(@Nonnull String text, int idSize, int timeHigh, int timeLow) throws IOException {
                 called.set(true);
                 assertEquals(HEADER_TEXT, text);
                 assertEquals(TIME_HIGH, timeHigh);
@@ -69,7 +71,7 @@ public class HprofReaderTest {
         HprofProcessor processor = new DiscardProcessor() {
 
             @Override
-            public void onRecord(int tag, int timestamp, int length, HprofReader reader) throws IOException {
+            public void onRecord(int tag, int timestamp, int length, @Nonnull HprofReader reader) throws IOException {
                 assertEquals(Tag.STRING, tag);
                 HprofString string = reader.readStringRecord(length, timestamp);
                 switch (calls.get()) {
@@ -114,7 +116,7 @@ public class HprofReaderTest {
         HprofProcessor processor = new DiscardProcessor() {
 
             @Override
-            public void onRecord(int tag, int timestamp, int length, HprofReader reader) throws IOException {
+            public void onRecord(int tag, int timestamp, int length, @Nonnull HprofReader reader) throws IOException {
                 called.set(true);
                 ClassDefinition readCls = reader.readLoadClassRecord();
                 assertEquals(SERIAL, readCls.getSerialNumber());
