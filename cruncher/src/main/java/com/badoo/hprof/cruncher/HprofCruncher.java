@@ -10,6 +10,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 import javax.annotation.Nonnull;
@@ -39,12 +41,14 @@ public class HprofCruncher {
         private final boolean collectStats;
         private final long timeLimit;
         private final long iterationSleep;
+        private final List<PreserveClass> preservedClasses;
 
 
-        private Config(boolean collectStats, long timeLimit, long iterationSleep) {
+        private Config(boolean collectStats, long timeLimit, long iterationSleep, List<PreserveClass> preservedClasses) {
             this.collectStats = collectStats;
             this.timeLimit = timeLimit;
             this.iterationSleep = iterationSleep;
+            this.preservedClasses = preservedClasses;
         }
 
         public static class Builder {
@@ -52,6 +56,7 @@ public class HprofCruncher {
             private boolean stats;
             private long timeLimit = NO_TIME_LIMIT;
             private long iterationSleep;
+            private List<PreserveClass> preservedClasses = new ArrayList<PreserveClass>();
 
             /**
              * Sets whether stats should be collected to measure how well the crunch operation performs
@@ -89,8 +94,48 @@ public class HprofCruncher {
                 return this;
             }
 
+            /**
+             * Add a class to the list of preserved classes. These classes will not have any primitive fields
+             * removed in order to save space. Objects (including Strings) referenced by instances of the class
+             * will still be crunched as usual unless they are also added to the list of preserved classes.
+             *
+             * @param classToPreserve the class to preserve
+             * @return the builder, for chained calls
+             */
+            public Builder preserveClass(@Nonnull Class classToPreserve) {
+                preservedClasses.add(new PreserveClass(classToPreserve.getName()));
+                return this;
+            }
+
+            /**
+             * Add a class name to the list of preserved classes. These classes will not have any primitive fields
+             * removed in order to save space. Objects (including Strings) referenced by instances of the class
+             * will still be crunched as usual unless they are also added to the list of preserved classes.
+             *
+             * @param classToPreserve the class to preserve
+             * @return the builder, for chained calls
+             */
+            public Builder preserveClass(@Nonnull String classToPreserve) {
+                preservedClasses.add(new PreserveClass(classToPreserve));
+                return this;
+            }
+
             public Config build() {
-                return new Config(stats, timeLimit, iterationSleep);
+                return new Config(stats, timeLimit, iterationSleep, preservedClasses);
+            }
+        }
+
+        public static class PreserveClass {
+
+            private final String className;
+
+            public PreserveClass(@Nonnull String className) {
+                this.className = className;
+            }
+
+            @Nonnull
+            public String getClassToPreserve() {
+                return className;
             }
         }
     }
