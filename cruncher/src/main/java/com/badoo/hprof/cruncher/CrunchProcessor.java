@@ -37,8 +37,14 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import static com.badoo.hprof.library.util.StreamUtil.copy;
 import static com.badoo.hprof.library.util.StreamUtil.read;
+import static com.badoo.hprof.library.util.StreamUtil.readByte;
+import static com.badoo.hprof.library.util.StreamUtil.readDouble;
+import static com.badoo.hprof.library.util.StreamUtil.readFloat;
 import static com.badoo.hprof.library.util.StreamUtil.readInt;
+import static com.badoo.hprof.library.util.StreamUtil.readLong;
+import static com.badoo.hprof.library.util.StreamUtil.readShort;
 import static com.badoo.hprof.library.util.StreamUtil.skip;
 
 /**
@@ -56,6 +62,7 @@ import static com.badoo.hprof.library.util.StreamUtil.skip;
 public class CrunchProcessor extends DiscardProcessor {
 
     private static final int FIRST_ID = 1; // Skipping 0 since this is used as a (null) marker in some cases
+    private static final boolean DEBUG = false;
 
     private boolean firstPass = true;
     private final CrunchBdmWriter writer;
@@ -171,8 +178,10 @@ public class CrunchProcessor extends DiscardProcessor {
 
     @Override
     public void onHeader(@Nonnull String text, int idSize, int timeHigh, int timeLow) throws IOException {
-        // The text of the HPROF header is written to the BMD header but the timestamp is discarded
-        writer.writeHeader(1, text.getBytes());
+        if (firstPass) {
+            // The text of the HPROF header is written to the BMD header but the timestamp is discarded
+            writer.writeHeader(1, text.getBytes());
+        }
     }
 
     /**
@@ -209,6 +218,14 @@ public class CrunchProcessor extends DiscardProcessor {
         return stringIds.get(originalId);
     }
 
+    private boolean shouldPreserve(@Nullable ClassDefinition classDefinition) {
+        if (classDefinition == null) {
+            return false;
+        }
+        final int mappedClassNameStringId = mapStringId(classDefinition.getNameStringId());
+        return preservedStringIds.contains(mappedClassNameStringId);
+    }
+
     @SuppressWarnings({"ForLoopReplaceableByForEach"})
     private class CrunchBdmWriter extends DataWriter {
 
@@ -231,6 +248,7 @@ public class CrunchProcessor extends DiscardProcessor {
         }
 
         public void writeString(@Nonnull HprofString string, boolean hashed) throws IOException {
+            log("Writing string: " + string.getValue() + ", hashed=" + hashed + ", id=" + string.getId());
             writeTag(hashed ? BmdTag.HASHED_STRING : BmdTag.STRING);
             writeInt32(string.getId());
             byte[] stringData = string.getValue().getBytes();
@@ -251,13 +269,11 @@ public class CrunchProcessor extends DiscardProcessor {
         }
 
         public void writeClassDefinition(@Nonnull ClassDefinition classDef) throws IOException {
-            final int mappedClassNameStringId = mapStringId(classDef.getNameStringId());
-            final boolean preserveClass = preservedStringIds.contains(mappedClassNameStringId);
             final long start = getCurrentPosition();
             writeTag(BmdTag.CLASS_DEFINITION);
             writeInt32(mapObjectId(classDef.getObjectId()));
             writeInt32(mapObjectId(classDef.getSuperClassObjectId()));
-            writeInt32(mappedClassNameStringId);
+            writeInt32(mapStringId(classDef.getNameStringId()));
             // Write constants and static fields (not filtered)
             int constantFieldCount = classDef.getConstantFields().size();
             writeInt32(constantFieldCount);
@@ -276,6 +292,7 @@ public class CrunchProcessor extends DiscardProcessor {
                 writeFieldValue(field.getType(), field.getValue());
             }
             // Filter instance fields before writing them
+            final boolean preserveClass = shouldPreserve(classDef);
             int skippedFieldSize = 0;
             List<InstanceField> keptFields = new ArrayList<InstanceField>();
             int instanceFieldCount = classDef.getInstanceFields().size();
@@ -308,6 +325,7 @@ public class CrunchProcessor extends DiscardProcessor {
             writeInt32(mapObjectId(instance.getClassObjectId()));
             ClassDefinition currentClass = classesByOriginalId.get(instance.getClassObjectId());
             ByteArrayInputStream in = new ByteArrayInputStream(instance.getInstanceFieldData());
+            boolean preserveClass = shouldPreserve(currentClass);
             while (currentClass != null) {
                 int fieldCount = currentClass.getInstanceFields().size();
                 for (int i = 0; i < fieldCount; i++) {
@@ -317,11 +335,40 @@ public class CrunchProcessor extends DiscardProcessor {
                         int id = readInt(in);
                         writeInt32(mapObjectId(id));
                     }
-                    else { // Other fields are ignored
+                    else if (!preserveClass) { // Other fields are ignored
                         skip(in, type.size);
+                    }
+                    else if (type == BasicType.INT) {
+                        int value = readInt(in);
+                        writeInt32(value);
+
+                    }
+                    else if (type == BasicType.SHORT) {
+                        short value = readShort(in);
+                        writeInt32(value);
+                    }
+                    else if (type == BasicType.LONG) {
+                        long value = readLong(in);
+                        writeInt64(value);
+                    }
+                    else if (type == BasicType.DOUBLE) {
+                        double value = readDouble(in);
+                        writeDouble(value);
+                    }
+                    else if (type == BasicType.FLOAT) {
+                        float value = readFloat(in);
+                        writeFloat(value);
+                    }
+                    else if (type == BasicType.BOOLEAN || type == BasicType.BYTE) {
+                        int value = readByte(in);
+                        writeRawByte(value);
+                    }
+                    else if (type == BasicType.CHAR) {
+                        copy(in, out, 2);
                     }
                 }
                 currentClass = classesByOriginalId.get(currentClass.getSuperClassObjectId());
+                preserveClass = shouldPreserve(currentClass);
             }
             if (in.available() != 0) {
                 throw new IllegalStateException("Did not read the expected number of bytes. Available: " + in.available());
@@ -423,6 +470,12 @@ public class CrunchProcessor extends DiscardProcessor {
 
         private void writeTag(BmdTag tag) throws IOException {
             writeInt32(tag.value);
+        }
+    }
+
+    private void log(String message) {
+        if (DEBUG) {
+            System.out.println(message);
         }
     }
 

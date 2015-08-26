@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 
+import javax.annotation.Nonnull;
+
 /**
  * Utility class containing methods to read and write to streams.
  * <p/>
@@ -135,6 +137,17 @@ public class StreamUtil {
     }
 
     /**
+     * Read an long.
+     *
+     * @param in The InputStream to read the int from
+     * @return The long read
+     * @throws IOException
+     */
+    public static long readLong(InputStream in) throws IOException {
+        return ((long) in.read() << 56) | ((long) in.read() << 48) | ((long) in.read() << 40) | ((long) in.read() << 32) | ((long) in.read() << 24) | ((long) in.read() << 16) | ((long) in.read() << 8) | (long) in.read();
+    }
+
+    /**
      * Read an short.
      *
      * @param in The InputStream to read the short from
@@ -155,6 +168,28 @@ public class StreamUtil {
     public static void writeShort(OutputStream out, short value) throws IOException {
         out.write(value >> 8);
         out.write(value);
+    }
+
+    /**
+     * Read a double value from an InputStream
+     *
+     * @param in stream to read the value from
+     * @return the double read
+     */
+    public static double readDouble(@Nonnull InputStream in) throws IOException {
+        long longBits = readLong(in);
+        return Double.longBitsToDouble(longBits);
+    }
+
+    /**
+     * Read a float value from an InputStream
+     *
+     * @param in stream to read the value from
+     * @return the float read
+     */
+    public static float readFloat(@Nonnull InputStream in) throws IOException {
+        int intBits = readInt(in);
+        return Float.intBitsToFloat(intBits);
     }
 
     /**
