@@ -1,5 +1,6 @@
 package com.badoo.hprof.cruncher;
 
+import com.badoo.hprof.cruncher.config.PreserveClass;
 import com.badoo.hprof.cruncher.util.Stats;
 import com.badoo.hprof.library.HprofReader;
 import com.google.common.io.CountingOutputStream;
@@ -125,19 +126,6 @@ public class HprofCruncher {
             }
         }
 
-        public static class PreserveClass {
-
-            private final String className;
-
-            public PreserveClass(@Nonnull String className) {
-                this.className = className;
-            }
-
-            @Nonnull
-            public String getClassToPreserve() {
-                return className;
-            }
-        }
     }
 
     /**
@@ -160,7 +148,7 @@ public class HprofCruncher {
         if (config.collectStats) {
             out = cOut;
         }
-        CrunchProcessor processor = new CrunchProcessor(out, true);
+        CrunchProcessor processor = new CrunchProcessor(out, config.preservedClasses, true);
         // Start first pass
         InputStream in = new BufferedInputStream(source.open());
         try {

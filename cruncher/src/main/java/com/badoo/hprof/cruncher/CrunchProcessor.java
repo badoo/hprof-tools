@@ -3,6 +3,7 @@ package com.badoo.hprof.cruncher;
 import com.badoo.bmd.BmdTag;
 import com.badoo.bmd.DataWriter;
 import com.badoo.bmd.model.BmdBasicType;
+import com.badoo.hprof.cruncher.config.PreserveClass;
 import com.badoo.hprof.cruncher.util.CodingUtil;
 import com.badoo.hprof.cruncher.util.Stats;
 import com.badoo.hprof.library.HprofReader;
@@ -28,8 +29,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -63,10 +66,15 @@ public class CrunchProcessor extends DiscardProcessor {
     private final Map<Integer, Integer> objectIds = new HashMap<Integer, Integer>(); // Maps original to updated object/class ids
     private final Map<Integer, ClassDefinition> classesByOriginalId = new HashMap<Integer, ClassDefinition>(); // Maps original class id to the class definition
     private final List<Integer> rootObjectIds = new ArrayList<Integer>();
+    private final Set<String> preservedClasses = new HashSet<String>(); // Set containing the name of all classes that should be preserved
+    private final Set<Integer> preservedStringIds = new HashSet<Integer>(); // Set containing the (mapped) ids of preserved string (these string can be the names of preserved classes, and more)
 
-    public CrunchProcessor(OutputStream out, boolean collectStats) {
+    public CrunchProcessor(@Nonnull OutputStream out, @Nonnull List<PreserveClass> preservedClasses, boolean collectStats) {
         this.writer = new CrunchBdmWriter(out);
         this.collectStats = collectStats;
+        for (PreserveClass cls : preservedClasses) {
+            this.preservedClasses.add(cls.getClassToPreserve());
+        }
     }
 
     /**
@@ -96,7 +104,7 @@ public class CrunchProcessor extends DiscardProcessor {
                     break;
                 case Tag.LOAD_CLASS:
                     if (collectStats) {
-                        Stats.increment(Stats.Type.CLASS, Stats.Variant.HPROF, length + 9); //TODO Document!
+                        Stats.increment(Stats.Type.CLASS, Stats.Variant.HPROF, length + 9); // 9 = header size
                     }
                     ClassDefinition classDef = reader.readLoadClassRecord();
                     classesByOriginalId.put(classDef.getObjectId(), classDef);
@@ -141,19 +149,22 @@ public class CrunchProcessor extends DiscardProcessor {
         }
         HprofString string = reader.readStringRecord(length, timestamp);
         // We replace the original string id with one starting from 1 as these are more efficient to store
-        string.setId(mapStringId(string.getId()));
-        boolean hashed = !keepString(string.getValue());
+        final int mappedStringId = mapStringId(string.getId());
+        string.setId(mappedStringId);
+        boolean preserve = keepString(string.getValue());
+        if (preserve) {
+            preservedStringIds.add(mappedStringId);
+        }
         final long start = writer.getCurrentPosition();
-        writer.writeString(string, hashed);
+        writer.writeString(string, !preserve);
         if (collectStats) {
             Stats.increment(Stats.Type.STRING, Stats.Variant.BMD, writer.getCurrentPosition() - start);
         }
     }
 
     private boolean keepString(String string) {
-        // TODO Document!
         // Keep the names of some core system classes (to avoid issues in MAT)
-        return string.startsWith("java.lang") || "V".equals(string) || "boolean".equals(string) || "byte".equals(string)
+        return preservedClasses.contains(string) || string.startsWith("java.lang") || "V".equals(string) || "boolean".equals(string) || "byte".equals(string)
             || "short".equals(string) || "char".equals(string) || "int".equals(string) || "long".equals(string)
             || "float".equals(string) || "double".equals(string);
     }
@@ -240,11 +251,13 @@ public class CrunchProcessor extends DiscardProcessor {
         }
 
         public void writeClassDefinition(@Nonnull ClassDefinition classDef) throws IOException {
+            final int mappedClassNameStringId = mapStringId(classDef.getNameStringId());
+            final boolean preserveClass = preservedStringIds.contains(mappedClassNameStringId);
             final long start = getCurrentPosition();
             writeTag(BmdTag.CLASS_DEFINITION);
             writeInt32(mapObjectId(classDef.getObjectId()));
             writeInt32(mapObjectId(classDef.getSuperClassObjectId()));
-            writeInt32(mapStringId(classDef.getNameStringId()));
+            writeInt32(mappedClassNameStringId);
             // Write constants and static fields (not filtered)
             int constantFieldCount = classDef.getConstantFields().size();
             writeInt32(constantFieldCount);
@@ -268,7 +281,7 @@ public class CrunchProcessor extends DiscardProcessor {
             int instanceFieldCount = classDef.getInstanceFields().size();
             for (int i = 0; i < instanceFieldCount; i++) {
                 InstanceField field = classDef.getInstanceFields().get(i);
-                if (field.getType() != BasicType.OBJECT) {
+                if (!preserveClass && field.getType() != BasicType.OBJECT) {
                     skippedFieldSize += field.getType().size;
                 }
                 else {
