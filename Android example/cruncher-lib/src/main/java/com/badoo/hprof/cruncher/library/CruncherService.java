@@ -1,8 +1,8 @@
 package com.badoo.hprof.cruncher.library;
 
 import android.app.IntentService;
-import android.content.Intent;
 import android.content.Context;
+import android.content.Intent;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
@@ -110,9 +110,7 @@ public class CruncherService extends IntentService {
         try {
             out = new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(outputFilePath)));
             long startTime = SystemClock.elapsedRealtime();
-            Config config = new Config();
-            config.enableStats(true).setTimeLimit(TIME_LIMIT);
-            config.setIterationSleepTime(1);
+            Config config = new Config.Builder().iterationSleep(0).stats(true).build();
             HprofCruncher.crunch(new HprofFileSource(inputFile), out, config);
             if (DEBUG) {
                 Log.d(TAG, "Crunching finished after " + (SystemClock.elapsedRealtime() - startTime) + "ms");

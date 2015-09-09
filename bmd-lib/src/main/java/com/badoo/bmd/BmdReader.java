@@ -76,10 +76,11 @@ public class BmdReader extends DataReader {
      */
     @Nonnull
     public BmdString readStringRecord() throws IOException {
-        int id = readInt32();
-        int length = readInt32();
-        byte[] data = readRawBytes(length);
-        return new BmdString(id, new String(data));
+        final int id = readInt32();
+        final int length = readInt32();
+        final byte[] data = readRawBytes(length);
+        final String stringValue = new String(data);
+        return new BmdString(id, stringValue);
     }
 
     /**
@@ -180,8 +181,10 @@ public class BmdReader extends DataReader {
                 switch (field.getType()) {
                     case OBJECT:
                     case INT:
-                    case SHORT:
                         fields.add(new BmdInstanceDumpField(currentClass, field, readInt32()));
+                        break;
+                    case SHORT:
+                        fields.add(new BmdInstanceDumpField(currentClass, field, (short) readInt32()));
                         break;
                     case LONG:
                         fields.add(new BmdInstanceDumpField(currentClass, field, readInt64()));

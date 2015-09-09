@@ -60,7 +60,14 @@
 
     <Button
         android:id="@+id/fillMemory"
-        android:text="Fill memory (crash!)"
+        android:text="OutOfMemoryError"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/activity_vertical_margin" />
+
+    <Button
+        android:id="@+id/npe"
+        android:text="NullPointerException"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/activity_vertical_margin" />

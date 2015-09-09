@@ -1,5 +1,6 @@
 package com.badoo.hprof.cruncher;
 
+import com.badoo.hprof.cruncher.config.PreserveClass;
 import com.badoo.hprof.cruncher.util.Stats;
 import com.badoo.hprof.library.HprofReader;
 import com.google.common.io.CountingOutputStream;
@@ -10,6 +11,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 import javax.annotation.Nonnull;
@@ -29,52 +32,100 @@ import javax.annotation.Nullable;
 public class HprofCruncher {
 
     /**
-     * Configurator for controlling how HrofCruncher converts HPROF files to BMD.
+     * Configurator for controlling how HprofCruncher converts HPROF files to BMD.
      */
     @SuppressWarnings("UnusedDeclaration")
     public static class Config {
 
         public static final int NO_TIME_LIMIT = -1;
 
-        private boolean collectStats;
-        private long timeLimit = NO_TIME_LIMIT;
-        private long iterationSleep;
+        private final boolean collectStats;
+        private final long timeLimit;
+        private final long iterationSleep;
+        private final List<PreserveClass> preservedClasses;
 
-        /**
-         * Sets whether stats should be collected to measure how well the crunch operation performs
-         *
-         * @param enabled true if stats should be collected
-         */
-        public Config enableStats(boolean enabled) {
-            this.collectStats = enabled;
-            return this;
-        }
 
-        /**
-         * Sets a time limit for the crunch operation. If the operation goes over time it will be cancelled.
-         *
-         * @param timeLimit time limit in milliseconds
-         */
-        public Config setTimeLimit(long timeLimit) {
+        private Config(boolean collectStats, long timeLimit, long iterationSleep, List<PreserveClass> preservedClasses) {
+            this.collectStats = collectStats;
             this.timeLimit = timeLimit;
-            return this;
+            this.iterationSleep = iterationSleep;
+            this.preservedClasses = preservedClasses;
         }
 
-        /**
-         * Set the time the thread performing the crunching will spend sleeping for each iteration. This number will dramatically slow down the operation.
-         * <p/>
-         * Examples:
-         * Nexus 5, 200MB HPROF, sleep=10, crunch time=14min
-         * Nexus 5, 200MB HPROF, sleep=5, crunch time=8.3min
-         * Nexus 5, 200MB HPROF, sleep=1, crunch time=3.5min
-         * Nexus 5, 200MB HPROF, sleep=0, crunch time=1.5min
-         *
-         * @param sleep number of milliseconds to spend sleeping each iteration.
-         */
-        public Config setIterationSleepTime(long sleep) {
-            this.iterationSleep = sleep;
-            return this;
+        public static class Builder {
+
+            private boolean stats;
+            private long timeLimit = NO_TIME_LIMIT;
+            private long iterationSleep;
+            private List<PreserveClass> preservedClasses = new ArrayList<PreserveClass>();
+
+            /**
+             * Sets whether stats should be collected to measure how well the crunch operation performs
+             *
+             * @param enabled true if stats should be collected
+             */
+            public Builder stats(boolean enabled) {
+                this.stats = enabled;
+                return this;
+            }
+
+            /**
+             * Sets a time limit for the crunch operation. If the operation goes over time it will be cancelled.
+             *
+             * @param timeLimit time limit in milliseconds
+             */
+            public Builder timeLimit(long timeLimit) {
+                this.timeLimit = timeLimit;
+                return this;
+            }
+
+            /**
+             * Set the time the thread performing the crunching will spend sleeping for each iteration. This number will dramatically slow down the operation.
+             * <p/>
+             * Examples:
+             * Nexus 5, 200MB HPROF, sleep=10, crunch time=14min
+             * Nexus 5, 200MB HPROF, sleep=5, crunch time=8.3min
+             * Nexus 5, 200MB HPROF, sleep=1, crunch time=3.5min
+             * Nexus 5, 200MB HPROF, sleep=0, crunch time=1.5min
+             *
+             * @param sleep number of milliseconds to spend sleeping each iteration.
+             */
+            public Builder iterationSleep(long sleep) {
+                this.iterationSleep = sleep;
+                return this;
+            }
+
+            /**
+             * Add a class to the list of preserved classes. These classes will not have any primitive fields
+             * removed in order to save space. Objects (including Strings) referenced by instances of the class
+             * will still be crunched as usual unless they are also added to the list of preserved classes.
+             *
+             * @param classToPreserve the class to preserve
+             * @return the builder, for chained calls
+             */
+            public Builder preserveClass(@Nonnull Class classToPreserve) {
+                preservedClasses.add(new PreserveClass(classToPreserve.getName()));
+                return this;
+            }
+
+            /**
+             * Add a class name to the list of preserved classes. These classes will not have any primitive fields
+             * removed in order to save space. Objects (including Strings) referenced by instances of the class
+             * will still be crunched as usual unless they are also added to the list of preserved classes.
+             *
+             * @param classToPreserve the class to preserve
+             * @return the builder, for chained calls
+             */
+            public Builder preserveClass(@Nonnull String classToPreserve) {
+                preservedClasses.add(new PreserveClass(classToPreserve));
+                return this;
+            }
+
+            public Config build() {
+                return new Config(stats, timeLimit, iterationSleep, preservedClasses);
+            }
         }
+
     }
 
     /**
@@ -86,7 +137,7 @@ public class HprofCruncher {
      */
     public static void crunch(@Nonnull HprofSource source, @Nonnull OutputStream out, @Nullable Config config) throws IOException, TimeoutException {
         if (config == null) {
-            config = new Config();
+            config = new Config.Builder().build();
         }
         Stats.setEnabled(config.collectStats);
         Stats.increment(Stats.Type.TOTAL, Stats.Variant.HPROF, source.getDataSize());
@@ -97,7 +148,7 @@ public class HprofCruncher {
         if (config.collectStats) {
             out = cOut;
         }
-        CrunchProcessor processor = new CrunchProcessor(out, true);
+        CrunchProcessor processor = new CrunchProcessor(out, config.preservedClasses, true);
         // Start first pass
         InputStream in = new BufferedInputStream(source.open());
         try {
@@ -166,8 +217,7 @@ public class HprofCruncher {
         OutputStream out = null;
         try {
             out = new FileOutputStream(outFile);
-            Config config = new Config();
-            config.enableStats(true);
+            Config config = new Config.Builder().stats(true).build();
             crunch(new HprofFileSource(new File(inFile)), out, config);
             System.exit(0);
         }

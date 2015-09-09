@@ -3,6 +3,7 @@ package com.badoo.hprof.cruncher;
 import com.badoo.bmd.BmdTag;
 import com.badoo.bmd.DataWriter;
 import com.badoo.bmd.model.BmdBasicType;
+import com.badoo.hprof.cruncher.config.PreserveClass;
 import com.badoo.hprof.cruncher.util.CodingUtil;
 import com.badoo.hprof.cruncher.util.Stats;
 import com.badoo.hprof.library.HprofReader;
@@ -28,14 +29,22 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import static com.badoo.hprof.library.util.StreamUtil.copy;
 import static com.badoo.hprof.library.util.StreamUtil.read;
+import static com.badoo.hprof.library.util.StreamUtil.readByte;
+import static com.badoo.hprof.library.util.StreamUtil.readDouble;
+import static com.badoo.hprof.library.util.StreamUtil.readFloat;
 import static com.badoo.hprof.library.util.StreamUtil.readInt;
+import static com.badoo.hprof.library.util.StreamUtil.readLong;
+import static com.badoo.hprof.library.util.StreamUtil.readShort;
 import static com.badoo.hprof.library.util.StreamUtil.skip;
 
 /**
@@ -53,6 +62,7 @@ import static com.badoo.hprof.library.util.StreamUtil.skip;
 public class CrunchProcessor extends DiscardProcessor {
 
     private static final int FIRST_ID = 1; // Skipping 0 since this is used as a (null) marker in some cases
+    private static final boolean DEBUG = false;
 
     private boolean firstPass = true;
     private final CrunchBdmWriter writer;
@@ -63,10 +73,15 @@ public class CrunchProcessor extends DiscardProcessor {
     private final Map<Integer, Integer> objectIds = new HashMap<Integer, Integer>(); // Maps original to updated object/class ids
     private final Map<Integer, ClassDefinition> classesByOriginalId = new HashMap<Integer, ClassDefinition>(); // Maps original class id to the class definition
     private final List<Integer> rootObjectIds = new ArrayList<Integer>();
+    private final Set<String> preservedClasses = new HashSet<String>(); // Set containing the name of all classes that should be preserved
+    private final Set<Integer> preservedStringIds = new HashSet<Integer>(); // Set containing the (mapped) ids of preserved string (these string can be the names of preserved classes, and more)
 
-    public CrunchProcessor(OutputStream out, boolean collectStats) {
+    public CrunchProcessor(@Nonnull OutputStream out, @Nonnull List<PreserveClass> preservedClasses, boolean collectStats) {
         this.writer = new CrunchBdmWriter(out);
         this.collectStats = collectStats;
+        for (PreserveClass cls : preservedClasses) {
+            this.preservedClasses.add(cls.getClassToPreserve());
+        }
     }
 
     /**
@@ -96,7 +111,7 @@ public class CrunchProcessor extends DiscardProcessor {
                     break;
                 case Tag.LOAD_CLASS:
                     if (collectStats) {
-                        Stats.increment(Stats.Type.CLASS, Stats.Variant.HPROF, length + 9); //TODO Document!
+                        Stats.increment(Stats.Type.CLASS, Stats.Variant.HPROF, length + 9); // 9 = header size
                     }
                     ClassDefinition classDef = reader.readLoadClassRecord();
                     classesByOriginalId.put(classDef.getObjectId(), classDef);
@@ -141,27 +156,32 @@ public class CrunchProcessor extends DiscardProcessor {
         }
         HprofString string = reader.readStringRecord(length, timestamp);
         // We replace the original string id with one starting from 1 as these are more efficient to store
-        string.setId(mapStringId(string.getId()));
-        boolean hashed = !keepString(string.getValue());
+        final int mappedStringId = mapStringId(string.getId());
+        string.setId(mappedStringId);
+        boolean preserve = keepString(string.getValue());
+        if (preserve) {
+            preservedStringIds.add(mappedStringId);
+        }
         final long start = writer.getCurrentPosition();
-        writer.writeString(string, hashed);
+        writer.writeString(string, !preserve);
         if (collectStats) {
             Stats.increment(Stats.Type.STRING, Stats.Variant.BMD, writer.getCurrentPosition() - start);
         }
     }
 
     private boolean keepString(String string) {
-        // TODO Document!
         // Keep the names of some core system classes (to avoid issues in MAT)
-        return string.startsWith("java.lang") || "V".equals(string) || "boolean".equals(string) || "byte".equals(string)
+        return preservedClasses.contains(string) || string.startsWith("java.lang") || "V".equals(string) || "boolean".equals(string) || "byte".equals(string)
             || "short".equals(string) || "char".equals(string) || "int".equals(string) || "long".equals(string)
             || "float".equals(string) || "double".equals(string);
     }
 
     @Override
     public void onHeader(@Nonnull String text, int idSize, int timeHigh, int timeLow) throws IOException {
-        // The text of the HPROF header is written to the BMD header but the timestamp is discarded
-        writer.writeHeader(1, text.getBytes());
+        if (firstPass) {
+            // The text of the HPROF header is written to the BMD header but the timestamp is discarded
+            writer.writeHeader(1, text.getBytes());
+        }
     }
 
     /**
@@ -198,6 +218,14 @@ public class CrunchProcessor extends DiscardProcessor {
         return stringIds.get(originalId);
     }
 
+    private boolean shouldPreserve(@Nullable ClassDefinition classDefinition) {
+        if (classDefinition == null) {
+            return false;
+        }
+        final int mappedClassNameStringId = mapStringId(classDefinition.getNameStringId());
+        return preservedStringIds.contains(mappedClassNameStringId);
+    }
+
     @SuppressWarnings({"ForLoopReplaceableByForEach"})
     private class CrunchBdmWriter extends DataWriter {
 
@@ -220,6 +248,7 @@ public class CrunchProcessor extends DiscardProcessor {
         }
 
         public void writeString(@Nonnull HprofString string, boolean hashed) throws IOException {
+            log("Writing string: " + string.getValue() + ", hashed=" + hashed + ", id=" + string.getId());
             writeTag(hashed ? BmdTag.HASHED_STRING : BmdTag.STRING);
             writeInt32(string.getId());
             byte[] stringData = string.getValue().getBytes();
@@ -263,12 +292,13 @@ public class CrunchProcessor extends DiscardProcessor {
                 writeFieldValue(field.getType(), field.getValue());
             }
             // Filter instance fields before writing them
+            final boolean preserveClass = shouldPreserve(classDef);
             int skippedFieldSize = 0;
             List<InstanceField> keptFields = new ArrayList<InstanceField>();
             int instanceFieldCount = classDef.getInstanceFields().size();
             for (int i = 0; i < instanceFieldCount; i++) {
                 InstanceField field = classDef.getInstanceFields().get(i);
-                if (field.getType() != BasicType.OBJECT) {
+                if (!preserveClass && field.getType() != BasicType.OBJECT) {
                     skippedFieldSize += field.getType().size;
                 }
                 else {
@@ -295,6 +325,7 @@ public class CrunchProcessor extends DiscardProcessor {
             writeInt32(mapObjectId(instance.getClassObjectId()));
             ClassDefinition currentClass = classesByOriginalId.get(instance.getClassObjectId());
             ByteArrayInputStream in = new ByteArrayInputStream(instance.getInstanceFieldData());
+            boolean preserveClass = shouldPreserve(currentClass);
             while (currentClass != null) {
                 int fieldCount = currentClass.getInstanceFields().size();
                 for (int i = 0; i < fieldCount; i++) {
@@ -304,11 +335,40 @@ public class CrunchProcessor extends DiscardProcessor {
                         int id = readInt(in);
                         writeInt32(mapObjectId(id));
                     }
-                    else { // Other fields are ignored
+                    else if (!preserveClass) { // Other fields are ignored
                         skip(in, type.size);
+                    }
+                    else if (type == BasicType.INT) {
+                        int value = readInt(in);
+                        writeInt32(value);
+
+                    }
+                    else if (type == BasicType.SHORT) {
+                        short value = readShort(in);
+                        writeInt32(value);
+                    }
+                    else if (type == BasicType.LONG) {
+                        long value = readLong(in);
+                        writeInt64(value);
+                    }
+                    else if (type == BasicType.DOUBLE) {
+                        double value = readDouble(in);
+                        writeDouble(value);
+                    }
+                    else if (type == BasicType.FLOAT) {
+                        float value = readFloat(in);
+                        writeFloat(value);
+                    }
+                    else if (type == BasicType.BOOLEAN || type == BasicType.BYTE) {
+                        int value = readByte(in);
+                        writeRawByte(value);
+                    }
+                    else if (type == BasicType.CHAR) {
+                        copy(in, out, 2);
                     }
                 }
                 currentClass = classesByOriginalId.get(currentClass.getSuperClassObjectId());
+                preserveClass = shouldPreserve(currentClass);
             }
             if (in.available() != 0) {
                 throw new IllegalStateException("Did not read the expected number of bytes. Available: " + in.available());
@@ -410,6 +470,12 @@ public class CrunchProcessor extends DiscardProcessor {
 
         private void writeTag(BmdTag tag) throws IOException {
             writeInt32(tag.value);
+        }
+    }
+
+    private void log(String message) {
+        if (DEBUG) {
+            System.out.println(message);
         }
     }
 
