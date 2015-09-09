@@ -44,16 +44,14 @@ public class HprofCatcher {
 
         @Override
         public void uncaughtException(Thread thread, Throwable ex) {
-            if (ex instanceof OutOfMemoryError) {
-                try {
-                    String fileName = mContext.getFilesDir().getAbsolutePath() + "/" + System.currentTimeMillis() + ".hprof";
-                    Log.d(TAG, "Writing memory dump to: " + fileName);
-                    Debug.dumpHprofData(fileName);
-                }
-                catch (Throwable t) {
-                    // Make sure we don't throw any new exception here!
-                    Log.e(TAG, "Failed to write memory dump", t);
-                }
+            try {
+                String fileName = mContext.getFilesDir().getAbsolutePath() + "/" + System.currentTimeMillis() + ".hprof";
+                Log.d(TAG, "Writing memory dump to: " + fileName);
+                Debug.dumpHprofData(fileName);
+            }
+            catch (Throwable t) {
+                // Make sure we don't throw any new exception here!
+                Log.e(TAG, "Failed to write memory dump", t);
             }
             mOldHandler.uncaughtException(thread, ex);
         }

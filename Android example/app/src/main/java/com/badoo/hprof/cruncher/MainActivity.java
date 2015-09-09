@@ -5,16 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
+import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.badoo.hprof.cruncher.library.CruncherService;
 import com.badoo.hprof.cruncher.library.HprofCatcher;
@@ -52,12 +47,17 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Initialize HprofCatcher so that any uncaught exception is intercepted
         HprofCatcher.init(this);
+
         setContentView(R.layout.activity_main);
         mStatus = (TextView) findViewById(R.id.status);
         mInput = (TextView) findViewById(R.id.input);
         mOutput = (TextView) findViewById(R.id.output);
         findViewById(R.id.fillMemory).setOnClickListener(this);
+        findViewById(R.id.npe).setOnClickListener(this);
+
+        // Register a receiver to listen for updates of the crunching status
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(this);
         IntentFilter filter = new IntentFilter();
         filter.addAction(CruncherService.ACTION_CRUNCHING_STARTED);
@@ -77,8 +77,12 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         if (v.getId() == R.id.fillMemory) {
             List<Bitmap> data = new ArrayList<>();
             while (true) {
+                // Allocate bitmaps until we run out of memory
                 data.add(generateBitmap());
             }
+        }
+        else if (v.getId() == R.id.npe) {
+            throw new NullPointerException("Let me explain you... crashing!");
         }
     }
 
