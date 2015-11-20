@@ -1,7 +1,5 @@
 package com.badoo.hprof.library.model;
 
-import com.badoo.hprof.library.util.StreamUtil;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
@@ -14,7 +12,7 @@ import static com.badoo.hprof.library.util.StreamUtil.skip;
 
 /**
  * Class containing the data of a class instance dump (INSTANCE_DUMP) heap record.
- *
+ * <p/>
  * Created by Erik Andre on 17/07/2014.
  */
 public class Instance {
@@ -88,9 +86,44 @@ public class Instance {
         return result;
     }
 
+    /**
+     * Returns the value of an Object field in this instance
+     *
+     * @param field   the field to read
+     * @param classes map containing all classes (or at least the ones between this class and the root)
+     * @return the field value
+     */
     public int getObjectField(InstanceField field, Map<Integer, ClassDefinition> classes) throws IOException {
         if (field.getType() != BasicType.OBJECT) {
             throw new IllegalArgumentException("Field is not of type OBJECT");
+        }
+        // Iterate over all the instance fields until we find one that is matching
+        ByteArrayInputStream in = new ByteArrayInputStream(instanceFieldData);
+        ClassDefinition currentClass = classes.get(classObjectId);
+        while (currentClass != null) {
+            for (InstanceField currentField : currentClass.getInstanceFields()) {
+                if (currentField == field) { // This is the one we are looking for
+                    return readInt(in);
+                }
+                else {
+                    skip(in, currentField.getType().size);
+                }
+            }
+            currentClass = classes.get(currentClass.getSuperClassObjectId());
+        }
+        throw new IllegalStateException("Failed to find field");
+    }
+
+    /**
+     * Returns the value of an int field in this instance
+     *
+     * @param field   the field to read
+     * @param classes map containing all classes (or at least the ones between this class and the root)
+     * @return the field value
+     */
+    public int getIntField(InstanceField field, Map<Integer, ClassDefinition> classes) throws IOException {
+        if (field.getType() != BasicType.INT) {
+            throw new IllegalArgumentException("Field is not of type INT");
         }
         // Iterate over all the instance fields until we find one that is matching
         ByteArrayInputStream in = new ByteArrayInputStream(instanceFieldData);
