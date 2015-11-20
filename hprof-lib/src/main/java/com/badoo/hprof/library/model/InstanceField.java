@@ -35,4 +35,12 @@ public class InstanceField implements NamedField {
     public void setFieldNameId(int nameId) {
         this.nameId = nameId;
     }
+
+    @Override
+    public String toString() {
+        return "InstanceField{" +
+            "type=" + type +
+            ", nameId=" + nameId +
+            '}';
+    }
 }

@@ -9,6 +9,7 @@ import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.HprofString;
 import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.library.model.ObjectArray;
+import com.badoo.hprof.library.model.PrimitiveArray;
 import com.badoo.hprof.library.processor.DiscardProcessor;
 
 import java.io.IOException;
@@ -25,6 +26,7 @@ public class ViewDataProcessor extends DiscardProcessor {
     private Map<Integer, HprofString> strings = new HashMap<Integer, HprofString>();
     private Map<Integer, ClassDefinition> classes = new HashMap<Integer, ClassDefinition>();
     private Map<Integer, ObjectArray> objArrays = new HashMap<Integer, ObjectArray>();
+    private Map<Integer, PrimitiveArray> primitiveArrays = new HashMap<Integer, PrimitiveArray>();
     private Map<Integer, Instance> instances = new HashMap<Integer, Instance>();
     private HeapDumpDiscardProcessor heapDumpProcessor = new HeapDumpDiscardProcessor() {
 
@@ -45,6 +47,11 @@ public class ViewDataProcessor extends DiscardProcessor {
                     objArrays.put(array.getObjectId(), array);
                     break;
                 }
+                case HeapTag.PRIMITIVE_ARRAY_DUMP: {
+                    PrimitiveArray array = reader.readPrimitiveArray();
+                    primitiveArrays.put(array.getObjectId(), array);
+                    break;
+                }
                 default:
                     super.onHeapRecord(tag, reader);
             }
@@ -61,6 +68,10 @@ public class ViewDataProcessor extends DiscardProcessor {
 
     public Map<Integer, ObjectArray> getObjectArrays() {
         return objArrays;
+    }
+
+    public Map<Integer, PrimitiveArray> getPrimitiveArrays() {
+        return primitiveArrays;
     }
 
     public Map<Integer, Instance> getInstances() {

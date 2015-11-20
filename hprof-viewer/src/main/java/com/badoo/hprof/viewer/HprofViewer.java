@@ -5,6 +5,8 @@ import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.HprofString;
 import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.viewer.model.ViewGroup;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -47,7 +49,8 @@ public class HprofViewer {
         while (reader.hasNext()) {
             reader.next();
         }
-        DumpData data = new DumpData(processor.getClasses(), processor.getStrings(), processor.getInstances(), processor.getObjectArrays());
+        DumpData data = new DumpData(processor.getClasses(), processor.getStrings(), processor.getInstances(),
+            processor.getObjectArrays(), processor.getPrimitiveArrays());
 
         // Class data read, now we can figure out which classes are Views (or ViewGroups)
         Map<Integer, ClassDefinition> viewClasses = filterViewClasses(data);
@@ -63,8 +66,10 @@ public class HprofViewer {
         System.out.println("Found " + viewRoots.size() + " roots instances of " + data.strings.get(decorClass.getNameStringId()).getValue());
 
         // Build the View hierarchy, starting with the roots
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         for (Instance root : viewRoots) {
             ViewGroup viewRoot = ViewFactory.buildViewHierarchy(root, data);
+            System.out.println(gson.toJson(viewRoot));
         }
     }
 
