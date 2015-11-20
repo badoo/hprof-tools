@@ -2,19 +2,17 @@ package com.badoo.hprof.viewer;
 
 import com.badoo.hprof.library.HprofReader;
 import com.badoo.hprof.library.Tag;
-import com.badoo.hprof.library.heap.HeapDumpProcessor;
 import com.badoo.hprof.library.heap.HeapDumpReader;
 import com.badoo.hprof.library.heap.HeapTag;
 import com.badoo.hprof.library.heap.processor.HeapDumpDiscardProcessor;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.HprofString;
 import com.badoo.hprof.library.model.Instance;
+import com.badoo.hprof.library.model.ObjectArray;
 import com.badoo.hprof.library.processor.DiscardProcessor;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
@@ -26,7 +24,8 @@ public class ViewDataProcessor extends DiscardProcessor {
 
     private Map<Integer, HprofString> strings = new HashMap<Integer, HprofString>();
     private Map<Integer, ClassDefinition> classes = new HashMap<Integer, ClassDefinition>();
-    private List<Instance> instances = new ArrayList<Instance>();
+    private Map<Integer, ObjectArray> objArrays = new HashMap<Integer, ObjectArray>();
+    private Map<Integer, Instance> instances = new HashMap<Integer, Instance>();
     private HeapDumpDiscardProcessor heapDumpProcessor = new HeapDumpDiscardProcessor() {
 
         @Override
@@ -37,7 +36,13 @@ public class ViewDataProcessor extends DiscardProcessor {
                     break;
                 }
                 case HeapTag.INSTANCE_DUMP: {
-                    instances.add(reader.readInstanceDump());
+                    final Instance instance = reader.readInstanceDump();
+                    instances.put(instance.getObjectId(), instance);
+                    break;
+                }
+                case HeapTag.OBJECT_ARRAY_DUMP: {
+                    ObjectArray array = reader.readObjectArray();
+                    objArrays.put(array.getObjectId(), array);
                     break;
                 }
                 default:
@@ -54,7 +59,11 @@ public class ViewDataProcessor extends DiscardProcessor {
         return strings;
     }
 
-    public List<Instance> getInstances() {
+    public Map<Integer, ObjectArray> getObjectArrays() {
+        return objArrays;
+    }
+
+    public Map<Integer, Instance> getInstances() {
         return instances;
     }
 

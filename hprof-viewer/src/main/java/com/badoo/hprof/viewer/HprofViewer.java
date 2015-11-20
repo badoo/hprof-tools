@@ -18,9 +18,9 @@ import java.util.Map;
 
 /**
  * Entry point for the HPROF Viewer application.
- *
+ * <p/>
  * HPROF Viewer supports the following functionality:
- *
+ * <p/>
  * TODO
  */
 public class HprofViewer {
@@ -47,30 +47,24 @@ public class HprofViewer {
         while (reader.hasNext()) {
             reader.next();
         }
+        DumpData data = new DumpData(processor.getClasses(), processor.getStrings(), processor.getInstances(), processor.getObjectArrays());
 
         // Class data read, now we can figure out which classes are Views (or ViewGroups)
-        Map<Integer, ClassDefinition> classes = processor.getClasses();
-        Map<Integer, HprofString> strings = processor.getStrings();
-        Map<Integer, ClassDefinition> viewClasses = new HashMap<Integer, ClassDefinition>();
-        for (ClassDefinition cls : classes.values()) {
-            if (isView(cls, classes, strings)) {
-                viewClasses.put(cls.getObjectId(), cls);
-            }
-        }
+        Map<Integer, ClassDefinition> viewClasses = filterViewClasses(data);
         System.out.println("Found " + viewClasses.size() + " View classes");
 
         // Filter out the instances dumps of the View classes
-        List<Instance> viewInstances = filterViewInstances(processor.getInstances(), viewClasses);
+        List<Instance> viewInstances = filterViewInstances(data, viewClasses);
         System.out.println("Found " + viewInstances.size() + " instances of View classes");
 
         // Find the View roots (Decor views), there should be at least one
-        ClassDefinition decorClass = findDecorClass(viewClasses, strings);
+        ClassDefinition decorClass = findDecorClass(viewClasses, data);
         List<Instance> viewRoots = findViewRoots(viewInstances, decorClass);
-        System.out.println("Found " + viewRoots.size() + " roots instances of " + strings.get(decorClass.getNameStringId()).getValue());
+        System.out.println("Found " + viewRoots.size() + " roots instances of " + data.strings.get(decorClass.getNameStringId()).getValue());
 
         // Build the View hierarchy, starting with the roots
         for (Instance root : viewRoots) {
-            ViewGroup viewRoot = ViewFactory.buildViewHierarchy(root, viewInstances, classes, strings);
+            ViewGroup viewRoot = ViewFactory.buildViewHierarchy(root, data);
         }
     }
 
@@ -84,9 +78,9 @@ public class HprofViewer {
         return roots;
     }
 
-    private static ClassDefinition findDecorClass(Map<Integer, ClassDefinition> viewClasses, Map<Integer, HprofString> strings) {
+    private static ClassDefinition findDecorClass(Map<Integer, ClassDefinition> viewClasses, DumpData data) {
         for (ClassDefinition cls : viewClasses.values()) {
-            HprofString clsName = strings.get(cls.getNameStringId());
+            HprofString clsName = data.strings.get(cls.getNameStringId());
             if (clsName.getValue().endsWith("$DecorView")) {
                 return cls;
             }
@@ -94,9 +88,19 @@ public class HprofViewer {
         throw new IllegalStateException("Dump contained no decor views!");
     }
 
-    private static List<Instance> filterViewInstances(List<Instance> allInstances, Map<Integer, ClassDefinition> viewClasses) {
+    private static Map<Integer, ClassDefinition> filterViewClasses(DumpData data) {
+        Map<Integer, ClassDefinition> viewClasses = new HashMap<Integer, ClassDefinition>();
+        for (ClassDefinition cls : data.classes.values()) {
+            if (isView(cls, data)) {
+                viewClasses.put(cls.getObjectId(), cls);
+            }
+        }
+        return viewClasses;
+    }
+
+    private static List<Instance> filterViewInstances(DumpData data, Map<Integer, ClassDefinition> viewClasses) {
         List<Instance> viewInstances = new ArrayList<Instance>();
-        for (Instance instance : allInstances) {
+        for (Instance instance : data.instances.values()) {
             if (viewClasses.containsKey(instance.getClassObjectId())) {
                 viewInstances.add(instance);
             }
@@ -104,9 +108,9 @@ public class HprofViewer {
         return viewInstances;
     }
 
-    private static boolean isView(ClassDefinition cls, Map<Integer, ClassDefinition> allClasses, Map<Integer, HprofString> strings) {
+    private static boolean isView(ClassDefinition cls, DumpData data) {
         while (cls != null) {
-            HprofString clsName = strings.get(cls.getNameStringId());
+            HprofString clsName = data.strings.get(cls.getNameStringId());
             if (clsName == null) {
                 System.err.println("Missing string id: " + cls.getNameStringId());
                 return false;
@@ -114,7 +118,7 @@ public class HprofViewer {
             if ("android.view.View".equals(clsName.getValue())) {
                 return true;
             }
-            cls = allClasses.get(cls.getSuperClassObjectId());
+            cls = data.classes.get(cls.getSuperClassObjectId());
         }
         return false;
     }

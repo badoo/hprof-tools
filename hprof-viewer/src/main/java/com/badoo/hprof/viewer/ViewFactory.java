@@ -26,17 +26,17 @@ public class ViewFactory {
         }
     }
 
-    static ViewGroup buildViewHierarchy(Instance root, List<Instance> viewInstances, DumpData data) {
+    static ViewGroup buildViewHierarchy(Instance root, DumpData data) {
         RefHolder refs = new RefHolder(data);
         try {
-            return createViewGroup(root, viewInstances, refs, data);
+            return createViewGroup(root, refs, data);
         }
         catch (IOException e) {
             throw new RuntimeException("Failed to create View Hierarchy", e);
         }
     }
 
-    private static ViewGroup createViewGroup(Instance instance, List<Instance> viewInstances, RefHolder refs, DumpData data) throws IOException {
+    private static ViewGroup createViewGroup(Instance instance, RefHolder refs, DumpData data) throws IOException {
         ClassDefinition cls = data.classes.get(instance.getClassObjectId());
          instance.getObjectField(refs.childrenField, data.classes);
         return null;
