@@ -16,4 +16,12 @@ public class View {
         this.top = top;
         this.bottom = bottom;
     }
+
+    public int getWidth() {
+        return right - left;
+    }
+
+    public int getHeight() {
+        return bottom - top;
+    }
 }

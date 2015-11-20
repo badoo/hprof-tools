@@ -5,9 +5,10 @@ import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.HprofString;
 import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.viewer.model.ViewGroup;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.badoo.hprof.viewer.rendering.ViewRenderer;
+import com.badoo.hprof.viewer.ui.ImagePanel;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,6 +18,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.swing.JFrame;
 
 /**
  * Entry point for the HPROF Viewer application.
@@ -66,11 +69,32 @@ public class HprofViewer {
         System.out.println("Found " + viewRoots.size() + " roots instances of " + data.strings.get(decorClass.getNameStringId()).getValue());
 
         // Build the View hierarchy, starting with the roots
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+//        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        List<ViewGroup> roots = new ArrayList<ViewGroup>();
         for (Instance root : viewRoots) {
             ViewGroup viewRoot = ViewFactory.buildViewHierarchy(root, data);
-            System.out.println(gson.toJson(viewRoot));
+            roots.add(viewRoot);
         }
+        // Render the views
+        BufferedImage image = ViewRenderer.renderViews(roots.get(1)); // Just the first one for now
+        showImage(image);
+    }
+
+    private static void showImage(final BufferedImage image) {
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                //Create and set up the window.
+                JFrame frame = new JFrame("Hprof Viewer");
+                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+                ImagePanel imagePanel = new ImagePanel(image);
+                frame.getContentPane().add(imagePanel);
+
+                //Display the window.
+                frame.pack();
+                frame.setVisible(true);
+            }
+        });
     }
 
     private static List<Instance> findViewRoots(List<Instance> viewInstances, ClassDefinition decorClass) {

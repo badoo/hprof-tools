@@ -119,7 +119,7 @@ public class ViewFactory {
             for (int i = 0; i < bytes.length; i += 2) {
                 builder.append(Chars.fromBytes(bytes[i], bytes[i + 1]));
             }
-            return new String(builder.toString());
+            return builder.toString();
         }
         return data.strings.get(cls.getNameStringId()).getValue();
     }
