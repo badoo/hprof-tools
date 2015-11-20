@@ -4,6 +4,7 @@ import com.badoo.hprof.library.HprofReader;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.HprofString;
 import com.badoo.hprof.library.model.Instance;
+import com.badoo.hprof.viewer.model.ViewGroup;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -46,6 +47,7 @@ public class HprofViewer {
         while (reader.hasNext()) {
             reader.next();
         }
+
         // Class data read, now we can figure out which classes are Views (or ViewGroups)
         Map<Integer, ClassDefinition> classes = processor.getClasses();
         Map<Integer, HprofString> strings = processor.getStrings();
@@ -56,14 +58,20 @@ public class HprofViewer {
             }
         }
         System.out.println("Found " + viewClasses.size() + " View classes");
+
         // Filter out the instances dumps of the View classes
         List<Instance> viewInstances = filterViewInstances(processor.getInstances(), viewClasses);
         System.out.println("Found " + viewInstances.size() + " instances of View classes");
+
         // Find the View roots (Decor views), there should be at least one
         ClassDefinition decorClass = findDecorClass(viewClasses, strings);
         List<Instance> viewRoots = findViewRoots(viewInstances, decorClass);
         System.out.println("Found " + viewRoots.size() + " roots instances of " + strings.get(decorClass.getNameStringId()).getValue());
 
+        // Build the View hierarchy, starting with the roots
+        for (Instance root : viewRoots) {
+            ViewGroup viewRoot = ViewFactory.buildViewHierarchy(root, viewInstances, classes, strings);
+        }
     }
 
     private static List<Instance> findViewRoots(List<Instance> viewInstances, ClassDefinition decorClass) {

@@ -1,8 +1,16 @@
 package com.badoo.hprof.library.model;
 
+import com.badoo.hprof.library.util.StreamUtil;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
+
+import static com.badoo.hprof.library.util.StreamUtil.readInt;
+import static com.badoo.hprof.library.util.StreamUtil.skip;
 
 /**
  * Class containing the data of a class instance dump (INSTANCE_DUMP) heap record.
@@ -78,5 +86,26 @@ public class Instance {
         result = 31 * result + classObjectId;
         result = 31 * result + Arrays.hashCode(instanceFieldData);
         return result;
+    }
+
+    public int getObjectField(InstanceField field, Map<Integer, ClassDefinition> classes) throws IOException {
+        if (field.getType() != BasicType.OBJECT) {
+            throw new IllegalArgumentException("Field is not of type OBJECT");
+        }
+        // Iterate over all the instance fields until we find one that is matching
+        ByteArrayInputStream in = new ByteArrayInputStream(instanceFieldData);
+        ClassDefinition currentClass = classes.get(classObjectId);
+        while (currentClass != null) {
+            for (InstanceField currentField : currentClass.getInstanceFields()) {
+                if (currentField == field) { // This is the one we are looking for
+                    return readInt(in);
+                }
+                else {
+                    skip(in, currentField.getType().size);
+                }
+            }
+            currentClass = classes.get(currentClass.getSuperClassObjectId());
+        }
+        throw new IllegalStateException("Failed to find field");
     }
 }
