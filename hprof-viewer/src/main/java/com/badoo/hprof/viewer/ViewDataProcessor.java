@@ -54,6 +54,10 @@ public class ViewDataProcessor extends DiscardProcessor {
         return strings;
     }
 
+    public List<Instance> getInstances() {
+        return instances;
+    }
+
     @Override
     public void onRecord(int tag, int timestamp, int length, @Nonnull HprofReader reader) throws IOException {
         switch (tag) {
