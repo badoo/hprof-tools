@@ -25,18 +25,25 @@ public class ViewFactory {
         final ClassDefinition viewGroupClass;
         final ClassDefinition textViewClass;
         final ClassDefinition stringClass;
+        final ClassDefinition colorDrawableClass;
+        final ClassDefinition colorStateClass;
 
         final InstanceField viewGroupChildrenField;
         final InstanceField viewLeftField;
         final InstanceField viewRightField;
         final InstanceField viewTopField;
         final InstanceField viewBottomField;
-        final InstanceField textViewTextField;
         final InstanceField viewFlagsField;
+        final InstanceField viewBackgroundField;
+
+        final InstanceField textViewTextField;
 
         final InstanceField stringValueField;
         final InstanceField stringOffsetField;
         final InstanceField stringCountField;
+
+        final InstanceField colorDrawableColorStateField;
+        final InstanceField colorStateBaseColorField;
 
         private RefHolder(DumpData data) {
             // Classes
@@ -44,6 +51,8 @@ public class ViewFactory {
             viewGroupClass = findClassByName("android.view.ViewGroup", data);
             textViewClass = findClassByName("android.widget.TextView", data);
             stringClass = findClassByName("java.lang.String", data);
+            colorDrawableClass = findClassByName("android.graphics.drawable.ColorDrawable", data);
+            colorStateClass = findClassByName("android.graphics.drawable.ColorDrawable$ColorState", data);
 
             // Fields
             viewGroupChildrenField = findFieldByName("mChildren", BasicType.OBJECT, viewGroupClass, data);
@@ -53,12 +62,16 @@ public class ViewFactory {
             viewTopField = findFieldByName("mTop", BasicType.INT, viewClass, data);
             viewBottomField = findFieldByName("mBottom", BasicType.INT, viewClass, data);
             viewFlagsField = findFieldByName("mViewFlags", BasicType.INT, viewClass, data);
+            viewBackgroundField = findFieldByName("mBackground", BasicType.OBJECT, viewClass, data);
 
             textViewTextField = findFieldByName("mText", BasicType.OBJECT, textViewClass, data);
 
             stringValueField = findFieldByName("value", BasicType.OBJECT, stringClass, data);
             stringOffsetField = findFieldByName("offset", BasicType.INT, stringClass, data);
             stringCountField = findFieldByName("count", BasicType.INT, stringClass, data);
+
+            colorDrawableColorStateField = findFieldByName("mColorState", BasicType.OBJECT, colorDrawableClass, data);
+            colorStateBaseColorField = findFieldByName("mBaseColor", BasicType.INT, colorStateClass, data);
         }
     }
 
@@ -91,15 +104,29 @@ public class ViewFactory {
                 }
             }
         }
+        // Try to parse the background
+        int backgroundId = instance.getObjectField(refs.viewBackgroundField, data.classes);
+        int backgroundColor = 0;
+        if (backgroundId != 0) {
+            backgroundColor = getDrawableColor(data.instances.get(backgroundId), refs, data);
+        }
+
         int flags = instance.getIntField(refs.viewFlagsField, data.classes);
         int left = instance.getIntField(refs.viewLeftField, data.classes);
         int right = instance.getIntField(refs.viewRightField, data.classes);
         int top = instance.getIntField(refs.viewTopField, data.classes);
         int bottom = instance.getIntField(refs.viewBottomField, data.classes);
-        return new ViewGroup(children, left, right, top, bottom, getClassName(instance, data), flags);
+        return new ViewGroup(children, left, right, top, bottom, getClassName(instance, data), flags, backgroundColor);
     }
 
     private static View createView(Instance instance, RefHolder refs, DumpData data) throws IOException {
+        // Try to parse the background
+        int backgroundId = instance.getObjectField(refs.viewBackgroundField, data.classes);
+        int backgroundColor = 0;
+        if (backgroundId != 0) {
+            backgroundColor = getDrawableColor(data.instances.get(backgroundId), refs, data);
+        }
+
         int flags = instance.getIntField(refs.viewFlagsField, data.classes);
         int left = instance.getIntField(refs.viewLeftField, data.classes);
         int right = instance.getIntField(refs.viewRightField, data.classes);
@@ -114,16 +141,29 @@ public class ViewFactory {
             if (text.length() > 100) {
                 System.out.println("Long text: " + textObjId + ", cls=" + getClassName(textInstance, data) + ", val=" + text);
             }
-            return new TextView(text, left, right, top, bottom, flags);
+            return new TextView(text, left, right, top, bottom, flags, backgroundColor);
         }
         else {
-            return new View(left, right, top, bottom, getClassName(instance, data), flags);
+            return new View(left, right, top, bottom, getClassName(instance, data), flags, backgroundColor);
         }
     }
 
     private static String getClassName(Instance instance, DumpData data) {
         ClassDefinition cls = data.classes.get(instance.getClassObjectId());
         return data.strings.get(cls.getNameStringId()).getValue();
+    }
+
+    private static int getDrawableColor(Instance instance, RefHolder refs, DumpData data) throws IOException {
+        if (!"android.graphics.drawable.ColorDrawable".equals(getClassName(instance, data))) {
+            System.out.print("Unsupported background: " + getClassName(instance, data));
+            return 0x00000000;
+        }
+        int stateFieldId = instance.getObjectField(refs.colorDrawableColorStateField, data.classes);
+        if (stateFieldId != 0) {
+            Instance colorState = data.instances.get(stateFieldId);
+            return colorState.getIntField(refs.colorStateBaseColorField, data.classes);
+        }
+        return 0xffff0000; // Just to catch errors!
     }
 
     private static String getTextFromCharSequence(Instance instance, RefHolder refs, DumpData data) throws IOException {

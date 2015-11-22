@@ -18,14 +18,16 @@ public class View {
     private final String className;
     private final int flags;
     private boolean selected;
+    private final int backgroundColor;
 
-    public View(int left, int right, int top, int bottom, String className, int flags) {
+    public View(int left, int right, int top, int bottom, String className, int flags, int backgroundColor) {
         this.left = left;
         this.right = right;
         this.top = top;
         this.bottom = bottom;
         this.className = className;
         this.flags = flags;
+        this.backgroundColor = backgroundColor;
     }
 
     public int getWidth() {
@@ -50,6 +52,10 @@ public class View {
 
     public int getVisibility() {
         return flags & VISIBILITY_MASK;
+    }
+
+    public int getBackgroundColor() {
+        return backgroundColor;
     }
 
     @Override

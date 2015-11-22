@@ -26,6 +26,7 @@ public class MainWindow extends JFrame implements TreeSelectionListener {
     private final JSplitPane splitPane;
     private final JTree viewTree;
     private final List<ViewGroup> roots;
+    private final ViewRenderer renderer = new ViewRenderer();
     private ImagePanel imagePanel;
     private View selectedView;
 
@@ -74,7 +75,7 @@ public class MainWindow extends JFrame implements TreeSelectionListener {
     }
 
     public void updateImage(boolean resize) {
-        BufferedImage image = ViewRenderer.renderViews(roots.get(0));
+        BufferedImage image = renderer.renderViews(roots.get(0));
         imagePanel.setImage(image);
         if (resize) {
             Dimension size = new Dimension((int) (imagePanel.getPreferredSize().getWidth() + 310), (int) imagePanel.getPreferredSize().getHeight());
