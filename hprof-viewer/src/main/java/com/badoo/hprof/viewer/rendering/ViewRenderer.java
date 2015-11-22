@@ -4,17 +4,21 @@ import com.badoo.hprof.viewer.model.TextView;
 import com.badoo.hprof.viewer.model.View;
 import com.badoo.hprof.viewer.model.ViewGroup;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.image.BufferedImage;
 
 /**
  * Utility class containing methods for rendering Views and ViewGroups
- *
+ * <p/>
  * Created by Erik Andre
  */
 public class ViewRenderer {
+
+    private static Stroke THIN = new BasicStroke(2);
+    private static Stroke THICK = new BasicStroke(10);
 
     public static BufferedImage renderViews(ViewGroup root) {
         if (root.getWidth() == 0 || root.getHeight() == 0) {
@@ -46,12 +50,14 @@ public class ViewRenderer {
     }
 
     private static void renderView(View view, Graphics2D canvas) {
-        canvas.setColor(Color.BLACK);
+        canvas.setColor(view.isSelected() ? Color.RED : Color.BLACK);
+        canvas.setStroke(view.isSelected() ? THICK : THIN);
         canvas.drawRect(view.left, view.top, view.getWidth(), view.getHeight());
     }
 
     private static void renderTextView(TextView view, Graphics2D canvas) {
-        canvas.setColor(Color.RED);
+        canvas.setColor(view.isSelected() ? Color.RED : Color.BLACK);
+        canvas.setStroke(view.isSelected() ? THICK : THIN);
         canvas.drawRect(view.left, view.top, view.getWidth(), view.getHeight());
         // Seems like we have a problem here if the text is too long (rendering stalls)
 //        canvas.translate(view.left, view.top); // Apply translation

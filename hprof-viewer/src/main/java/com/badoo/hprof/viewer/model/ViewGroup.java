@@ -8,8 +8,8 @@ public class ViewGroup extends View {
 
     private final List<View> children;
 
-    public ViewGroup(List<View> children, int left, int right, int top, int bottom) {
-        super(left, right, top, bottom);
+    public ViewGroup(List<View> children, int left, int right, int top, int bottom, String className) {
+        super(left, right, top, bottom, className);
         this.children = children;
     }
 

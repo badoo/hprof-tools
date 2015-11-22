@@ -5,10 +5,8 @@ import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.HprofString;
 import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.viewer.model.ViewGroup;
-import com.badoo.hprof.viewer.rendering.ViewRenderer;
 import com.badoo.hprof.viewer.ui.MainWindow;
 
-import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -69,16 +67,14 @@ public class HprofViewer {
             roots.add(viewRoot);
         }
         // Render the views
-        BufferedImage image = ViewRenderer.renderViews(roots.get(1)); // Just the first one for now
-        updateUi(image, roots);
+        updateUi(roots);
     }
 
-    private static void updateUi(final BufferedImage image, final List<ViewGroup> roots) {
+    private static void updateUi(final List<ViewGroup> roots) {
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 //Create and set up the window.
-                MainWindow frame = new MainWindow(roots);
-                frame.updateImage(image);
+                new MainWindow(roots);
             }
         });
     }

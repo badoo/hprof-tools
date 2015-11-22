@@ -85,7 +85,7 @@ public class ViewFactory {
         int right = instance.getIntField(refs.viewRightField, data.classes);
         int top = instance.getIntField(refs.viewTopField, data.classes);
         int bottom = instance.getIntField(refs.viewBottomField, data.classes);
-        return new ViewGroup(children, left, right, top, bottom);
+        return new ViewGroup(children, left, right, top, bottom, getClassName(instance, data));
     }
 
     private static View createView(Instance instance, RefHolder refs, DumpData data) throws IOException {
@@ -102,8 +102,13 @@ public class ViewFactory {
             return new TextView(text, left, right, top, bottom);
         }
         else {
-            return new View(left, right, top, bottom);
+            return new View(left, right, top, bottom, getClassName(instance, data));
         }
+    }
+
+    private static String getClassName(Instance instance, DumpData data) {
+        ClassDefinition cls = data.classes.get(instance.getClassObjectId());
+        return data.strings.get(cls.getNameStringId()).getValue();
     }
 
     private static String getTextFromCharSequence(Instance instance, RefHolder refs, DumpData data) throws IOException {
