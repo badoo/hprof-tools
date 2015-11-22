@@ -32,7 +32,10 @@ public class ViewFactory {
         final InstanceField viewTopField;
         final InstanceField viewBottomField;
         final InstanceField textViewTextField;
+
         final InstanceField stringValueField;
+        final InstanceField stringOffsetField;
+        final InstanceField stringCountField;
 
         private RefHolder(DumpData data) {
             // Classes
@@ -48,7 +51,10 @@ public class ViewFactory {
             viewTopField = findFieldByName("mTop", BasicType.INT, viewClass, data);
             viewBottomField = findFieldByName("mBottom", BasicType.INT, viewClass, data);
             textViewTextField = findFieldByName("mText", BasicType.OBJECT, textViewClass, data);
+
             stringValueField = findFieldByName("value", BasicType.OBJECT, stringClass, data);
+            stringOffsetField = findFieldByName("offset", BasicType.INT, stringClass, data);
+            stringCountField = findFieldByName("count", BasicType.INT, stringClass, data);
         }
     }
 
@@ -99,6 +105,9 @@ public class ViewFactory {
             // The text field is an object which implements the CharSequence interface. How to access the actual text
             // is dependant on which implementation of the interface we are dealing with.
             String text = getTextFromCharSequence(textInstance, refs, data);
+            if (text.length() > 100) {
+                System.out.println("Long text: " + textObjId + ", cls=" + getClassName(textInstance, data) + ", val=" + text);
+            }
             return new TextView(text, left, right, top, bottom);
         }
         else {
@@ -114,7 +123,9 @@ public class ViewFactory {
     private static String getTextFromCharSequence(Instance instance, RefHolder refs, DumpData data) throws IOException {
         ClassDefinition cls = data.classes.get(instance.getClassObjectId());
         if (cls == refs.stringClass) {
-            int valueObjectId = instance.getObjectField(refs.stringValueField, data.classes);
+            final int valueObjectId = instance.getObjectField(refs.stringValueField, data.classes);
+            final int offset = instance.getIntField(refs.stringOffsetField, data.classes);
+            final int count = instance.getIntField(refs.stringCountField, data.classes);
             PrimitiveArray value = data.primitiveArrays.get(valueObjectId);
             if (value.getType() != BasicType.CHAR) {
                 throw new IllegalArgumentException("String.value field is not of type char[]");
@@ -124,7 +135,7 @@ public class ViewFactory {
             for (int i = 0; i < bytes.length; i += 2) {
                 builder.append(Chars.fromBytes(bytes[i], bytes[i + 1]));
             }
-            return builder.toString();
+            return builder.toString().substring(offset, offset + count);
         }
         return data.strings.get(cls.getNameStringId()).getValue();
     }
@@ -155,6 +166,11 @@ public class ViewFactory {
                 return field;
             }
         }
-        throw new IllegalArgumentException("Field " + name + " not found!");
+        // Error reporting
+        StringBuilder error = new StringBuilder();
+        for (InstanceField field : cls.getInstanceFields()) {
+            error.append(data.strings.get(field.getFieldNameId())).append(" ").append(field.getType()).append("\n");
+        }
+        throw new IllegalArgumentException("Field " + name + " not found in " + data.strings.get(cls.getNameStringId()) + "\n" + error.toString());
     }
 }
