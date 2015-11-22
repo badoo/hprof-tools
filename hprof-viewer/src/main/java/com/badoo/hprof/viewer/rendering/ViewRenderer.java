@@ -60,8 +60,9 @@ public class ViewRenderer {
         canvas.setStroke(view.isSelected() ? THICK : THIN);
         canvas.drawRect(view.left, view.top, view.getWidth(), view.getHeight());
         // Seems like we have a problem here if the text is too long (rendering stalls)
-//        canvas.translate(view.left, view.top); // Apply translation
-//        canvas.drawString(view.text, 20, view.getHeight() / 2);
-//        canvas.translate(-view.left, -view.top); // Restore the translation
+        canvas.translate(view.left, view.top); // Apply translation
+        String text = view.text.length() < 20 ? view.text : view.text.substring(0, 20);
+        canvas.drawString(text, 20, view.getHeight() / 2);
+        canvas.translate(-view.left, -view.top); // Restore the translation
     }
 }
