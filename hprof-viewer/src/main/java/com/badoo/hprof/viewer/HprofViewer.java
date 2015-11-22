@@ -7,6 +7,7 @@ import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.viewer.model.ViewGroup;
 import com.badoo.hprof.viewer.rendering.ViewRenderer;
 import com.badoo.hprof.viewer.ui.ImagePanel;
+import com.badoo.hprof.viewer.ui.MainWindow;
 
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
@@ -23,10 +24,6 @@ import javax.swing.JFrame;
 
 /**
  * Entry point for the HPROF Viewer application.
- * <p/>
- * HPROF Viewer supports the following functionality:
- * <p/>
- * TODO
  */
 public class HprofViewer {
 
@@ -69,7 +66,6 @@ public class HprofViewer {
         System.out.println("Found " + viewRoots.size() + " roots instances of " + data.strings.get(decorClass.getNameStringId()).getValue());
 
         // Build the View hierarchy, starting with the roots
-//        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         List<ViewGroup> roots = new ArrayList<ViewGroup>();
         for (Instance root : viewRoots) {
             ViewGroup viewRoot = ViewFactory.buildViewHierarchy(root, data);
@@ -84,15 +80,8 @@ public class HprofViewer {
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 //Create and set up the window.
-                JFrame frame = new JFrame("Hprof Viewer");
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-                ImagePanel imagePanel = new ImagePanel(image);
-                frame.getContentPane().add(imagePanel);
-
-                //Display the window.
-                frame.pack();
-                frame.setVisible(true);
+                MainWindow frame = new MainWindow();
+                frame.updateImage(image);
             }
         });
     }

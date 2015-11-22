@@ -7,7 +7,9 @@ import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
 
 /**
- * Created by erikandre on 18/10/15.
+ * Panel for displaying a single image
+ *
+ * Created by Erik Andre on 18/10/15.
  */
 public class ImagePanel extends JPanel {
 
@@ -16,6 +18,9 @@ public class ImagePanel extends JPanel {
 
     public ImagePanel(BufferedImage image) {
         setImage(image);
+    }
+
+    public ImagePanel() {
     }
 
     @Override
