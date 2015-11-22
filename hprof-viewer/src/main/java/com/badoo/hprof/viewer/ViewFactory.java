@@ -16,19 +16,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Factory class for creating Views from Instances and ClassDefinitions.
  */
 public class ViewFactory {
 
     private static class RefHolder {
 
+        // View
         final ClassDefinition viewClass;
-        final ClassDefinition viewGroupClass;
-        final ClassDefinition textViewClass;
-        final ClassDefinition stringClass;
-        final ClassDefinition colorDrawableClass;
-        final ClassDefinition colorStateClass;
-
-        final InstanceField viewGroupChildrenField;
         final InstanceField viewLeftField;
         final InstanceField viewRightField;
         final InstanceField viewTopField;
@@ -36,27 +31,30 @@ public class ViewFactory {
         final InstanceField viewFlagsField;
         final InstanceField viewBackgroundField;
 
+        // ViewGroup
+        final ClassDefinition viewGroupClass;
+        final InstanceField viewGroupChildrenField;
+
+        // TextView
+        final ClassDefinition textViewClass;
         final InstanceField textViewTextField;
 
+        // String
+        final ClassDefinition stringClass;
         final InstanceField stringValueField;
         final InstanceField stringOffsetField;
         final InstanceField stringCountField;
 
+        // ColorDrawable
+        final ClassDefinition colorDrawableClass;
+        final ClassDefinition colorStateClass;
         final InstanceField colorDrawableColorStateField;
         final InstanceField colorStateBaseColorField;
 
         private RefHolder(DumpData data) {
-            // Classes
+            
+            // View
             viewClass = findClassByName("android.view.View", data);
-            viewGroupClass = findClassByName("android.view.ViewGroup", data);
-            textViewClass = findClassByName("android.widget.TextView", data);
-            stringClass = findClassByName("java.lang.String", data);
-            colorDrawableClass = findClassByName("android.graphics.drawable.ColorDrawable", data);
-            colorStateClass = findClassByName("android.graphics.drawable.ColorDrawable$ColorState", data);
-
-            // Fields
-            viewGroupChildrenField = findFieldByName("mChildren", BasicType.OBJECT, viewGroupClass, data);
-
             viewLeftField = findFieldByName("mLeft", BasicType.INT, viewClass, data);
             viewRightField = findFieldByName("mRight", BasicType.INT, viewClass, data);
             viewTopField = findFieldByName("mTop", BasicType.INT, viewClass, data);
@@ -64,14 +62,26 @@ public class ViewFactory {
             viewFlagsField = findFieldByName("mViewFlags", BasicType.INT, viewClass, data);
             viewBackgroundField = findFieldByName("mBackground", BasicType.OBJECT, viewClass, data);
 
+            // ViewGroup
+            viewGroupClass = findClassByName("android.view.ViewGroup", data);
+            viewGroupChildrenField = findFieldByName("mChildren", BasicType.OBJECT, viewGroupClass, data);
+
+            // TextView
+            textViewClass = findClassByName("android.widget.TextView", data);
             textViewTextField = findFieldByName("mText", BasicType.OBJECT, textViewClass, data);
 
+            // String
+            stringClass = findClassByName("java.lang.String", data);
             stringValueField = findFieldByName("value", BasicType.OBJECT, stringClass, data);
             stringOffsetField = findFieldByName("offset", BasicType.INT, stringClass, data);
             stringCountField = findFieldByName("count", BasicType.INT, stringClass, data);
 
+            // ColorDrawable
+            colorDrawableClass = findClassByName("android.graphics.drawable.ColorDrawable", data);
+            colorStateClass = findClassByName("android.graphics.drawable.ColorDrawable$ColorState", data);
             colorDrawableColorStateField = findFieldByName("mColorState", BasicType.OBJECT, colorDrawableClass, data);
             colorStateBaseColorField = findFieldByName("mBaseColor", BasicType.INT, colorStateClass, data);
+
         }
     }
 
