@@ -6,11 +6,13 @@ import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.library.model.InstanceField;
 import com.badoo.hprof.library.model.ObjectArray;
 import com.badoo.hprof.library.model.PrimitiveArray;
+import com.badoo.hprof.viewer.model.ImageView;
 import com.badoo.hprof.viewer.model.TextView;
 import com.badoo.hprof.viewer.model.View;
 import com.badoo.hprof.viewer.model.ViewGroup;
 import com.google.common.primitives.Chars;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,11 +50,27 @@ public class ViewFactory {
         // ColorDrawable
         final ClassDefinition colorDrawableClass;
         final ClassDefinition colorStateClass;
-        final InstanceField colorDrawableColorStateField;
-        final InstanceField colorStateBaseColorField;
+        final InstanceField colorDrawable_colorStateField;
+        final InstanceField colorState_baseColorField;
+
+        // BitmapDrawable
+        final ClassDefinition bitmapDrawableClass;
+        final ClassDefinition bitmapStateClass;
+        final InstanceField bitmapDrawable_bitmapStateField;
+        final InstanceField bitmapState_bitmapField;
+
+        // Bitmap
+        final ClassDefinition bitmapClass;
+        final InstanceField bitmap_buffer;
+        final InstanceField bitmap_width;
+        final InstanceField bitmap_height;
+
+        // ImageView
+        final ClassDefinition imageViewClass;
+        final InstanceField imageView_drawable;
 
         private RefHolder(DumpData data) {
-            
+
             // View
             viewClass = findClassByName("android.view.View", data);
             viewLeftField = findFieldByName("mLeft", BasicType.INT, viewClass, data);
@@ -78,10 +96,25 @@ public class ViewFactory {
 
             // ColorDrawable
             colorDrawableClass = findClassByName("android.graphics.drawable.ColorDrawable", data);
+            colorDrawable_colorStateField = findFieldByName("mColorState", BasicType.OBJECT, colorDrawableClass, data);
             colorStateClass = findClassByName("android.graphics.drawable.ColorDrawable$ColorState", data);
-            colorDrawableColorStateField = findFieldByName("mColorState", BasicType.OBJECT, colorDrawableClass, data);
-            colorStateBaseColorField = findFieldByName("mBaseColor", BasicType.INT, colorStateClass, data);
+            colorState_baseColorField = findFieldByName("mBaseColor", BasicType.INT, colorStateClass, data);
 
+            // BitmapDrawable
+            bitmapDrawableClass = findClassByName("android.graphics.drawable.BitmapDrawable", data);
+            bitmapDrawable_bitmapStateField = findFieldByName("mBitmapState", BasicType.OBJECT, bitmapDrawableClass, data);
+            bitmapStateClass = findClassByName("android.graphics.drawable.BitmapDrawable$BitmapState", data);
+            bitmapState_bitmapField = findFieldByName("mBitmap", BasicType.OBJECT, bitmapStateClass, data);
+
+            // Bitmap
+            bitmapClass = findClassByName("android.graphics.Bitmap", data);
+            bitmap_buffer = findFieldByName("mBuffer", BasicType.OBJECT, bitmapClass, data);
+            bitmap_width = findFieldByName("mWidth", BasicType.INT, bitmapClass, data);
+            bitmap_height = findFieldByName("mHeight", BasicType.INT, bitmapClass, data);
+
+            // ImageView
+            imageViewClass = findClassByName("android.widget.ImageView", data);
+            imageView_drawable = findFieldByName("mDrawable", BasicType.OBJECT, imageViewClass, data);
         }
     }
 
@@ -153,9 +186,29 @@ public class ViewFactory {
             }
             return new TextView(text, left, right, top, bottom, flags, backgroundColor);
         }
-        else {
-            return new View(left, right, top, bottom, getClassName(instance, data), flags, backgroundColor);
+        else if (isInstanceOf(instance, refs.imageViewClass, data)) {
+            int drawableId = instance.getObjectField(refs.imageView_drawable, data.classes);
+            if (drawableId != 0) {
+                Instance drawable = data.instances.get(drawableId);
+                if (isInstanceOf(drawable, refs.bitmapDrawableClass, data)) {
+                    int stateId = drawable.getObjectField(refs.bitmapDrawable_bitmapStateField, data.classes);
+                    Instance state = data.instances.get(stateId);
+                    int bitmapId = state.getObjectField(refs.bitmapState_bitmapField, data.classes);
+                    if (bitmapId != 0) {
+                        Instance bitmap = data.instances.get(bitmapId);
+                        int bufferId = bitmap.getObjectField(refs.bitmap_buffer, data.classes);
+                        int width = bitmap.getIntField(refs.bitmap_width, data.classes);
+                        int height = bitmap.getIntField(refs.bitmap_height, data.classes);
+                        if (bufferId != 0) {
+                            PrimitiveArray buffer = data.primitiveArrays.get(bufferId);
+                            BufferedImage image = BitmapFactory.createBitmap(bitmapId, buffer.getArrayData(), width, height);
+                            return new ImageView(left, right, top, bottom, getClassName(instance, data), flags, backgroundColor, image);
+                        }
+                    }
+                }
+            }
         }
+        return new View(left, right, top, bottom, getClassName(instance, data), flags, backgroundColor);
     }
 
     private static String getClassName(Instance instance, DumpData data) {
@@ -165,13 +218,13 @@ public class ViewFactory {
 
     private static int getDrawableColor(Instance instance, RefHolder refs, DumpData data) throws IOException {
         if (!"android.graphics.drawable.ColorDrawable".equals(getClassName(instance, data))) {
-            System.out.print("Unsupported background: " + getClassName(instance, data));
+            System.out.println("Unsupported background: " + getClassName(instance, data));
             return 0x00000000;
         }
-        int stateFieldId = instance.getObjectField(refs.colorDrawableColorStateField, data.classes);
+        int stateFieldId = instance.getObjectField(refs.colorDrawable_colorStateField, data.classes);
         if (stateFieldId != 0) {
             Instance colorState = data.instances.get(stateFieldId);
-            return colorState.getIntField(refs.colorStateBaseColorField, data.classes);
+            return colorState.getIntField(refs.colorState_baseColorField, data.classes);
         }
         return 0xffff0000; // Just to catch errors!
     }

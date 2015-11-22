@@ -1,5 +1,6 @@
 package com.badoo.hprof.viewer.rendering;
 
+import com.badoo.hprof.viewer.model.ImageView;
 import com.badoo.hprof.viewer.model.TextView;
 import com.badoo.hprof.viewer.model.View;
 import com.badoo.hprof.viewer.model.ViewGroup;
@@ -49,6 +50,9 @@ public class ViewRenderer {
             else if (child instanceof TextView) {
                 renderTextView((TextView) child, canvas);
             }
+            else if (child instanceof ImageView) {
+                renderImageView((ImageView) child, canvas);
+            }
             else {
                 renderView(child, canvas);
             }
@@ -73,6 +77,15 @@ public class ViewRenderer {
         // Seems like we have a problem here if the text is too long (rendering stalls)
         canvas.translate(view.left, view.top); // Apply translation
         canvas.drawString(view.text, 20, view.getHeight() / 2);
+        canvas.translate(-view.left, -view.top); // Restore the translation
+    }
+
+    private void renderImageView(ImageView view, Graphics2D canvas) {
+        renderView(view, canvas);
+        canvas.translate(view.left, view.top); // Apply translation
+        int left = (view.getWidth() - view.getImage().getWidth()) / 2;
+        int top = (view.getHeight() - view.getImage().getHeight()) / 2;
+        canvas.drawImage(view.getImage(), left, top, null);
         canvas.translate(-view.left, -view.top); // Restore the translation
     }
 
