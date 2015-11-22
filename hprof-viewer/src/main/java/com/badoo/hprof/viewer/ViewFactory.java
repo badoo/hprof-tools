@@ -32,6 +32,7 @@ public class ViewFactory {
         final InstanceField viewTopField;
         final InstanceField viewBottomField;
         final InstanceField textViewTextField;
+        final InstanceField viewFlagsField;
 
         final InstanceField stringValueField;
         final InstanceField stringOffsetField;
@@ -46,10 +47,13 @@ public class ViewFactory {
 
             // Fields
             viewGroupChildrenField = findFieldByName("mChildren", BasicType.OBJECT, viewGroupClass, data);
+
             viewLeftField = findFieldByName("mLeft", BasicType.INT, viewClass, data);
             viewRightField = findFieldByName("mRight", BasicType.INT, viewClass, data);
             viewTopField = findFieldByName("mTop", BasicType.INT, viewClass, data);
             viewBottomField = findFieldByName("mBottom", BasicType.INT, viewClass, data);
+            viewFlagsField = findFieldByName("mViewFlags", BasicType.INT, viewClass, data);
+
             textViewTextField = findFieldByName("mText", BasicType.OBJECT, textViewClass, data);
 
             stringValueField = findFieldByName("value", BasicType.OBJECT, stringClass, data);
@@ -87,14 +91,16 @@ public class ViewFactory {
                 }
             }
         }
+        int flags = instance.getIntField(refs.viewFlagsField, data.classes);
         int left = instance.getIntField(refs.viewLeftField, data.classes);
         int right = instance.getIntField(refs.viewRightField, data.classes);
         int top = instance.getIntField(refs.viewTopField, data.classes);
         int bottom = instance.getIntField(refs.viewBottomField, data.classes);
-        return new ViewGroup(children, left, right, top, bottom, getClassName(instance, data));
+        return new ViewGroup(children, left, right, top, bottom, getClassName(instance, data), flags);
     }
 
     private static View createView(Instance instance, RefHolder refs, DumpData data) throws IOException {
+        int flags = instance.getIntField(refs.viewFlagsField, data.classes);
         int left = instance.getIntField(refs.viewLeftField, data.classes);
         int right = instance.getIntField(refs.viewRightField, data.classes);
         int top = instance.getIntField(refs.viewTopField, data.classes);
@@ -108,10 +114,10 @@ public class ViewFactory {
             if (text.length() > 100) {
                 System.out.println("Long text: " + textObjId + ", cls=" + getClassName(textInstance, data) + ", val=" + text);
             }
-            return new TextView(text, left, right, top, bottom);
+            return new TextView(text, left, right, top, bottom, flags);
         }
         else {
-            return new View(left, right, top, bottom, getClassName(instance, data));
+            return new View(left, right, top, bottom, getClassName(instance, data), flags);
         }
     }
 
