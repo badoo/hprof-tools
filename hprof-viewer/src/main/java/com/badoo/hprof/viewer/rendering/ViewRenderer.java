@@ -109,8 +109,8 @@ public class ViewRenderer {
         }
         if (!colorMap.containsKey(color)) {
             // Add some alpha to make it easier to see all layers
-            int red = (color >> 8) & 0xff;
-            int green = (color >> 4) & 0xff;
+            int red = (color >> 16) & 0xff;
+            int green = (color >> 8) & 0xff;
             int blue = color & 0xff;
             colorMap.put(color, new Color(red, green, blue, 120));
         }
