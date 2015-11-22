@@ -24,6 +24,8 @@ public class ViewRenderer {
     private static Stroke THICK = new BasicStroke(10);
 
     private Map<Integer, Color> colorMap = new HashMap<Integer, Color>();
+    private boolean showBounds = true;
+    private boolean forceAlpha = true;
 
     public BufferedImage renderViews(ViewGroup root) {
         if (root.getWidth() == 0 || root.getHeight() == 0) {
@@ -35,6 +37,15 @@ public class ViewRenderer {
         canvas.setFont(canvas.getFont().deriveFont(24f));
         renderViewGroup(root, canvas);
         return buffer;
+    }
+
+    public void setShowBounds(boolean showBounds) {
+        this.showBounds = showBounds;
+    }
+
+    public void setForceAlpha(boolean forceAlpha) {
+        colorMap.clear();
+        this.forceAlpha = forceAlpha;
     }
 
     private void renderViewGroup(ViewGroup view, Graphics2D canvas) {
@@ -69,7 +80,9 @@ public class ViewRenderer {
         canvas.setColor(getViewForegroundColor(view));
         canvas.setColor(view.isSelected() ? Color.RED : Color.BLACK);
         canvas.setStroke(view.isSelected() ? THICK : THIN);
-        canvas.drawRect(view.left, view.top, view.getWidth(), view.getHeight());
+        if (showBounds) {
+            canvas.drawRect(view.left, view.top, view.getWidth(), view.getHeight());
+        }
     }
 
     private void renderTextView(TextView view, Graphics2D canvas) {
@@ -99,7 +112,7 @@ public class ViewRenderer {
         if (view.isSelected()) {
             return Color.RED;
         }
-        return view.getVisibility() == View.VISIBLE? Color.BLACK : Color.LIGHT_GRAY;
+        return view.getVisibility() == View.VISIBLE ? Color.BLACK : Color.LIGHT_GRAY;
     }
 
     private Color getViewBackgroundColor(View view) {
@@ -112,8 +125,10 @@ public class ViewRenderer {
             int red = (color >> 16) & 0xff;
             int green = (color >> 8) & 0xff;
             int blue = color & 0xff;
-            colorMap.put(color, new Color(red, green, blue, 120));
+            int alpha = forceAlpha? 120 : (color >> 24) & 0xff;
+            colorMap.put(color, new Color(red, green, blue, alpha));
         }
         return colorMap.get(color);
     }
+
 }

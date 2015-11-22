@@ -6,12 +6,14 @@ import com.badoo.hprof.viewer.rendering.ViewRenderer;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.Vector;
 
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -31,9 +33,10 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
 
     private final JSplitPane splitPane;
     private final JTree viewTree;
-    private final List<ViewGroup> roots;
     private final ViewRenderer renderer = new ViewRenderer();
     private final JComboBox rootPicker;
+    private final JCheckBox showBoundsBox;
+    private final JCheckBox forceAlpha;
     private ViewGroup selectedRoot;
     private ImagePanel imagePanel;
     private View selectedView;
@@ -42,7 +45,7 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
         super("Hprof Viewer");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        this.roots = roots;
+        List<ViewGroup> roots1 = roots;
 
         imagePanel = new ImagePanel();
         viewTree = new JTree(new DefaultMutableTreeNode("Loading..."));
@@ -53,9 +56,18 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
         rootPicker = new JComboBox(new Vector<Object>(roots));
         rootPicker.addItemListener(this);
 
+        JPanel settingsPanel = new JPanel(new GridLayout(1,2));
+        showBoundsBox = new JCheckBox("Show layout bounds", true);
+        showBoundsBox.addItemListener(this);
+        forceAlpha = new JCheckBox("Force alpha", true);
+        forceAlpha.addItemListener(this);
+        settingsPanel.add(showBoundsBox);
+        settingsPanel.add(forceAlpha);
+
         JPanel leftPanel = new JPanel(new BorderLayout());
         leftPanel.add(rootPicker, BorderLayout.NORTH);
         leftPanel.add(treeScroller, BorderLayout.CENTER);
+        leftPanel.add(settingsPanel, BorderLayout.SOUTH);
 
         // Split pane for the tree and image views
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -120,7 +132,17 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
 
     @Override
     public void itemStateChanged(ItemEvent itemEvent) {
-        selectedRoot = (ViewGroup) itemEvent.getItem();
-        update();
+        if (itemEvent.getSource() == rootPicker) {
+            selectedRoot = (ViewGroup) itemEvent.getItem();
+            update();
+        }
+        else if (itemEvent.getSource() == showBoundsBox) {
+            renderer.setShowBounds(showBoundsBox.isSelected());
+            updateImage(false);
+        }
+        else if (itemEvent.getSource() == forceAlpha) {
+            renderer.setForceAlpha(forceAlpha.isSelected());
+            updateImage(false);
+        }
     }
 }
