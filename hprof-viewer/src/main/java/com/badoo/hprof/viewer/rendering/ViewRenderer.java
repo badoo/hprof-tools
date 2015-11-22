@@ -83,9 +83,15 @@ public class ViewRenderer {
     private void renderImageView(ImageView view, Graphics2D canvas) {
         renderView(view, canvas);
         canvas.translate(view.left, view.top); // Apply translation
-        int left = (view.getWidth() - view.getImage().getWidth()) / 2;
-        int top = (view.getHeight() - view.getImage().getHeight()) / 2;
-        canvas.drawImage(view.getImage(), left, top, null);
+        final BufferedImage image = view.getImage();
+        if (image.getWidth() < view.getWidth() && image.getHeight() < view.getHeight()) { // Center inside
+            int left = (view.getWidth() - image.getWidth()) / 2;
+            int top = (view.getHeight() - image.getHeight()) / 2;
+            canvas.drawImage(image, left, top, null);
+        }
+        else {
+            canvas.drawImage(image, 0, 0, view.getWidth(), view.getHeight(), null); // Fit inside
+        }
         canvas.translate(-view.left, -view.top); // Restore the translation
     }
 

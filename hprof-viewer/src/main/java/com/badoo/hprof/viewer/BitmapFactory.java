@@ -24,7 +24,7 @@ public class BitmapFactory {
         for (int i = 0; i < data.length; i += 4) {
             int pixel = i / 4;
             // Force the alpha to make the image more visible
-            int value = 0xff000000 |  (data[i + 1] << 16) | (data[i + 2] << 8) | data[i + 3];
+            int value = ((data[i + 3] << 24) & 0xff000000) |  ((data[i] << 16) & 0xff0000) | ((data[i + 1] << 8) & 0xff00) | (data[i + 2] & 0xff);
             image.setRGB(pixel % width, pixel / width, value);
         }
         cache.put(bitmapObjectId, image);
