@@ -1,4 +1,4 @@
-package com.badoo.hprof.viewer.model;
+package com.badoo.hprof.viewer.android;
 
 /**
  * Model class for an Android view
@@ -18,16 +18,19 @@ public class View {
     private final String className;
     private final int flags;
     private boolean selected;
-    private final int backgroundColor;
+    private Drawable background;
 
-    public View(int left, int right, int top, int bottom, String className, int flags, int backgroundColor) {
+    public View(String className, int left, int right, int top, int bottom, int flags) {
         this.left = left;
         this.right = right;
         this.top = top;
         this.bottom = bottom;
         this.className = className;
         this.flags = flags;
-        this.backgroundColor = backgroundColor;
+    }
+
+    public void setBackground(Drawable background) {
+        this.background = background;
     }
 
     public int getWidth() {
@@ -54,8 +57,8 @@ public class View {
         return flags & VISIBILITY_MASK;
     }
 
-    public int getBackgroundColor() {
-        return backgroundColor;
+    public Drawable getBackground() {
+        return background;
     }
 
     @Override

@@ -1,9 +1,10 @@
 package com.badoo.hprof.viewer.rendering;
 
-import com.badoo.hprof.viewer.model.ImageView;
-import com.badoo.hprof.viewer.model.TextView;
-import com.badoo.hprof.viewer.model.View;
-import com.badoo.hprof.viewer.model.ViewGroup;
+import com.badoo.hprof.viewer.android.Drawable;
+import com.badoo.hprof.viewer.android.ImageView;
+import com.badoo.hprof.viewer.android.TextView;
+import com.badoo.hprof.viewer.android.View;
+import com.badoo.hprof.viewer.android.ViewGroup;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -23,7 +24,6 @@ public class ViewRenderer {
     private static Stroke THIN = new BasicStroke(2);
     private static Stroke THICK = new BasicStroke(10);
 
-    private Map<Integer, Color> colorMap = new HashMap<Integer, Color>();
     private boolean showBounds = true;
     private boolean forceAlpha = true;
 
@@ -44,7 +44,6 @@ public class ViewRenderer {
     }
 
     public void setForceAlpha(boolean forceAlpha) {
-        colorMap.clear();
         this.forceAlpha = forceAlpha;
     }
 
@@ -72,10 +71,15 @@ public class ViewRenderer {
     }
 
     private void renderView(View view, Graphics2D canvas) {
-        Color background = getViewBackgroundColor(view);
+        Drawable background = view.getBackground();
         if (background != null) {
-            canvas.setColor(background);
-            canvas.fillRect(view.left, view.top, view.getWidth(), view.getHeight());
+            if (forceAlpha) {
+                background.setAlpha(120);
+            }
+            else {
+                background.setAlpha(255);
+            }
+            background.draw(canvas, view.left, view.top, view.right, view.bottom);
         }
         canvas.setColor(getViewForegroundColor(view));
         canvas.setColor(view.isSelected() ? Color.RED : Color.BLACK);
@@ -95,17 +99,10 @@ public class ViewRenderer {
 
     private void renderImageView(ImageView view, Graphics2D canvas) {
         renderView(view, canvas);
-        canvas.translate(view.left, view.top); // Apply translation
-        final BufferedImage image = view.getImage();
-        if (image.getWidth() < view.getWidth() && image.getHeight() < view.getHeight()) { // Center inside
-            int left = (view.getWidth() - image.getWidth()) / 2;
-            int top = (view.getHeight() - image.getHeight()) / 2;
-            canvas.drawImage(image, left, top, null);
+        Drawable image = view.getImage();
+        if (image != null) {
+            image.draw(canvas, view.left, view.top, view.right, view.bottom);
         }
-        else {
-            canvas.drawImage(image, 0, 0, view.getWidth(), view.getHeight(), null); // Fit inside
-        }
-        canvas.translate(-view.left, -view.top); // Restore the translation
     }
 
     private Color getViewForegroundColor(View view) {
@@ -113,22 +110,6 @@ public class ViewRenderer {
             return Color.RED;
         }
         return view.getVisibility() == View.VISIBLE ? Color.BLACK : Color.LIGHT_GRAY;
-    }
-
-    private Color getViewBackgroundColor(View view) {
-        final int color = view.getBackgroundColor();
-        if (color == 0) {
-            return null;
-        }
-        if (!colorMap.containsKey(color)) {
-            // Add some alpha to make it easier to see all layers
-            int red = (color >> 16) & 0xff;
-            int green = (color >> 8) & 0xff;
-            int blue = color & 0xff;
-            int alpha = forceAlpha? 120 : (color >> 24) & 0xff;
-            colorMap.put(color, new Color(red, green, blue, alpha));
-        }
-        return colorMap.get(color);
     }
 
 }

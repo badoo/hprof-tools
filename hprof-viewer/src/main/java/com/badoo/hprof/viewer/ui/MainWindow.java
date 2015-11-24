@@ -1,7 +1,7 @@
 package com.badoo.hprof.viewer.ui;
 
-import com.badoo.hprof.viewer.model.View;
-import com.badoo.hprof.viewer.model.ViewGroup;
+import com.badoo.hprof.viewer.android.View;
+import com.badoo.hprof.viewer.android.ViewGroup;
 import com.badoo.hprof.viewer.rendering.ViewRenderer;
 
 import java.awt.BorderLayout;

@@ -4,7 +4,7 @@ import com.badoo.hprof.library.HprofReader;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.HprofString;
 import com.badoo.hprof.library.model.Instance;
-import com.badoo.hprof.viewer.model.ViewGroup;
+import com.badoo.hprof.viewer.android.ViewGroup;
 import com.badoo.hprof.viewer.ui.MainWindow;
 
 import java.io.BufferedInputStream;
