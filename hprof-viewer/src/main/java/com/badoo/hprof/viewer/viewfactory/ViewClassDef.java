@@ -21,6 +21,8 @@ class ViewClassDef extends BaseClassDef {
     final InstanceField bottom;
     final InstanceField flags;
     final InstanceField background;
+    final InstanceField context;
+
 
     public ViewClassDef(@Nonnull DumpData data) {
         cls = findClassByName("android.view.View", data);
@@ -30,5 +32,6 @@ class ViewClassDef extends BaseClassDef {
         bottom = findFieldByName("mBottom", BasicType.INT, cls, data);
         flags = findFieldByName("mViewFlags", BasicType.INT, cls, data);
         background = findFieldByName("mBackground", BasicType.OBJECT, cls, data);
+        context = findFieldByName("mContext", BasicType.OBJECT, cls, data);
     }
 }

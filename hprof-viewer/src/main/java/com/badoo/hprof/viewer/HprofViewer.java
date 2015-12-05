@@ -6,6 +6,7 @@ import com.badoo.hprof.library.model.HprofString;
 import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.viewer.android.ViewGroup;
 import com.badoo.hprof.viewer.ui.MainWindow;
+import com.badoo.hprof.viewer.viewfactory.Screen;
 import com.badoo.hprof.viewer.viewfactory.ViewFactory;
 
 import java.io.BufferedInputStream;
@@ -62,16 +63,16 @@ public class HprofViewer {
         System.out.println("Found " + viewRoots.size() + " roots instances of " + data.strings.get(decorClass.getNameStringId()).getValue());
 
         // Build the View hierarchy, starting with the roots
-        List<ViewGroup> roots = new ArrayList<ViewGroup>();
+        List<Screen> screens = new ArrayList<Screen>();
         for (Instance root : viewRoots) {
-            ViewGroup viewRoot = ViewFactory.buildViewHierarchy(root, data);
-            roots.add(viewRoot);
+            Screen screen = ViewFactory.buildViewHierarchy(root, data);
+            screens.add(screen);
         }
         // Render the views
-        updateUi(roots);
+        updateUi(screens);
     }
 
-    private static void updateUi(final List<ViewGroup> roots) {
+    private static void updateUi(final List<Screen> roots) {
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 //Create and set up the window.

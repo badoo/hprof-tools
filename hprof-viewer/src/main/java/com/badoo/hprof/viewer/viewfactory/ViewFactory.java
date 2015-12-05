@@ -2,11 +2,13 @@ package com.badoo.hprof.viewer.viewfactory;
 
 import com.badoo.hprof.library.model.BasicType;
 import com.badoo.hprof.library.model.ClassDefinition;
+import com.badoo.hprof.library.model.HprofString;
 import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.library.model.ObjectArray;
 import com.badoo.hprof.library.model.PrimitiveArray;
 import com.badoo.hprof.viewer.BitmapFactory;
 import com.badoo.hprof.viewer.DumpData;
+import com.badoo.hprof.viewer.android.Activity;
 import com.badoo.hprof.viewer.android.Drawable;
 import com.badoo.hprof.viewer.android.ImageView;
 import com.badoo.hprof.viewer.android.TextView;
@@ -34,14 +36,21 @@ public class ViewFactory {
      */
     private static class RefHolder {
 
+        // Views
         final ViewClassDef view;
         final ViewGroupClassDef viewGroup;
         final TextViewClassDef textView;
-        final StringClassDef string;
+        final ImageViewClassDef imageView;
+
+        // Drawables
         final ColorDrawableClassDef colorDrawable;
         final BitmapDrawableClassDef bitmapDrawable;
+
+        // Other classes
         final BitmapClassDef bitmap;
-        final ImageViewClassDef imageView;
+        final StringClassDef string;
+        final ActivityClassDef activity;
+
 
         private RefHolder(DumpData data) {
             view = new ViewClassDef(data);
@@ -52,6 +61,7 @@ public class ViewFactory {
             bitmapDrawable = new BitmapDrawableClassDef(data);
             bitmap = new BitmapClassDef(data);
             imageView = new ImageViewClassDef(data);
+            activity = new ActivityClassDef(data);
         }
     }
 
@@ -63,14 +73,32 @@ public class ViewFactory {
      * @return a ViewGroup linked to the other Views in this hierarchy
      */
     @Nonnull
-    public static ViewGroup buildViewHierarchy(Instance root, DumpData data) {
+    public static Screen buildViewHierarchy(@Nonnull Instance root, @Nonnull DumpData data) {
         RefHolder refs = new RefHolder(data);
         try {
-            return createViewGroup(root, refs, data);
+            Activity activity = createActivity(root, refs, data);
+            return new Screen(createViewGroup(root, refs, data), activity);
         }
         catch (IOException e) {
             throw new RuntimeException("Failed to create View Hierarchy", e);
         }
+    }
+
+    private static Activity createActivity(Instance root, RefHolder refs, DumpData data) throws IOException {
+        int activityInstanceId = root.getObjectField(refs.view.context, data.classes);
+        if (activityInstanceId != 0) {
+            Instance activity = data.instances.get(activityInstanceId);
+            ClassDefinition activityClass = data.classes.get(activity.getClassObjectId());
+            final HprofString name = data.strings.get(activityClass.getNameStringId());
+            int titleInstanceId = activity.getObjectField(refs.activity.title, data.classes);
+            String titleString = null;
+            if (titleInstanceId != 0) {
+                Instance title = data.instances.get(titleInstanceId);
+                titleString = getTextFromCharSequence(title, refs, data);
+            }
+            return new Activity(name.getValue(), titleString);
+        }
+        return null;
     }
 
     private static ViewGroup createViewGroup(Instance instance, RefHolder refs, DumpData data) throws IOException {

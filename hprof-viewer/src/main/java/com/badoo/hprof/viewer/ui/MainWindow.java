@@ -3,6 +3,7 @@ package com.badoo.hprof.viewer.ui;
 import com.badoo.hprof.viewer.android.View;
 import com.badoo.hprof.viewer.android.ViewGroup;
 import com.badoo.hprof.viewer.rendering.ViewRenderer;
+import com.badoo.hprof.viewer.viewfactory.Screen;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -41,11 +42,9 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
     private ImagePanel imagePanel;
     private View selectedView;
 
-    public MainWindow(List<ViewGroup> roots) {
+    public MainWindow(List<Screen> screens) {
         super("Hprof Viewer");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        List<ViewGroup> roots1 = roots;
 
         imagePanel = new ImagePanel();
         viewTree = new JTree(new DefaultMutableTreeNode("Loading..."));
@@ -53,7 +52,7 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
         viewTree.addTreeSelectionListener(this);
         JScrollPane treeScroller = new JScrollPane(viewTree);
 
-        rootPicker = new JComboBox(new Vector<Object>(roots));
+        rootPicker = new JComboBox(new Vector<Object>(screens));
         rootPicker.addItemListener(this);
 
         JPanel settingsPanel = new JPanel(new GridLayout(1,2));
@@ -75,7 +74,7 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
         splitPane.setRightComponent(imagePanel);
         add(splitPane);
         setVisible(true);
-        selectedRoot = roots.get(0);
+        selectedRoot = screens.get(0).getViewRoot();
         update();
     }
 
@@ -133,7 +132,7 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
     @Override
     public void itemStateChanged(ItemEvent itemEvent) {
         if (itemEvent.getSource() == rootPicker) {
-            selectedRoot = (ViewGroup) itemEvent.getItem();
+            selectedRoot = ((Screen) itemEvent.getItem()).getViewRoot();
             update();
         }
         else if (itemEvent.getSource() == showBoundsBox) {
