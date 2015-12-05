@@ -1,4 +1,4 @@
-package com.badoo.hprof.viewer.viewfactory;
+package com.badoo.hprof.viewer.factory;
 
 import com.badoo.hprof.library.model.BasicType;
 import com.badoo.hprof.library.model.ClassDefinition;

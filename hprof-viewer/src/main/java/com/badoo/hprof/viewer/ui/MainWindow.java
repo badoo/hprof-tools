@@ -4,8 +4,9 @@ import com.badoo.hprof.viewer.android.Activity;
 import com.badoo.hprof.viewer.android.Intent;
 import com.badoo.hprof.viewer.android.View;
 import com.badoo.hprof.viewer.android.ViewGroup;
+import com.badoo.hprof.viewer.factory.SystemInfo;
 import com.badoo.hprof.viewer.rendering.ViewRenderer;
-import com.badoo.hprof.viewer.viewfactory.Screen;
+import com.badoo.hprof.viewer.factory.Screen;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import javax.annotation.Nonnull;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -35,12 +37,14 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeSelectionModel;
 
 /**
+ * Main window containing information about Views and activities.
+ * <p/>
  * Created by Erik Andre on 22/11/15.
  */
 public class MainWindow extends JFrame implements TreeSelectionListener, ItemListener {
 
-    public static final String[] HEADER = new String[]{"Name", "Value"};
-    private final JSplitPane splitPane;
+    private static final String[] HEADER = new String[]{"Name", "Value"};
+
     private final JTree viewTree;
     private final ViewRenderer renderer = new ViewRenderer();
     private final JComboBox rootPicker;
@@ -51,7 +55,7 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
     private ImagePanel imagePanel;
     private View selectedView;
 
-    public MainWindow(List<Screen> screens) {
+    public MainWindow(@Nonnull List<Screen> screens, SystemInfo sysInfo) {
         super("Hprof Viewer");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -91,13 +95,14 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
         leftPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         // Split pane for the tree and image views
-        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setLeftComponent(leftPanel);
         splitPane.setRightComponent(imagePanel);
         add(splitPane);
         setVisible(true);
         selectedScreen = screens.get(0);
         update();
+        new SysInfoWindow(sysInfo);
     }
 
     private void update() {
@@ -116,12 +121,12 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
             if (params == null) {
                 params = new HashMap<String, String>();
             }
-            cells = new String[params.size() + (hasAction? 1 : 0)][2];
+            cells = new String[params.size() + (hasAction ? 1 : 0)][2];
             if (hasAction) {
                 cells[0][0] = "Action";
                 cells[0][1] = intent.getAction();
             }
-            int position = hasAction? 1 : 0;
+            int position = hasAction ? 1 : 0;
             for (Map.Entry<String, String> entry : params.entrySet()) {
                 cells[position][0] = entry.getKey();
                 cells[position][1] = entry.getValue();

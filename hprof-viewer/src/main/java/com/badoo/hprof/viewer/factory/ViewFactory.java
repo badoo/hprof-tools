@@ -1,6 +1,5 @@
-package com.badoo.hprof.viewer.viewfactory;
+package com.badoo.hprof.viewer.factory;
 
-import com.badoo.hprof.library.model.BasicType;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.HprofString;
 import com.badoo.hprof.library.model.Instance;
@@ -18,12 +17,10 @@ import com.badoo.hprof.viewer.android.ViewGroup;
 import com.badoo.hprof.viewer.android.drawables.BitmapDrawable;
 import com.badoo.hprof.viewer.android.drawables.ColorDrawable;
 import com.badoo.hprof.viewer.android.drawables.EmptyDrawable;
-import com.google.common.primitives.Chars;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,12 +29,12 @@ import javax.annotation.Nonnull;
 /**
  * Factory class for creating Views from Instances and ClassDefinitions.
  */
-public class ViewFactory {
+public class ViewFactory extends BaseFactory{
 
     /**
      * Class holding references to the class definitions we need to decode a view hierarchy
      */
-    private static class RefHolder {
+    private static class ViewRefHolder extends BaseRefHolder {
 
         // Views
         final ViewClassDef view;
@@ -51,31 +48,16 @@ public class ViewFactory {
 
         // Other classes
         final BitmapClassDef bitmap;
-        final StringClassDef string;
-        final ActivityClassDef activity;
-        final IntentClassDef intent;
-        final BundleBaseClassDef bundle;
-        final ArrayMapClassDef arrayMap;
-        final BooleanClassDef bool;
-        final IntegerClassDef integer;
-        final EnumClassDef enumDef;
 
-        private RefHolder(DumpData data) {
+        private ViewRefHolder(DumpData data) {
+            super(data);
             view = new ViewClassDef(data);
             viewGroup = new ViewGroupClassDef(data);
             textView = new TextViewClassDef(data);
-            string = new StringClassDef(data);
             colorDrawable = new ColorDrawableClassDef(data);
             bitmapDrawable = new BitmapDrawableClassDef(data);
             bitmap = new BitmapClassDef(data);
             imageView = new ImageViewClassDef(data);
-            activity = new ActivityClassDef(data);
-            intent = new IntentClassDef(data);
-            bundle = new BundleBaseClassDef(data);
-            arrayMap = new ArrayMapClassDef(data);
-            bool = new BooleanClassDef(data);
-            integer = new IntegerClassDef(data);
-            enumDef = new EnumClassDef(data);
         }
     }
 
@@ -88,7 +70,7 @@ public class ViewFactory {
      */
     @Nonnull
     public static Screen buildViewHierarchy(@Nonnull Instance root, @Nonnull DumpData data) {
-        RefHolder refs = new RefHolder(data);
+        ViewRefHolder refs = new ViewRefHolder(data);
         try {
             Activity activity = createActivity(root, refs, data);
             return new Screen(createViewGroup(root, refs, data), activity);
@@ -98,7 +80,7 @@ public class ViewFactory {
         }
     }
 
-    private static Activity createActivity(Instance root, RefHolder refs, DumpData data) throws IOException {
+    private static Activity createActivity(Instance root, ViewRefHolder refs, DumpData data) throws IOException {
         Instance activity = data.instances.get(root.getObjectField(refs.view.context, data.classes));
         if (activity != null) {
             // Name and title
@@ -108,7 +90,7 @@ public class ViewFactory {
             String titleString = null;
             if (titleInstanceId != 0) {
                 Instance title = data.instances.get(titleInstanceId);
-                titleString = getTextFromCharSequence(title, refs, data);
+                titleString = readString(title, refs, data);
             }
             // Intent
             Intent restoredIntent = null;
@@ -117,7 +99,7 @@ public class ViewFactory {
                 String actionString = null;
                 Instance action = data.instances.get(intent.getObjectField(refs.intent.action, data.classes));
                 if (action != null) {
-                    actionString = getTextFromCharSequence(action, refs, data);
+                    actionString = readString(action, refs, data);
                 }
                 Instance bundle = data.instances.get(intent.getObjectField(refs.intent.extras, data.classes));
                 if (bundle != null) {
@@ -133,7 +115,7 @@ public class ViewFactory {
         return null;
     }
 
-    private static ViewGroup createViewGroup(Instance instance, RefHolder refs, DumpData data) throws IOException {
+    private static ViewGroup createViewGroup(Instance instance, ViewRefHolder refs, DumpData data) throws IOException {
         int childFieldId = instance.getObjectField(refs.viewGroup.children, data.classes);
         List<View> children = new ArrayList<View>();
         if (childFieldId != 0) {
@@ -164,7 +146,7 @@ public class ViewFactory {
         return group;
     }
 
-    private static View createView(Instance instance, RefHolder refs, DumpData data) throws IOException {
+    private static View createView(Instance instance, ViewRefHolder refs, DumpData data) throws IOException {
         int backgroundId = instance.getObjectField(refs.view.background, data.classes);
         Drawable background = createDrawable(backgroundId, refs, data);
         int flags = instance.getIntField(refs.view.flags, data.classes);
@@ -180,7 +162,7 @@ public class ViewFactory {
             Instance textInstance = data.instances.get(textObjId);
             // The text field is an object which implements the CharSequence interface. How to access the actual text
             // is dependant on which implementation of the interface we are dealing with.
-            String text = getTextFromCharSequence(textInstance, refs, data);
+            String text = readString(textInstance, refs, data);
             view = new TextView(className, left, right, top, bottom, flags, text);
         }
         else if (isInstanceOf(instance, refs.imageView.cls, data)) { // ImageView
@@ -196,12 +178,7 @@ public class ViewFactory {
         return view;
     }
 
-    private static String getClassName(Instance instance, DumpData data) {
-        ClassDefinition cls = data.classes.get(instance.getClassObjectId());
-        return data.strings.get(cls.getNameStringId()).getValue();
-    }
-
-    private static Drawable createDrawable(int drawableId, RefHolder refs, DumpData data) throws IOException {
+    private static Drawable createDrawable(int drawableId, ViewRefHolder refs, DumpData data) throws IOException {
         if (drawableId == 0) {
             return new EmptyDrawable();
         }
@@ -231,76 +208,6 @@ public class ViewFactory {
             }
         }
         return new EmptyDrawable();
-    }
-
-    private static String getTextFromCharSequence(Instance instance, RefHolder refs, DumpData data) throws IOException {
-        ClassDefinition cls = data.classes.get(instance.getClassObjectId());
-        if (cls == refs.string.cls) {
-            final int valueObjectId = instance.getObjectField(refs.string.value, data.classes);
-            final int offset = instance.getIntField(refs.string.offset, data.classes);
-            final int count = instance.getIntField(refs.string.count, data.classes);
-            PrimitiveArray value = data.primitiveArrays.get(valueObjectId);
-            if (value.getType() != BasicType.CHAR) {
-                throw new IllegalArgumentException("String.value field is not of type char[]");
-            }
-            StringBuilder builder = new StringBuilder();
-            byte[] bytes = value.getArrayData();
-            for (int i = 0; i < bytes.length; i += 2) {
-                builder.append(Chars.fromBytes(bytes[i], bytes[i + 1]));
-            }
-            return builder.toString().substring(offset, offset + count);
-        }
-        return data.strings.get(cls.getNameStringId()).getValue();
-    }
-
-    private static Map<String, String> createMap(Instance map, RefHolder refs, DumpData data) throws IOException {
-        if (!isInstanceOf(map, refs.arrayMap.cls, data)) {
-            System.err.println("Unsupported map: " + data.strings.get(data.classes.get(map.getClassObjectId()).getNameStringId()).getValue());
-            return null;
-        }
-        int size = map.getIntField(refs.arrayMap.size, data.classes);
-        ObjectArray array = data.objArrays.get(map.getObjectField(refs.arrayMap.array, data.classes));
-        if (array == null) {
-            return null;
-        }
-        Map<String, String> values = new HashMap<String, String>();
-        for (int i = 0; i < size; i++) {
-            String key = instanceToString(data.instances.get(array.getElements()[i * 2]), refs, data);
-            String value = instanceToString(data.instances.get(array.getElements()[i * 2 + 1]), refs, data);
-            values.put(key, value);
-        }
-        return values;
-    }
-
-    private static String instanceToString(Instance instance, RefHolder refs, DumpData data) throws IOException {
-        if (isInstanceOf(instance, refs.string.cls, data)) {
-            return getTextFromCharSequence(instance, refs, data);
-        }
-        else if (isInstanceOf(instance, refs.bool.cls, data)) {
-           return Boolean.toString(instance.getBooleanField(refs.bool.value, data.classes));
-        }
-        else if (isInstanceOf(instance, refs.integer.cls, data)) {
-            return Integer.toString(instance.getIntField(refs.integer.value, data.classes));
-        }
-        else if (isInstanceOf(instance, refs.enumDef.cls, data)) {
-            String clsName = getClassName(instance, data);
-            Instance nameInstance = data.instances.get(instance.getObjectField(refs.enumDef.name, data.classes));
-            String name = getTextFromCharSequence(nameInstance, refs, data);
-            int ordinal = instance.getIntField(refs.enumDef.ordinal, data.classes);
-            return clsName + "." + name + " (" + ordinal + ")";
-        }
-        return data.strings.get(data.classes.get(instance.getClassObjectId()).getNameStringId()).getValue();
-    }
-
-    private static boolean isInstanceOf(Instance instance, ClassDefinition of, DumpData data) {
-        ClassDefinition cls = data.classes.get(instance.getClassObjectId());
-        while (cls != null) {
-            if (cls == of) {
-                return true;
-            }
-            cls = data.classes.get(cls.getSuperClassObjectId());
-        }
-        return false;
     }
 
 }

@@ -1,4 +1,4 @@
-package com.badoo.hprof.viewer.viewfactory;
+package com.badoo.hprof.viewer.factory;
 
 import com.badoo.hprof.viewer.android.Activity;
 import com.badoo.hprof.viewer.android.ViewGroup;
