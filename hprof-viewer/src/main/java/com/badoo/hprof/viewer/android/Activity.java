@@ -12,10 +12,12 @@ public class Activity {
 
     private final String name;
     private final String title;
+    private final Intent intent;
 
-    public Activity(@Nonnull String name, @Nullable String title) {
+    public Activity(@Nonnull String name, @Nullable String title, @Nullable Intent intent) {
         this.name = name;
         this.title = title;
+        this.intent = intent;
     }
 
     /**
@@ -36,6 +38,16 @@ public class Activity {
     @Nullable
     public String getTitle() {
         return title;
+    }
+
+    /**
+     * Returns the Intent used to start this activity
+     *
+     * @return the starting intent
+     */
+    @Nullable
+    public Intent getIntent() {
+        return intent;
     }
 
     @Override

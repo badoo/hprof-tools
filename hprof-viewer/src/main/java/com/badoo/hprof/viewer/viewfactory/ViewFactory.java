@@ -11,6 +11,7 @@ import com.badoo.hprof.viewer.DumpData;
 import com.badoo.hprof.viewer.android.Activity;
 import com.badoo.hprof.viewer.android.Drawable;
 import com.badoo.hprof.viewer.android.ImageView;
+import com.badoo.hprof.viewer.android.Intent;
 import com.badoo.hprof.viewer.android.TextView;
 import com.badoo.hprof.viewer.android.View;
 import com.badoo.hprof.viewer.android.ViewGroup;
@@ -22,7 +23,9 @@ import com.google.common.primitives.Chars;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 
@@ -50,7 +53,11 @@ public class ViewFactory {
         final BitmapClassDef bitmap;
         final StringClassDef string;
         final ActivityClassDef activity;
-
+        final IntentClassDef intent;
+        final BundleBaseClassDef bundle;
+        final ArrayMapClassDef arrayMap;
+        final BooleanClassDef bool;
+        final IntegerClassDef integer;
 
         private RefHolder(DumpData data) {
             view = new ViewClassDef(data);
@@ -62,6 +69,11 @@ public class ViewFactory {
             bitmap = new BitmapClassDef(data);
             imageView = new ImageViewClassDef(data);
             activity = new ActivityClassDef(data);
+            intent = new IntentClassDef(data);
+            bundle = new BundleBaseClassDef(data);
+            arrayMap = new ArrayMapClassDef(data);
+            bool = new BooleanClassDef(data);
+            integer = new IntegerClassDef(data);
         }
     }
 
@@ -85,9 +97,9 @@ public class ViewFactory {
     }
 
     private static Activity createActivity(Instance root, RefHolder refs, DumpData data) throws IOException {
-        int activityInstanceId = root.getObjectField(refs.view.context, data.classes);
-        if (activityInstanceId != 0) {
-            Instance activity = data.instances.get(activityInstanceId);
+        Instance activity = data.instances.get(root.getObjectField(refs.view.context, data.classes));
+        if (activity != null) {
+            // Name and title
             ClassDefinition activityClass = data.classes.get(activity.getClassObjectId());
             final HprofString name = data.strings.get(activityClass.getNameStringId());
             int titleInstanceId = activity.getObjectField(refs.activity.title, data.classes);
@@ -96,7 +108,25 @@ public class ViewFactory {
                 Instance title = data.instances.get(titleInstanceId);
                 titleString = getTextFromCharSequence(title, refs, data);
             }
-            return new Activity(name.getValue(), titleString);
+            // Intent
+            Intent restoredIntent = null;
+            Instance intent = data.instances.get(activity.getObjectField(refs.activity.intent, data.classes));
+            if (intent != null) {
+                String actionString = null;
+                Instance action = data.instances.get(intent.getObjectField(refs.intent.action, data.classes));
+                if (action != null) {
+                    actionString = getTextFromCharSequence(action, refs, data);
+                }
+                Instance bundle = data.instances.get(intent.getObjectField(refs.intent.extras, data.classes));
+                if (bundle != null) {
+                    Instance map = data.instances.get(bundle.getObjectField(refs.bundle.map, data.classes));
+                    if (map != null) {
+                        Map<String, String> extras = createMap(map, refs, data);
+                        restoredIntent = new Intent(actionString, extras);
+                    }
+                }
+            }
+            return new Activity(name.getValue(), titleString, restoredIntent);
         }
         return null;
     }
@@ -221,8 +251,40 @@ public class ViewFactory {
         return data.strings.get(cls.getNameStringId()).getValue();
     }
 
-    private static boolean isInstanceOf(Instance childInstance, ClassDefinition of, DumpData data) {
-        ClassDefinition cls = data.classes.get(childInstance.getClassObjectId());
+    private static Map<String, String> createMap(Instance map, RefHolder refs, DumpData data) throws IOException {
+        if (!isInstanceOf(map, refs.arrayMap.cls, data)) {
+            System.err.println("Unsupported map: " + data.strings.get(data.classes.get(map.getClassObjectId()).getNameStringId()).getValue());
+            return null;
+        }
+        int size = map.getIntField(refs.arrayMap.size, data.classes);
+        ObjectArray array = data.objArrays.get(map.getObjectField(refs.arrayMap.array, data.classes));
+        if (array == null) {
+            return null;
+        }
+        Map<String, String> values = new HashMap<String, String>();
+        for (int i = 0; i < size; i++) {
+            String key = instanceToString(data.instances.get(array.getElements()[i * 2]), refs, data);
+            String value = instanceToString(data.instances.get(array.getElements()[i * 2 + 1]), refs, data);
+            values.put(key, value);
+        }
+        return values;
+    }
+
+    private static String instanceToString(Instance instance, RefHolder refs, DumpData data) throws IOException {
+        if (isInstanceOf(instance, refs.string.cls, data)) {
+            return getTextFromCharSequence(instance, refs, data);
+        }
+        if (isInstanceOf(instance, refs.bool.cls, data)) {
+           return Boolean.toString(instance.getBooleanField(refs.bool.value, data.classes));
+        }
+        if (isInstanceOf(instance, refs.integer.cls, data)) {
+            return Integer.toString(instance.getIntField(refs.integer.value, data.classes));
+        }
+        return data.strings.get(data.classes.get(instance.getClassObjectId()).getNameStringId()).getValue();
+    }
+
+    private static boolean isInstanceOf(Instance instance, ClassDefinition of, DumpData data) {
+        ClassDefinition cls = data.classes.get(instance.getClassObjectId());
         while (cls != null) {
             if (cls == of) {
                 return true;

@@ -1,5 +1,7 @@
 package com.badoo.hprof.viewer.ui;
 
+import com.badoo.hprof.viewer.android.Activity;
+import com.badoo.hprof.viewer.android.Intent;
 import com.badoo.hprof.viewer.android.View;
 import com.badoo.hprof.viewer.android.ViewGroup;
 import com.badoo.hprof.viewer.rendering.ViewRenderer;
@@ -11,7 +13,9 @@ import java.awt.GridLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.JCheckBox;
@@ -43,7 +47,7 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
     private final JCheckBox showBoundsBox;
     private final JCheckBox forceAlpha;
     private final JTable infoTable;
-    private ViewGroup selectedRoot;
+    private Screen selectedScreen;
     private ImagePanel imagePanel;
     private View selectedView;
 
@@ -92,7 +96,7 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
         splitPane.setRightComponent(imagePanel);
         add(splitPane);
         setVisible(true);
-        selectedRoot = screens.get(0).getViewRoot();
+        selectedScreen = screens.get(0);
         update();
     }
 
@@ -103,12 +107,36 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
     }
 
     private void updateInfoTable() {
-        infoTable.setModel(new DefaultTableModel(new Object[][]{{"a", "b"}}, HEADER));
+        Activity activity = selectedScreen.getActivity();
+        String cells[][];
+        if (activity != null && activity.getIntent() != null) {
+            Intent intent = activity.getIntent();
+            boolean hasAction = intent.getAction() != null;
+            Map<String, String> params = intent.getExtras();
+            if (params == null) {
+                params = new HashMap<String, String>();
+            }
+            cells = new String[params.size() + (hasAction? 1 : 0)][2];
+            if (hasAction) {
+                cells[0][0] = "Action";
+                cells[0][1] = intent.getAction();
+            }
+            int position = hasAction? 1 : 0;
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                cells[position][0] = entry.getKey();
+                cells[position][1] = entry.getValue();
+                position++;
+            }
+        }
+        else {
+            cells = new String[][]{{"No intent data", ""}};
+        }
+        infoTable.setModel(new DefaultTableModel(cells, HEADER));
     }
 
     public void showViewTree() {
-        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(selectedRoot);
-        addChildViews(rootNode, selectedRoot);
+        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(selectedScreen);
+        addChildViews(rootNode, selectedScreen.getViewRoot());
         DefaultTreeModel model = new DefaultTreeModel(rootNode);
         viewTree.setModel(model);
     }
@@ -127,7 +155,7 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
     }
 
     public void updateImage(boolean resize) {
-        BufferedImage image = renderer.renderViews(selectedRoot);
+        BufferedImage image = renderer.renderViews(selectedScreen.getViewRoot());
         imagePanel.setImage(image);
         if (resize) {
             Dimension size = new Dimension((int) (imagePanel.getPreferredSize().getWidth() + rootPicker.getPreferredSize().getWidth() + 15), (int) imagePanel.getPreferredSize().getHeight() + 25);
@@ -155,7 +183,7 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
     @Override
     public void itemStateChanged(ItemEvent itemEvent) {
         if (itemEvent.getSource() == rootPicker) {
-            selectedRoot = ((Screen) itemEvent.getItem()).getViewRoot();
+            selectedScreen = ((Screen) itemEvent.getItem());
             update();
         }
         else if (itemEvent.getSource() == showBoundsBox) {

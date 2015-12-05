@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
+import static com.badoo.hprof.library.util.StreamUtil.readByte;
 import static com.badoo.hprof.library.util.StreamUtil.readInt;
 import static com.badoo.hprof.library.util.StreamUtil.skip;
 
@@ -132,6 +133,34 @@ public class Instance {
             for (InstanceField currentField : currentClass.getInstanceFields()) {
                 if (currentField == field) { // This is the one we are looking for
                     return readInt(in);
+                }
+                else {
+                    skip(in, currentField.getType().size);
+                }
+            }
+            currentClass = classes.get(currentClass.getSuperClassObjectId());
+        }
+        throw new IllegalStateException("Failed to find field");
+    }
+
+    /**
+     * Returns the value of an boolean field in this instance
+     *
+     * @param field   the field to read
+     * @param classes map containing all classes (or at least the ones between this class and the root)
+     * @return the field value
+     */
+    public boolean getBooleanField(InstanceField field, Map<Integer, ClassDefinition> classes) throws IOException {
+        if (field.getType() != BasicType.BOOLEAN) {
+            throw new IllegalArgumentException("Field is not of type BOOLEAN");
+        }
+        // Iterate over all the instance fields until we find one that is matching
+        ByteArrayInputStream in = new ByteArrayInputStream(instanceFieldData);
+        ClassDefinition currentClass = classes.get(classObjectId);
+        while (currentClass != null) {
+            for (InstanceField currentField : currentClass.getInstanceFields()) {
+                if (currentField == field) { // This is the one we are looking for
+                    return readByte(in) != 0;
                 }
                 else {
                     skip(in, currentField.getType().size);
