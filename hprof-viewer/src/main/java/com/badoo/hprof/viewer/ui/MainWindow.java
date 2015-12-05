@@ -141,7 +141,7 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
             updateImage(false);
         }
         else if (itemEvent.getSource() == forceAlpha) {
-            renderer.setForceAlpha(forceAlpha.isSelected());
+            renderer.setForceBackgroundTransparency(forceAlpha.isSelected());
             updateImage(false);
         }
     }

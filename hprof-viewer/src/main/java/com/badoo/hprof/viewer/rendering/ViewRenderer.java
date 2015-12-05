@@ -11,22 +11,30 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Utility class containing methods for rendering Views and ViewGroups
  * <p/>
  * Created by Erik Andre
  */
+@SuppressWarnings("unused")
 public class ViewRenderer {
 
-    private static Stroke THIN = new BasicStroke(2);
-    private static Stroke THICK = new BasicStroke(10);
+    private static Stroke THIN_LINE = new BasicStroke(2);
+    private static Stroke THICK_LINE = new BasicStroke(10);
 
     private boolean showBounds = true;
+    private boolean renderText = true;
+    private boolean renderBackgrounds = true;
+    private boolean renderImageViews = true;
     private boolean forceAlpha = true;
 
+    /**
+     * Render all Views in a ViewGroup
+     *
+     * @param root the root of the ViewGroup to render
+     * @return the rendered image
+     */
     public BufferedImage renderViews(ViewGroup root) {
         if (root.getWidth() == 0 || root.getHeight() == 0) {
             throw new IllegalArgumentException("View root has no size!");
@@ -39,12 +47,50 @@ public class ViewRenderer {
         return buffer;
     }
 
+    /**
+     * Enable or disable rendering of View bounds.
+     *
+     * @param showBounds true if bounds should be rendered
+     */
     public void setShowBounds(boolean showBounds) {
         this.showBounds = showBounds;
     }
 
-    public void setForceAlpha(boolean forceAlpha) {
+    /**
+     * Enable or disable forced background transparency.
+     *
+     * @param forceAlpha true if View backgrounds should be forced to be semi transparent
+     */
+    public void setForceBackgroundTransparency(boolean forceAlpha) {
         this.forceAlpha = forceAlpha;
+    }
+
+    /**
+     * Enable or disable rendering of text
+     *
+     * @param renderText true if texts should be rendered
+     */
+    public void setRenderText(boolean renderText) {
+        this.renderText = renderText;
+    }
+
+    /**
+     * Enable or disable rendering of View background drawables
+     *
+     * @param renderBackgrounds true if backgrounds should be rendered
+     */
+    public void setRenderBackgrounds(boolean renderBackgrounds) {
+        this.renderBackgrounds = renderBackgrounds;
+    }
+
+
+    /**
+     * Enable or disable rendering of images (in ImageViews)
+     *
+     * @param renderImageViews true if images should be rendered
+     */
+    public void setRenderImages(boolean renderImageViews) {
+        this.renderImageViews = renderImageViews;
     }
 
     private void renderViewGroup(ViewGroup view, Graphics2D canvas) {
@@ -72,7 +118,7 @@ public class ViewRenderer {
 
     private void renderView(View view, Graphics2D canvas) {
         Drawable background = view.getBackground();
-        if (background != null) {
+        if (renderBackgrounds && background != null) {
             if (forceAlpha) {
                 background.setAlpha(120);
             }
@@ -81,9 +127,9 @@ public class ViewRenderer {
             }
             background.draw(canvas, view.left, view.top, view.right, view.bottom);
         }
-        canvas.setColor(getViewForegroundColor(view));
+        canvas.setColor(getViewOutlineColor(view));
         canvas.setColor(view.isSelected() ? Color.RED : Color.BLACK);
-        canvas.setStroke(view.isSelected() ? THICK : THIN);
+        canvas.setStroke(view.isSelected() ? THICK_LINE : THIN_LINE);
         if (showBounds) {
             canvas.drawRect(view.left, view.top, view.getWidth(), view.getHeight());
         }
@@ -93,19 +139,21 @@ public class ViewRenderer {
         renderView(view, canvas);
         // Seems like we have a problem here if the text is too long (rendering stalls)
         canvas.translate(view.left, view.top); // Apply translation
-        canvas.drawString(view.text, 20, view.getHeight() / 2);
+        if (renderText) {
+            canvas.drawString(view.text, 20, view.getHeight() / 2);
+        }
         canvas.translate(-view.left, -view.top); // Restore the translation
     }
 
     private void renderImageView(ImageView view, Graphics2D canvas) {
         renderView(view, canvas);
         Drawable image = view.getImage();
-        if (image != null) {
+        if (renderImageViews && image != null) {
             image.draw(canvas, view.left, view.top, view.right, view.bottom);
         }
     }
 
-    private Color getViewForegroundColor(View view) {
+    private Color getViewOutlineColor(View view) {
         if (view.isSelected()) {
             return Color.RED;
         }
