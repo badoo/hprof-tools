@@ -83,6 +83,9 @@ public class BaseFactory {
     }
 
     protected static boolean isInstanceOf(Instance instance, ClassDefinition of, DumpData data) {
+        if (instance == null) {
+            return false;
+        }
         ClassDefinition cls = data.classes.get(instance.getClassObjectId());
         while (cls != null) {
             if (cls == of) {

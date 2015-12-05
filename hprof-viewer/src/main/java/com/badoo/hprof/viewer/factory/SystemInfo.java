@@ -1,5 +1,6 @@
 package com.badoo.hprof.viewer.factory;
 
+import com.badoo.hprof.viewer.android.AndroidSocket;
 import com.badoo.hprof.viewer.android.Location;
 
 import java.util.Collections;
@@ -16,13 +17,19 @@ import javax.annotation.Nullable;
 public class SystemInfo {
 
     private final List<Location> locations;
+    private final List<AndroidSocket> sockets;
 
-    public SystemInfo(@Nullable List<Location> locations) {
-        this.locations = locations != null? locations : Collections.<Location>emptyList();
+    public SystemInfo(@Nonnull List<Location> locations, @Nonnull List<AndroidSocket> sockets) {
+        this.locations = locations;
+        this.sockets = sockets;
     }
 
     @Nonnull
     public List<Location> getLocations() {
         return locations;
+    }
+
+    public List<AndroidSocket> getSockets() {
+        return sockets;
     }
 }
