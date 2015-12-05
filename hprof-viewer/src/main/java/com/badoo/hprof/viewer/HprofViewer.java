@@ -6,6 +6,7 @@ import com.badoo.hprof.library.model.HprofString;
 import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.viewer.android.ViewGroup;
 import com.badoo.hprof.viewer.ui.MainWindow;
+import com.badoo.hprof.viewer.viewfactory.ViewFactory;
 
 import java.io.BufferedInputStream;
 import java.io.File;
