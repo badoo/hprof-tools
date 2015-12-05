@@ -58,6 +58,7 @@ public class ViewFactory {
         final ArrayMapClassDef arrayMap;
         final BooleanClassDef bool;
         final IntegerClassDef integer;
+        final EnumClassDef enumDef;
 
         private RefHolder(DumpData data) {
             view = new ViewClassDef(data);
@@ -74,6 +75,7 @@ public class ViewFactory {
             arrayMap = new ArrayMapClassDef(data);
             bool = new BooleanClassDef(data);
             integer = new IntegerClassDef(data);
+            enumDef = new EnumClassDef(data);
         }
     }
 
@@ -274,11 +276,18 @@ public class ViewFactory {
         if (isInstanceOf(instance, refs.string.cls, data)) {
             return getTextFromCharSequence(instance, refs, data);
         }
-        if (isInstanceOf(instance, refs.bool.cls, data)) {
+        else if (isInstanceOf(instance, refs.bool.cls, data)) {
            return Boolean.toString(instance.getBooleanField(refs.bool.value, data.classes));
         }
-        if (isInstanceOf(instance, refs.integer.cls, data)) {
+        else if (isInstanceOf(instance, refs.integer.cls, data)) {
             return Integer.toString(instance.getIntField(refs.integer.value, data.classes));
+        }
+        else if (isInstanceOf(instance, refs.enumDef.cls, data)) {
+            String clsName = getClassName(instance, data);
+            Instance nameInstance = data.instances.get(instance.getObjectField(refs.enumDef.name, data.classes));
+            String name = getTextFromCharSequence(nameInstance, refs, data);
+            int ordinal = instance.getIntField(refs.enumDef.ordinal, data.classes);
+            return clsName + "." + name + " (" + ordinal + ")";
         }
         return data.strings.get(data.classes.get(instance.getClassObjectId()).getNameStringId()).getValue();
     }
