@@ -20,9 +20,12 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTable;
 import javax.swing.JTree;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeSelectionModel;
@@ -32,12 +35,14 @@ import javax.swing.tree.TreeSelectionModel;
  */
 public class MainWindow extends JFrame implements TreeSelectionListener, ItemListener {
 
+    public static final String[] HEADER = new String[]{"Name", "Value"};
     private final JSplitPane splitPane;
     private final JTree viewTree;
     private final ViewRenderer renderer = new ViewRenderer();
     private final JComboBox rootPicker;
     private final JCheckBox showBoundsBox;
     private final JCheckBox forceAlpha;
+    private final JTable infoTable;
     private ViewGroup selectedRoot;
     private ImagePanel imagePanel;
     private View selectedView;
@@ -55,18 +60,31 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
         rootPicker = new JComboBox(new Vector<Object>(screens));
         rootPicker.addItemListener(this);
 
-        JPanel settingsPanel = new JPanel(new GridLayout(1,2));
+        JPanel settingsPanel = new JPanel(new GridLayout(1, 2));
         showBoundsBox = new JCheckBox("Show layout bounds", true);
         showBoundsBox.addItemListener(this);
         forceAlpha = new JCheckBox("Force alpha", true);
         forceAlpha.addItemListener(this);
         settingsPanel.add(showBoundsBox);
         settingsPanel.add(forceAlpha);
+        settingsPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
+
+        infoTable = new JTable();
+        infoTable.setRowSelectionAllowed(false);
+        infoTable.setColumnSelectionAllowed(false);
+        infoTable.setCellSelectionEnabled(false);
+        infoTable.setShowGrid(true);
+
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        bottomPanel.add(infoTable, BorderLayout.CENTER);
+        bottomPanel.add(infoTable.getTableHeader(), BorderLayout.NORTH);
+        bottomPanel.add(settingsPanel, BorderLayout.SOUTH);
 
         JPanel leftPanel = new JPanel(new BorderLayout());
         leftPanel.add(rootPicker, BorderLayout.NORTH);
         leftPanel.add(treeScroller, BorderLayout.CENTER);
-        leftPanel.add(settingsPanel, BorderLayout.SOUTH);
+        leftPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         // Split pane for the tree and image views
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -81,6 +99,11 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
     private void update() {
         showViewTree();
         updateImage(true);
+        updateInfoTable();
+    }
+
+    private void updateInfoTable() {
+        infoTable.setModel(new DefaultTableModel(new Object[][]{{"a", "b"}}, HEADER));
     }
 
     public void showViewTree() {
@@ -92,7 +115,7 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
 
     private void addChildViews(DefaultMutableTreeNode parent, ViewGroup group) {
         for (View view : group.getChildren()) {
-            if (view instanceof  ViewGroup) {
+            if (view instanceof ViewGroup) {
                 DefaultMutableTreeNode newParent = new DefaultMutableTreeNode(view);
                 parent.add(newParent);
                 addChildViews(newParent, (ViewGroup) view);
