@@ -8,7 +8,7 @@ import com.badoo.hprof.viewer.factory.SystemInfo;
 import com.badoo.hprof.viewer.factory.SystemInfoFactory;
 import com.badoo.hprof.viewer.ui.MainWindow;
 import com.badoo.hprof.viewer.factory.Screen;
-import com.badoo.hprof.viewer.factory.ViewFactory;
+import com.badoo.hprof.viewer.factory.ScreenFactory;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -66,7 +66,7 @@ public class HprofViewer {
         // Build the View hierarchy, starting with the roots
         List<Screen> screens = new ArrayList<Screen>();
         for (Instance root : viewRoots) {
-            Screen screen = ViewFactory.buildViewHierarchy(root, data);
+            Screen screen = ScreenFactory.buildViewHierarchy(root, data);
             screens.add(screen);
         }
         // Collect system information

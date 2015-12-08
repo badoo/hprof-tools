@@ -36,7 +36,7 @@ import javax.annotation.Nonnull;
 /**
  * Factory class for creating Views from Instances and ClassDefinitions.
  */
-public class ViewFactory extends BaseFactory{
+public class ScreenFactory extends BaseFactory{
 
     /**
      * Class holding references to the class definitions we need to decode a view hierarchy
