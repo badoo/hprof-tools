@@ -5,6 +5,10 @@ import com.badoo.hprof.library.model.PrimitiveArray;
 import com.badoo.hprof.viewer.DumpData;
 import com.badoo.hprof.viewer.android.AndroidSocket;
 import com.badoo.hprof.viewer.android.Location;
+import com.badoo.hprof.viewer.factory.classdefs.Inet4AddressClassDef;
+import com.badoo.hprof.viewer.factory.classdefs.LocationClassDef;
+import com.badoo.hprof.viewer.factory.classdefs.SocketClassDef;
+import com.badoo.hprof.viewer.factory.classdefs.SocketImplClassDef;
 
 import java.io.IOException;
 import java.util.ArrayList;

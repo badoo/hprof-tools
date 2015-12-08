@@ -1,9 +1,10 @@
-package com.badoo.hprof.viewer.factory;
+package com.badoo.hprof.viewer.factory.classdefs;
 
 import com.badoo.hprof.library.model.BasicType;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.InstanceField;
 import com.badoo.hprof.viewer.DumpData;
+import com.badoo.hprof.viewer.factory.classdefs.BaseClassDef;
 
 import javax.annotation.Nonnull;
 
@@ -14,9 +15,9 @@ import javax.annotation.Nonnull;
  */
 public class SocketImplClassDef extends BaseClassDef {
 
-    final ClassDefinition cls;
-    final InstanceField address;
-    final InstanceField port;
+    public final ClassDefinition cls;
+    public final InstanceField address;
+    public final InstanceField port;
 
      public SocketImplClassDef(@Nonnull DumpData data) {
             cls = findClassByName("java.net.SocketImpl", data);

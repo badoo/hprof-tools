@@ -1,9 +1,10 @@
-package com.badoo.hprof.viewer.factory;
+package com.badoo.hprof.viewer.factory.classdefs;
 
 import com.badoo.hprof.library.model.BasicType;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.InstanceField;
 import com.badoo.hprof.viewer.DumpData;
+import com.badoo.hprof.viewer.factory.classdefs.BaseClassDef;
 
 import javax.annotation.Nonnull;
 
@@ -14,9 +15,9 @@ import javax.annotation.Nonnull;
  */
 public class EnumClassDef extends BaseClassDef {
 
-    final ClassDefinition cls;
-    final InstanceField name;
-    final InstanceField ordinal;
+    public final ClassDefinition cls;
+    public final InstanceField name;
+    public final InstanceField ordinal;
 
     public EnumClassDef(@Nonnull DumpData data) {
         cls = findClassByName("java.lang.Enum", data);

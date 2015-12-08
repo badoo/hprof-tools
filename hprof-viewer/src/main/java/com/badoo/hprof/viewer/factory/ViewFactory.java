@@ -17,6 +17,13 @@ import com.badoo.hprof.viewer.android.ViewGroup;
 import com.badoo.hprof.viewer.android.drawables.BitmapDrawable;
 import com.badoo.hprof.viewer.android.drawables.ColorDrawable;
 import com.badoo.hprof.viewer.android.drawables.EmptyDrawable;
+import com.badoo.hprof.viewer.factory.classdefs.BitmapClassDef;
+import com.badoo.hprof.viewer.factory.classdefs.BitmapDrawableClassDef;
+import com.badoo.hprof.viewer.factory.classdefs.ColorDrawableClassDef;
+import com.badoo.hprof.viewer.factory.classdefs.ImageViewClassDef;
+import com.badoo.hprof.viewer.factory.classdefs.TextViewClassDef;
+import com.badoo.hprof.viewer.factory.classdefs.ViewClassDef;
+import com.badoo.hprof.viewer.factory.classdefs.ViewGroupClassDef;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;

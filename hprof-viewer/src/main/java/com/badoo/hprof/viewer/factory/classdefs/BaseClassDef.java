@@ -1,4 +1,4 @@
-package com.badoo.hprof.viewer.factory;
+package com.badoo.hprof.viewer.factory.classdefs;
 
 import com.badoo.hprof.library.model.BasicType;
 import com.badoo.hprof.library.model.ClassDefinition;
@@ -10,7 +10,7 @@ import com.badoo.hprof.viewer.DumpData;
  *
  * Created by Erik Andre on 05/12/15.
  */
-class BaseClassDef {
+public class BaseClassDef {
 
     protected ClassDefinition findClassByName(String name, DumpData data) {
         for (ClassDefinition cls : data.classes.values()) {

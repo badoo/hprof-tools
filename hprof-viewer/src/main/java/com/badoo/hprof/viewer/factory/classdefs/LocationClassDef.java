@@ -1,9 +1,10 @@
-package com.badoo.hprof.viewer.factory;
+package com.badoo.hprof.viewer.factory.classdefs;
 
 import com.badoo.hprof.library.model.BasicType;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.InstanceField;
 import com.badoo.hprof.viewer.DumpData;
+import com.badoo.hprof.viewer.factory.classdefs.BaseClassDef;
 
 import javax.annotation.Nonnull;
 
@@ -14,12 +15,12 @@ import javax.annotation.Nonnull;
  */
 public class LocationClassDef extends BaseClassDef {
 
-    final ClassDefinition cls;
-    final InstanceField provider;
-    final InstanceField latitude;
-    final InstanceField longitude;
-    final InstanceField accuracy;
-    final InstanceField time;
+    public final ClassDefinition cls;
+    public final InstanceField provider;
+    public final InstanceField latitude;
+    public final InstanceField longitude;
+    public final InstanceField accuracy;
+    public final InstanceField time;
 
     public LocationClassDef(@Nonnull DumpData data) {
         this.cls = findClassByName("android.location.Location", data);;

@@ -1,9 +1,10 @@
-package com.badoo.hprof.viewer.factory;
+package com.badoo.hprof.viewer.factory.classdefs;
 
 import com.badoo.hprof.library.model.BasicType;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.InstanceField;
 import com.badoo.hprof.viewer.DumpData;
+import com.badoo.hprof.viewer.factory.classdefs.BaseClassDef;
 
 import javax.annotation.Nonnull;
 
@@ -12,11 +13,11 @@ import javax.annotation.Nonnull;
  * <p/>
  * Created by Erik Andre on 05/12/15.
  */
-class ColorDrawableClassDef extends BaseClassDef {
+public class ColorDrawableClassDef extends BaseClassDef {
 
-    final ClassDefinition cls;
-    final InstanceField stateField;
-    final StateClassDef state;
+    public final ClassDefinition cls;
+    public final InstanceField stateField;
+    public final StateClassDef state;
 
     public ColorDrawableClassDef(@Nonnull DumpData data) {
         cls = findClassByName("android.graphics.drawable.ColorDrawable", data);
@@ -27,8 +28,8 @@ class ColorDrawableClassDef extends BaseClassDef {
 
     public static class StateClassDef extends BaseClassDef {
 
-        final ClassDefinition cls;
-        final InstanceField baseColor;
+        public final ClassDefinition cls;
+        public final InstanceField baseColor;
 
         StateClassDef(@Nonnull DumpData data) {
             cls = findClassByName("android.graphics.drawable.ColorDrawable$ColorState", data);

@@ -1,9 +1,10 @@
-package com.badoo.hprof.viewer.factory;
+package com.badoo.hprof.viewer.factory.classdefs;
 
 import com.badoo.hprof.library.model.BasicType;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.InstanceField;
 import com.badoo.hprof.viewer.DumpData;
+import com.badoo.hprof.viewer.factory.classdefs.BaseClassDef;
 
 import javax.annotation.Nonnull;
 
@@ -12,16 +13,16 @@ import javax.annotation.Nonnull;
  * <p/>
  * Created by Erik Andre on 05/12/15.
  */
-class ViewClassDef extends BaseClassDef {
+public class ViewClassDef extends BaseClassDef {
 
-    final ClassDefinition cls;
-    final InstanceField left;
-    final InstanceField right;
-    final InstanceField top;
-    final InstanceField bottom;
-    final InstanceField flags;
-    final InstanceField background;
-    final InstanceField context;
+    public final ClassDefinition cls;
+    public final InstanceField left;
+    public final InstanceField right;
+    public final InstanceField top;
+    public final InstanceField bottom;
+    public final InstanceField flags;
+    public final InstanceField background;
+    public final InstanceField context;
 
 
     public ViewClassDef(@Nonnull DumpData data) {

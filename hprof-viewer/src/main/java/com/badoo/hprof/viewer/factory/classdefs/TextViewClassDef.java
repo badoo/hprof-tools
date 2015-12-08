@@ -1,9 +1,10 @@
-package com.badoo.hprof.viewer.factory;
+package com.badoo.hprof.viewer.factory.classdefs;
 
 import com.badoo.hprof.library.model.BasicType;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.InstanceField;
 import com.badoo.hprof.viewer.DumpData;
+import com.badoo.hprof.viewer.factory.classdefs.BaseClassDef;
 
 import javax.annotation.Nonnull;
 
@@ -12,10 +13,10 @@ import javax.annotation.Nonnull;
  *
  * Created by Erik Andre on 05/12/15.
  */
-class TextViewClassDef extends BaseClassDef {
+public class TextViewClassDef extends BaseClassDef {
 
-    final ClassDefinition cls;
-    final InstanceField text;
+    public final ClassDefinition cls;
+    public final InstanceField text;
 
     public TextViewClassDef(@Nonnull DumpData data) {
         cls = findClassByName("android.widget.TextView", data);

@@ -1,6 +1,14 @@
 package com.badoo.hprof.viewer.factory;
 
 import com.badoo.hprof.viewer.DumpData;
+import com.badoo.hprof.viewer.factory.classdefs.ActivityClassDef;
+import com.badoo.hprof.viewer.factory.classdefs.ArrayMapClassDef;
+import com.badoo.hprof.viewer.factory.classdefs.BooleanClassDef;
+import com.badoo.hprof.viewer.factory.classdefs.BundleBaseClassDef;
+import com.badoo.hprof.viewer.factory.classdefs.EnumClassDef;
+import com.badoo.hprof.viewer.factory.classdefs.IntegerClassDef;
+import com.badoo.hprof.viewer.factory.classdefs.IntentClassDef;
+import com.badoo.hprof.viewer.factory.classdefs.StringClassDef;
 
 import javax.annotation.Nonnull;
 
