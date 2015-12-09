@@ -9,7 +9,7 @@ import java.util.Map;
  *
  * Created by Erik Andre on 22/11/15.
  */
-public class BitmapFactory {
+public class BitmapCache {
 
     private static Map<Integer, BufferedImage> cache = new HashMap<Integer, BufferedImage>();
 

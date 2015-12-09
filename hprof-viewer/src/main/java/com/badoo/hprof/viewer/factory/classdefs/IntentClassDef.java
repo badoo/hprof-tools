@@ -3,8 +3,7 @@ package com.badoo.hprof.viewer.factory.classdefs;
 import com.badoo.hprof.library.model.BasicType;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.InstanceField;
-import com.badoo.hprof.viewer.DumpData;
-import com.badoo.hprof.viewer.factory.classdefs.BaseClassDef;
+import com.badoo.hprof.viewer.MemoryDump;
 
 import javax.annotation.Nonnull;
 
@@ -19,7 +18,7 @@ public class IntentClassDef extends BaseClassDef {
     public final InstanceField extras;
     public final InstanceField action;
 
-    public IntentClassDef(@Nonnull DumpData data) {
+    public IntentClassDef(@Nonnull MemoryDump data) {
         cls = findClassByName("android.content.Intent", data);
         extras = findFieldByName("mExtras", BasicType.OBJECT, cls, data);
         action = findFieldByName("mAction", BasicType.OBJECT, cls, data);

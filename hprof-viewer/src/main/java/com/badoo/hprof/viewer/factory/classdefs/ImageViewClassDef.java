@@ -3,8 +3,7 @@ package com.badoo.hprof.viewer.factory.classdefs;
 import com.badoo.hprof.library.model.BasicType;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.InstanceField;
-import com.badoo.hprof.viewer.DumpData;
-import com.badoo.hprof.viewer.factory.classdefs.BaseClassDef;
+import com.badoo.hprof.viewer.MemoryDump;
 
 import javax.annotation.Nonnull;
 
@@ -13,13 +12,14 @@ import javax.annotation.Nonnull;
  *
  * Created by Erik Andre on 05/12/15.
  */
-public class ImageViewClassDef extends BaseClassDef {
+public class ImageViewClassDef extends GenericViewClassDef {
 
-    public final ClassDefinition cls;
+    public final ClassDefinition imageViewCls;
     public final InstanceField drawable;
 
-    public ImageViewClassDef(@Nonnull DumpData data) {
-        cls = findClassByName("android.widget.ImageView", data);
-        drawable = findFieldByName("mDrawable", BasicType.OBJECT, cls, data);
+    public ImageViewClassDef(@Nonnull MemoryDump data) {
+        super(data);
+        imageViewCls = findClassByName("android.widget.ImageView", data);
+        drawable = findFieldByName("mDrawable", BasicType.OBJECT, imageViewCls, data);
     }
 }

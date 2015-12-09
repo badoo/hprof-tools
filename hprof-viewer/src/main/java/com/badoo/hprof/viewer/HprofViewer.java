@@ -4,11 +4,13 @@ import com.badoo.hprof.library.HprofReader;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.HprofString;
 import com.badoo.hprof.library.model.Instance;
+import com.badoo.hprof.viewer.android.Version;
+import com.badoo.hprof.viewer.factory.Environment;
+import com.badoo.hprof.viewer.factory.Screen;
+import com.badoo.hprof.viewer.factory.ScreenFactory;
 import com.badoo.hprof.viewer.factory.SystemInfo;
 import com.badoo.hprof.viewer.factory.SystemInfoFactory;
 import com.badoo.hprof.viewer.ui.MainWindow;
-import com.badoo.hprof.viewer.factory.Screen;
-import com.badoo.hprof.viewer.factory.ScreenFactory;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -47,7 +49,7 @@ public class HprofViewer {
         while (reader.hasNext()) {
             reader.next();
         }
-        DumpData data = new DumpData(processor.getClasses(), processor.getStrings(), processor.getInstances(),
+        MemoryDump data = new MemoryDump(processor.getClasses(), processor.getStrings(), processor.getInstances(),
             processor.getObjectArrays(), processor.getPrimitiveArrays());
 
         // Class data read, now we can figure out which classes are Views (or ViewGroups)
@@ -65,12 +67,13 @@ public class HprofViewer {
 
         // Build the View hierarchy, starting with the roots
         List<Screen> screens = new ArrayList<Screen>();
+        Environment env = new Environment(Version.KITKAT); //TODO Figure this out!
         for (Instance root : viewRoots) {
-            Screen screen = ScreenFactory.buildViewHierarchy(root, data);
+            Screen screen = ScreenFactory.buildViewHierarchy(root, data, env);
             screens.add(screen);
         }
         // Collect system information
-        SystemInfo sysInfo = SystemInfoFactory.createSystemInfo(data);
+        SystemInfo sysInfo = SystemInfoFactory.createSystemInfo(data, env);
         // Render the views
         updateUi(screens, sysInfo);
     }
@@ -94,7 +97,7 @@ public class HprofViewer {
         return roots;
     }
 
-    private static ClassDefinition findDecorClass(Map<Integer, ClassDefinition> viewClasses, DumpData data) {
+    private static ClassDefinition findDecorClass(Map<Integer, ClassDefinition> viewClasses, MemoryDump data) {
         for (ClassDefinition cls : viewClasses.values()) {
             HprofString clsName = data.strings.get(cls.getNameStringId());
             if (clsName.getValue().endsWith("$DecorView")) {
@@ -104,7 +107,7 @@ public class HprofViewer {
         throw new IllegalStateException("Dump contained no decor views!");
     }
 
-    private static Map<Integer, ClassDefinition> filterViewClasses(DumpData data) {
+    private static Map<Integer, ClassDefinition> filterViewClasses(MemoryDump data) {
         Map<Integer, ClassDefinition> viewClasses = new HashMap<Integer, ClassDefinition>();
         for (ClassDefinition cls : data.classes.values()) {
             if (isView(cls, data)) {
@@ -114,7 +117,7 @@ public class HprofViewer {
         return viewClasses;
     }
 
-    private static List<Instance> filterViewInstances(DumpData data, Map<Integer, ClassDefinition> viewClasses) {
+    private static List<Instance> filterViewInstances(MemoryDump data, Map<Integer, ClassDefinition> viewClasses) {
         List<Instance> viewInstances = new ArrayList<Instance>();
         for (Instance instance : data.instances.values()) {
             if (viewClasses.containsKey(instance.getClassObjectId())) {
@@ -124,7 +127,7 @@ public class HprofViewer {
         return viewInstances;
     }
 
-    private static boolean isView(ClassDefinition cls, DumpData data) {
+    private static boolean isView(ClassDefinition cls, MemoryDump data) {
         while (cls != null) {
             HprofString clsName = data.strings.get(cls.getNameStringId());
             if (clsName == null) {

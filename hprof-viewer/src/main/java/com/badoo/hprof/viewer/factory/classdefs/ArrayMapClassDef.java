@@ -3,8 +3,7 @@ package com.badoo.hprof.viewer.factory.classdefs;
 import com.badoo.hprof.library.model.BasicType;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.InstanceField;
-import com.badoo.hprof.viewer.DumpData;
-import com.badoo.hprof.viewer.factory.classdefs.BaseClassDef;
+import com.badoo.hprof.viewer.MemoryDump;
 
 import javax.annotation.Nonnull;
 
@@ -19,7 +18,7 @@ public class ArrayMapClassDef extends BaseClassDef {
     public final InstanceField size;
     public final InstanceField array;
 
-    public ArrayMapClassDef(@Nonnull DumpData data) {
+    public ArrayMapClassDef(@Nonnull MemoryDump data) {
         cls = findClassByName("android.util.ArrayMap", data);
         size = findFieldByName("mSize", BasicType.INT, cls, data);
         array = findFieldByName("mArray", BasicType.OBJECT, cls, data);

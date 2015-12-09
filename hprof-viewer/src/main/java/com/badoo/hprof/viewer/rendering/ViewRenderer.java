@@ -139,8 +139,9 @@ public class ViewRenderer {
         renderView(view, canvas);
         // Seems like we have a problem here if the text is too long (rendering stalls)
         canvas.translate(view.left, view.top); // Apply translation
-        if (renderText) {
-            canvas.drawString(view.text, 20, view.getHeight() / 2);
+        CharSequence text = view.getText();
+        if (renderText && text != null) {
+            canvas.drawString(text.toString(), 20, view.getHeight() / 2);
         }
         canvas.translate(-view.left, -view.top); // Restore the translation
     }

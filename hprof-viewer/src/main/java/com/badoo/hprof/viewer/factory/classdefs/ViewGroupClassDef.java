@@ -3,8 +3,7 @@ package com.badoo.hprof.viewer.factory.classdefs;
 import com.badoo.hprof.library.model.BasicType;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.InstanceField;
-import com.badoo.hprof.viewer.DumpData;
-import com.badoo.hprof.viewer.factory.classdefs.BaseClassDef;
+import com.badoo.hprof.viewer.MemoryDump;
 
 import javax.annotation.Nonnull;
 
@@ -13,13 +12,16 @@ import javax.annotation.Nonnull;
  *
  * Created by Erik Andre on 05/12/15.
  */
-public class ViewGroupClassDef extends BaseClassDef {
+public class ViewGroupClassDef extends GenericViewClassDef {
 
-    public final ClassDefinition cls;
+    public final ClassDefinition viewGroupCls;
     public final InstanceField children;
+    public final InstanceField childrenCount;
 
-    public ViewGroupClassDef(@Nonnull DumpData data) {
-        cls = findClassByName("android.view.ViewGroup", data);
-        children = findFieldByName("mChildren", BasicType.OBJECT, cls, data);
+    public ViewGroupClassDef(@Nonnull MemoryDump data) {
+        super(data);
+        viewGroupCls = findClassByName("android.view.ViewGroup", data);
+        children = findFieldByName("mChildren", BasicType.OBJECT, viewGroupCls, data);
+        childrenCount = findFieldByName("mChildrenCount", BasicType.INT, viewGroupCls, data);
     }
 }

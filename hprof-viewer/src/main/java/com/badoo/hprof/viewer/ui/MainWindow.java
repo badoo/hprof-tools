@@ -1,6 +1,7 @@
 package com.badoo.hprof.viewer.ui;
 
 import com.badoo.hprof.viewer.android.Activity;
+import com.badoo.hprof.viewer.android.Bundle;
 import com.badoo.hprof.viewer.android.Intent;
 import com.badoo.hprof.viewer.android.View;
 import com.badoo.hprof.viewer.android.ViewGroup;
@@ -102,7 +103,9 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
         setVisible(true);
         selectedScreen = screens.get(0);
         update();
-        new SysInfoWindow(sysInfo);
+        SysInfoWindow sysInfoWindow = new SysInfoWindow(sysInfo);
+        sysInfoWindow.setLocationRelativeTo(this);
+        sysInfoWindow.setLocation(getWidth(), 0);
     }
 
     private void update() {
@@ -113,21 +116,18 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
 
     private void updateInfoTable() {
         Activity activity = selectedScreen.getActivity();
-        String cells[][];
+        Object cells[][];
         if (activity != null && activity.getIntent() != null) {
             Intent intent = activity.getIntent();
             boolean hasAction = intent.getAction() != null;
-            Map<String, String> params = intent.getExtras();
-            if (params == null) {
-                params = new HashMap<String, String>();
-            }
-            cells = new String[params.size() + (hasAction ? 1 : 0)][2];
+            Map<Object, Object> params = intent.getExtras().getMap();
+            cells = new Object[params.size() + (hasAction ? 1 : 0)][2];
             if (hasAction) {
                 cells[0][0] = "Action";
                 cells[0][1] = intent.getAction();
             }
             int position = hasAction ? 1 : 0;
-            for (Map.Entry<String, String> entry : params.entrySet()) {
+            for (Map.Entry<Object, Object> entry : params.entrySet()) {
                 cells[position][0] = entry.getKey();
                 cells[position][1] = entry.getValue();
                 position++;
@@ -140,7 +140,7 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
     }
 
     public void showViewTree() {
-        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(selectedScreen);
+        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(selectedScreen.getViewRoot());
         addChildViews(rootNode, selectedScreen.getViewRoot());
         DefaultTreeModel model = new DefaultTreeModel(rootNode);
         viewTree.setModel(model);

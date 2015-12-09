@@ -9,12 +9,12 @@ public class View {
     public static final int INVISIBLE = 0x00000004;
     public static final int GONE = 0x00000008;
 
-    private final int VISIBILITY_MASK = 0x0000000C;
-
     public final int left;
     public final int right;
     public final int top;
     public final int bottom;
+
+    private final int VISIBILITY_MASK = 0x0000000C;
     private final String className;
     private final int flags;
     private boolean selected;
@@ -27,10 +27,6 @@ public class View {
         this.bottom = bottom;
         this.className = className;
         this.flags = flags;
-    }
-
-    public void setBackground(Drawable background) {
-        this.background = background;
     }
 
     public int getWidth() {
@@ -59,6 +55,10 @@ public class View {
 
     public Drawable getBackground() {
         return background;
+    }
+
+    public void setBackground(Drawable background) {
+        this.background = background;
     }
 
     @Override

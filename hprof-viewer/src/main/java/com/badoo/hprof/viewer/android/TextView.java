@@ -5,10 +5,14 @@ package com.badoo.hprof.viewer.android;
  */
 public class TextView extends View {
 
-    public final String text;
+    private final CharSequence text;
 
-    public TextView(String className, int left, int right, int top, int bottom, int flags, String text) {
+    public TextView(String className, int left, int right, int top, int bottom, int flags, CharSequence text) {
         super(className, left, right, top, bottom, flags);
         this.text = text;
+    }
+
+    public CharSequence getText() {
+        return text;
     }
 }

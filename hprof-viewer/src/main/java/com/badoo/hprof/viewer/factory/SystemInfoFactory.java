@@ -2,13 +2,14 @@ package com.badoo.hprof.viewer.factory;
 
 import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.library.model.PrimitiveArray;
-import com.badoo.hprof.viewer.DumpData;
+import com.badoo.hprof.viewer.MemoryDump;
 import com.badoo.hprof.viewer.android.AndroidSocket;
 import com.badoo.hprof.viewer.android.Location;
 import com.badoo.hprof.viewer.factory.classdefs.Inet4AddressClassDef;
 import com.badoo.hprof.viewer.factory.classdefs.LocationClassDef;
 import com.badoo.hprof.viewer.factory.classdefs.SocketClassDef;
 import com.badoo.hprof.viewer.factory.classdefs.SocketImplClassDef;
+import com.badoo.hprof.viewer.factory.classdefs.StringClassDef;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,22 +17,23 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import static com.badoo.hprof.viewer.factory.FactoryUtils.isInstanceOf;
+
 /**
  * Factory class for creating system information classes based on memory dump data.
  * <p/>
  * Created by Erik Andre on 05/12/15.
  */
-public class SystemInfoFactory extends BaseFactory {
+public class SystemInfoFactory {
 
-    private static class SystemRefHolder extends BaseRefHolder {
+    private static class SystemRefHolder {
 
         final LocationClassDef location;
         final SocketClassDef socket;
         final SocketImplClassDef socketImpl;
         final Inet4AddressClassDef inet4Address;
 
-        public SystemRefHolder(@Nonnull DumpData data) {
-            super(data);
+        public SystemRefHolder(@Nonnull MemoryDump data) {
             location = new LocationClassDef(data);
             socket = new SocketClassDef(data);
             socketImpl = new SocketImplClassDef(data);
@@ -39,14 +41,14 @@ public class SystemInfoFactory extends BaseFactory {
         }
     }
 
-    public static SystemInfo createSystemInfo(@Nonnull DumpData data) {
+    public static SystemInfo createSystemInfo(@Nonnull MemoryDump data, @Nonnull Environment env) {
         try {
             SystemRefHolder refs = new SystemRefHolder(data);
             // Find location data
             List<Location> locations = null;
-            locations = createLocations(refs, data);
+            locations = createLocations(refs, data, env);
             // Find socket information
-            List<AndroidSocket> sockets = createSockets(refs, data);
+            List<AndroidSocket> sockets = createSockets(refs, data, env);
             return new SystemInfo(locations, sockets);
         }
         catch (IOException e) {
@@ -56,7 +58,7 @@ public class SystemInfoFactory extends BaseFactory {
         }
     }
 
-    private static List<AndroidSocket> createSockets(SystemRefHolder refs, DumpData data) throws IOException {
+    private static List<AndroidSocket> createSockets(SystemRefHolder refs, MemoryDump data, @Nonnull Environment env) throws IOException {
         List<AndroidSocket> result = new ArrayList<AndroidSocket>();
         for (Instance instance : data.instances.values()) {
             if (isInstanceOf(instance, refs.socket.cls, data)) {
@@ -68,10 +70,8 @@ public class SystemInfoFactory extends BaseFactory {
                     Instance address = data.instances.get(impl.getObjectField(refs.socketImpl.address, data.classes));
                     if (isInstanceOf(address, refs.inet4Address.cls, data)) {
                         String hostNameString = null;
-                        Instance hostName = data.instances.get(address.getObjectField(refs.inet4Address.hostName, data.classes));
-                        if (hostName != null) {
-                            hostNameString = readString(hostName, refs, data);
-                        }
+                        Instance hostNameInstance = data.instances.get(address.getObjectField(refs.inet4Address.hostName, data.classes));
+                        hostNameString = StringFactory.getInstance(data, env).create(hostNameInstance);
                         String addressString = null;
                         PrimitiveArray rawAddress = data.primitiveArrays.get(address.getObjectField(refs.inet4Address.ipaddress, data.classes));
                         if (rawAddress != null) {
@@ -87,13 +87,13 @@ public class SystemInfoFactory extends BaseFactory {
         return result;
     }
 
-    private static List<Location> createLocations(SystemRefHolder refs, DumpData data) throws IOException {
+    private static List<Location> createLocations(SystemRefHolder refs, MemoryDump data, @Nonnull Environment env) throws IOException {
         List<Location> result = new ArrayList<Location>();
         for (Instance instance : data.instances.values()) {
             if (isInstanceOf(instance, refs.location.cls, data)) {
                 // Provider name
-                Instance provider = data.instances.get(instance.getObjectField(refs.location.provider, data.classes));
-                String providerName = readString(provider, refs, data);
+                Instance providerNameInstance = data.instances.get(instance.getObjectField(refs.location.provider, data.classes));
+                String providerName = StringFactory.getInstance(data, env).create(providerNameInstance);
                 // Latitude
                 double latitude = instance.getDoubleField(refs.location.latitude, data.classes);
                 // Longitude
@@ -105,6 +105,7 @@ public class SystemInfoFactory extends BaseFactory {
                 result.add(new Location(providerName, latitude, longitude, accuracy, time));
             }
         }
+        System.out.println("Found " + result.size() + " locations");
         return result;
     }
 }
