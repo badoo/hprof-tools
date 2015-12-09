@@ -8,8 +8,8 @@ import java.io.IOException;
 
 import javax.annotation.Nonnull;
 
-import static com.badoo.hprof.viewer.factory.FactoryUtils.getClassName;
-import static com.badoo.hprof.viewer.factory.FactoryUtils.isInstanceOf;
+import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.getClassName;
+import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.isInstanceOf;
 
 /**
  * Factory for creating generic objects of unknown type

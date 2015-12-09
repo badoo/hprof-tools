@@ -5,6 +5,7 @@ import com.badoo.hprof.viewer.MemoryDump;
 import com.badoo.hprof.viewer.android.Activity;
 import com.badoo.hprof.viewer.android.Intent;
 import com.badoo.hprof.viewer.factory.classdefs.ActivityClassDef;
+import com.badoo.hprof.viewer.factory.classdefs.ClassUtils;
 
 import java.io.IOException;
 
@@ -33,7 +34,7 @@ public class ActivityFactory extends BaseClassFactory<ActivityClassDef, Activity
     @Override
     protected Activity create(@Nonnull Instance instance, @Nonnull MemoryDump data, @Nonnull Environment env, @Nonnull ActivityClassDef classDef) throws IOException {
         // Name and title
-        String className = FactoryUtils.getClassName(instance, data);
+        String className = ClassUtils.getClassName(instance, data);
         Instance titleInstance = data.instances.get(instance.getObjectField(classDef.title, data.classes));
         String title = StringFactory.getInstance(data, env).create(titleInstance);
         // Intent

@@ -9,7 +9,7 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-import static com.badoo.hprof.viewer.factory.FactoryUtils.isInstanceOf;
+import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.isInstanceOf;
 
 /**
  * Factory for creating different types of maps.

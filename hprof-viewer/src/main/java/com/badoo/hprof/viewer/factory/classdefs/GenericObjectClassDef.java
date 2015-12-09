@@ -4,6 +4,8 @@ import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.viewer.MemoryDump;
 
 import javax.annotation.Nonnull;
+import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findClassByName;
+import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findFieldByName;
 
 /**
  * Class definition used for accessing fields of unknown objects (e.g values in a map or list)

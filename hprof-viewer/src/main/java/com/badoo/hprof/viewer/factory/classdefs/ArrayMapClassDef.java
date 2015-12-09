@@ -7,9 +7,12 @@ import com.badoo.hprof.viewer.MemoryDump;
 
 import javax.annotation.Nonnull;
 
+import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findClassByName;
+import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findFieldByName;
+
 /**
  * Class definition for accessing data of an instance dump of an ArrayMap
- *
+ * <p/>
  * Created by Erik Andre on 05/12/15.
  */
 public class ArrayMapClassDef extends BaseClassDef {

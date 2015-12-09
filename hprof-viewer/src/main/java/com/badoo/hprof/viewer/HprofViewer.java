@@ -67,7 +67,7 @@ public class HprofViewer {
 
         // Build the View hierarchy, starting with the roots
         List<Screen> screens = new ArrayList<Screen>();
-        Environment env = new Environment(Version.KITKAT); //TODO Figure this out!
+        Environment env = new Environment(data);
         for (Instance root : viewRoots) {
             Screen screen = ScreenFactory.buildViewHierarchy(root, data, env);
             screens.add(screen);

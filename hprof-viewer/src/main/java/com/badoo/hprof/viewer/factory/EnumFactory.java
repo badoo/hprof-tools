@@ -9,7 +9,7 @@ import java.io.IOException;
 
 import javax.annotation.Nonnull;
 
-import static com.badoo.hprof.viewer.factory.FactoryUtils.getClassName;
+import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.getClassName;
 
 /**
  * Factory class for creating Booleans from Boolean instance dumps.

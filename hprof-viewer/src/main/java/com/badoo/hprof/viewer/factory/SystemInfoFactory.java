@@ -9,7 +9,6 @@ import com.badoo.hprof.viewer.factory.classdefs.Inet4AddressClassDef;
 import com.badoo.hprof.viewer.factory.classdefs.LocationClassDef;
 import com.badoo.hprof.viewer.factory.classdefs.SocketClassDef;
 import com.badoo.hprof.viewer.factory.classdefs.SocketImplClassDef;
-import com.badoo.hprof.viewer.factory.classdefs.StringClassDef;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,7 +16,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import static com.badoo.hprof.viewer.factory.FactoryUtils.isInstanceOf;
+import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.isInstanceOf;
 
 /**
  * Factory class for creating system information classes based on memory dump data.

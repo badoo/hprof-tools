@@ -9,7 +9,7 @@ import java.io.IOException;
 
 import javax.annotation.Nonnull;
 
-import static com.badoo.hprof.viewer.factory.FactoryUtils.getClassName;
+import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.getClassName;
 
 /**
  * Factory for creating generic Views (those not handled by more specific factories like TextViewFactory)

@@ -3,6 +3,7 @@ package com.badoo.hprof.viewer.factory;
 import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.viewer.MemoryDump;
 import com.badoo.hprof.viewer.android.Drawable;
+import com.badoo.hprof.viewer.factory.classdefs.ClassUtils;
 import com.badoo.hprof.viewer.factory.classdefs.DrawableClassDef;
 
 import java.io.IOException;
@@ -31,10 +32,10 @@ public class DrawableFactory extends BaseClassFactory<DrawableClassDef, Drawable
 
     @Override
     protected Drawable create(@Nonnull Instance instance, @Nonnull MemoryDump data, @Nonnull Environment env, @Nonnull DrawableClassDef classDef) throws IOException {
-        if (FactoryUtils.isInstanceOf(instance, classDef.colorDrawableCls, data)) {
+        if (ClassUtils.isInstanceOf(instance, classDef.colorDrawableCls, data)) {
             return ColorDrawableFactory.getInstance(data, env).create(instance);
         }
-        else if (FactoryUtils.isInstanceOf(instance, classDef.bitmapDrawableCls, data)) {
+        else if (ClassUtils.isInstanceOf(instance, classDef.bitmapDrawableCls, data)) {
             return BitmapDrawableFactory.getInstance(data, env).create(instance);
         }
         return null; // Unsupported drawable type

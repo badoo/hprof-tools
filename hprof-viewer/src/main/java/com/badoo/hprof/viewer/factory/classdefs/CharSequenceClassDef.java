@@ -5,6 +5,8 @@ import com.badoo.hprof.viewer.MemoryDump;
 
 import javax.annotation.Nonnull;
 
+import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findClassByName;
+
 /**
  * Class definition used to process instance dumps for classes implementing CharSequence.
  * <p/>
