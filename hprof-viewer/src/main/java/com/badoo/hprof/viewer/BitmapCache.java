@@ -4,6 +4,8 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 /**
  * Factory class for bitmaps (BufferedImage)
  *
@@ -13,12 +15,14 @@ public class BitmapCache {
 
     private static Map<Integer, BufferedImage> cache = new HashMap<Integer, BufferedImage>();
 
+    @Nullable
     public static BufferedImage createBitmap(int bitmapObjectId, byte[] data, int width, int height) {
         if (cache.containsKey(bitmapObjectId)) {
             return cache.get(bitmapObjectId);
         }
         if (data.length != width * height * 4) {
-            throw new IllegalArgumentException("Invalid bitmap dimensions! length=" + data.length + ", w=" + width + ", h=" + height);
+            System.err.println("Invalid bitmap dimensions! length=" + data.length + ", w=" + width + ", h=" + height);
+            return null;
         }
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         for (int i = 0; i < data.length; i += 4) {

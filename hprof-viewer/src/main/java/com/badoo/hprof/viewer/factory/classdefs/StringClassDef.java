@@ -8,6 +8,7 @@ import com.badoo.hprof.viewer.MemoryDump;
 import javax.annotation.Nonnull;
 import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findClassByName;
 import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findFieldByName;
+import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.tryFindFieldByName;
 
 /**
  * Class definition for accessing data of an instance dump of a String
@@ -24,7 +25,7 @@ public class StringClassDef extends BaseClassDef {
     public StringClassDef(@Nonnull MemoryDump data) {
         cls = findClassByName("java.lang.String", data);
         value = findFieldByName("value", BasicType.OBJECT, cls, data);
-        offset = findFieldByName("offset", BasicType.INT, cls, data);
+        offset = tryFindFieldByName("offset", BasicType.INT, cls, data);
         count = findFieldByName("count", BasicType.INT, cls, data);
     }
 }

@@ -11,6 +11,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
+ * Utility methods for handling class data
+ *
  * Created by Erik Andre on 09/12/15.
  */
 public class ClassUtils {
@@ -36,17 +38,26 @@ public class ClassUtils {
 
     @Nonnull
     public static InstanceField findFieldByName(@Nonnull String name, @Nonnull BasicType type, @Nonnull ClassDefinition cls, @Nonnull MemoryDump data) {
+        InstanceField foundField = tryFindFieldByName(name, type, cls, data);
+        if (foundField == null) {
+            // Error reporting
+            StringBuilder error = new StringBuilder();
+            for (InstanceField field : cls.getInstanceFields()) {
+                error.append(data.strings.get(field.getFieldNameId())).append(" ").append(field.getType()).append("\n");
+            }
+            throw new IllegalArgumentException("Field " + name + " not found in " + data.strings.get(cls.getNameStringId()) + "\n" + error.toString());
+        }
+        return foundField;
+    }
+
+    @Nullable
+    public static InstanceField tryFindFieldByName(@Nonnull String name, @Nonnull BasicType type, @Nonnull ClassDefinition cls, @Nonnull MemoryDump data) {
         for (InstanceField field : cls.getInstanceFields()) {
             if (field.getType() == type && name.equals(data.strings.get(field.getFieldNameId()).getValue())) {
                 return field;
             }
         }
-        // Error reporting
-        StringBuilder error = new StringBuilder();
-        for (InstanceField field : cls.getInstanceFields()) {
-            error.append(data.strings.get(field.getFieldNameId())).append(" ").append(field.getType()).append("\n");
-        }
-        throw new IllegalArgumentException("Field " + name + " not found in " + data.strings.get(cls.getNameStringId()) + "\n" + error.toString());
+        return null;
     }
 
     @Nonnull

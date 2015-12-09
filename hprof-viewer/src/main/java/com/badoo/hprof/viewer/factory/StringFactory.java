@@ -20,10 +20,6 @@ public class StringFactory extends BaseClassFactory<StringClassDef, String> {
 
     private static StringFactory instance;
 
-    private StringFactory(@Nonnull MemoryDump data, @Nonnull Environment env) {
-        super(data, env);
-    }
-
     public static StringFactory getInstance(@Nonnull MemoryDump data, @Nonnull Environment env) {
         if (instance == null) {
             instance = new StringFactory(data, env);
@@ -31,10 +27,14 @@ public class StringFactory extends BaseClassFactory<StringClassDef, String> {
         return instance;
     }
 
+    private StringFactory(@Nonnull MemoryDump data, @Nonnull Environment env) {
+        super(data, env);
+    }
+
     @Override
     protected String create(@Nonnull Instance instance, @Nonnull MemoryDump data, @Nonnull Environment env, @Nonnull StringClassDef classDef) throws IOException {
         final int valueObjectId = instance.getObjectField(classDef.value, data.classes);
-        final int offset = instance.getIntField(classDef.offset, data.classes);
+        final int offset = classDef.offset != null ? instance.getIntField(classDef.offset, data.classes) : 0;
         final int count = instance.getIntField(classDef.count, data.classes);
         PrimitiveArray value = data.primitiveArrays.get(valueObjectId);
         if (value.getType() != BasicType.CHAR) {
