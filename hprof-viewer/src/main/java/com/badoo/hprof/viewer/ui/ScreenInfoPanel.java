@@ -38,11 +38,11 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeSelectionModel;
 
 /**
- * Main window containing information about Views and activities.
+ * Panel containing information about Views and activities.
  * <p/>
  * Created by Erik Andre on 22/11/15.
  */
-public class MainWindow extends JFrame implements TreeSelectionListener, ItemListener {
+public class ScreenInfoPanel extends JPanel implements TreeSelectionListener, ItemListener {
 
     private static final String[] HEADER = new String[]{"Name", "Value"};
 
@@ -56,10 +56,7 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
     private ImagePanel imagePanel;
     private View selectedView;
 
-    public MainWindow(@Nonnull List<Screen> screens, SystemInfo sysInfo) {
-        super("Hprof Viewer");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+    public ScreenInfoPanel(@Nonnull List<Screen> screens) {
         imagePanel = new ImagePanel();
         viewTree = new JTree(new DefaultMutableTreeNode("Loading..."));
         viewTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -100,12 +97,8 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
         splitPane.setLeftComponent(leftPanel);
         splitPane.setRightComponent(imagePanel);
         add(splitPane);
-        setVisible(true);
         selectedScreen = screens.get(0);
         update();
-        SysInfoWindow sysInfoWindow = new SysInfoWindow(sysInfo);
-        sysInfoWindow.setLocationRelativeTo(this);
-        sysInfoWindow.setLocation(getWidth(), 0);
     }
 
     private void update() {
@@ -165,7 +158,6 @@ public class MainWindow extends JFrame implements TreeSelectionListener, ItemLis
         if (resize) {
             Dimension size = new Dimension((int) (imagePanel.getPreferredSize().getWidth() + rootPicker.getPreferredSize().getWidth() + 15), (int) imagePanel.getPreferredSize().getHeight() + 25);
             setPreferredSize(size);
-            pack();
         }
     }
 

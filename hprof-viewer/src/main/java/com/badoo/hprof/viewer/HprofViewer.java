@@ -4,13 +4,13 @@ import com.badoo.hprof.library.HprofReader;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.HprofString;
 import com.badoo.hprof.library.model.Instance;
-import com.badoo.hprof.viewer.android.Version;
 import com.badoo.hprof.viewer.factory.Environment;
 import com.badoo.hprof.viewer.factory.Screen;
 import com.badoo.hprof.viewer.factory.ScreenFactory;
 import com.badoo.hprof.viewer.factory.SystemInfo;
 import com.badoo.hprof.viewer.factory.SystemInfoFactory;
-import com.badoo.hprof.viewer.ui.MainWindow;
+import com.badoo.hprof.viewer.ui.ScreenInfoPanel;
+import com.badoo.hprof.viewer.ui.TabbedInfoWindow;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -75,14 +75,14 @@ public class HprofViewer {
         // Collect system information
         SystemInfo sysInfo = SystemInfoFactory.createSystemInfo(data, env);
         // Render the views
-        updateUi(screens, sysInfo);
+        updateUi(screens, sysInfo, data);
     }
 
-    private static void updateUi(final List<Screen> roots, final SystemInfo sysInfo) {
+    private static void updateUi(final List<Screen> roots, final SystemInfo sysInfo, final MemoryDump data) {
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 //Create and set up the window.
-                new MainWindow(roots, sysInfo);
+                new TabbedInfoWindow(data, roots, sysInfo);
             }
         });
     }

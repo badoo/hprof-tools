@@ -25,7 +25,7 @@ import javax.swing.table.DefaultTableModel;
  * <p/>
  * Created by Erik Andre on 05/12/15.
  */
-public class SysInfoWindow extends JFrame implements ItemListener {
+public class SystemInfoPanel extends JPanel implements ItemListener {
 
     private static final String LOCATION = "Location";
     private static final String SOCKET_CONNECTIONS = "Socket connections";
@@ -35,9 +35,7 @@ public class SysInfoWindow extends JFrame implements ItemListener {
     private final JTable details;
     private final SystemInfo sysInfo;
 
-    public SysInfoWindow(SystemInfo sysInfo) {
-        super("System Information");
-
+    public SystemInfoPanel(SystemInfo sysInfo) {
         this.sysInfo = sysInfo;
         // Picker
         Vector<String> items = new Vector<String>();
@@ -56,8 +54,6 @@ public class SysInfoWindow extends JFrame implements ItemListener {
         add(main);
         update(LOCATION);
         setMinimumSize(new Dimension(400, 300));
-        pack();
-        setVisible(true);
     }
 
     private void update(String selected) {

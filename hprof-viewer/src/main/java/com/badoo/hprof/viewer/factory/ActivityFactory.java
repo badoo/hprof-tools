@@ -35,12 +35,10 @@ public class ActivityFactory extends BaseClassFactory<ActivityClassDef, Activity
     protected Activity create(@Nonnull Instance instance, @Nonnull MemoryDump data, @Nonnull Environment env, @Nonnull ActivityClassDef classDef) throws IOException {
         // Name and title
         String className = ClassUtils.getClassName(instance, data);
-//        Instance titleInstance = data.instances.get(instance.getObjectField(classDef.title, data.classes));
-        Instance titleInstance = null;
+        Instance titleInstance = data.instances.get(instance.getObjectField(classDef.title, data.classes));
         String title = StringFactory.getInstance(data, env).create(titleInstance);
         // Intent
-//        Instance intentInstance = data.instances.get(instance.getObjectField(classDef.intent, data.classes));
-        Instance intentInstance = null;
+        Instance intentInstance = data.instances.get(instance.getObjectField(classDef.intent, data.classes));
         Intent intent = IntentFactory.getInstance(data, env).create(intentInstance);
         return new Activity(className, title, intent);
     }

@@ -5,12 +5,17 @@ import com.badoo.hprof.viewer.android.ImageView;
 import com.badoo.hprof.viewer.android.TextView;
 import com.badoo.hprof.viewer.android.View;
 import com.badoo.hprof.viewer.android.ViewGroup;
+import com.badoo.hprof.viewer.factory.SystemInfo;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.awt.image.BufferedImage;
+
+import javax.annotation.Nonnull;
 
 /**
  * Utility class containing methods for rendering Views and ViewGroups
@@ -22,6 +27,7 @@ public class ViewRenderer {
 
     private static Stroke THIN_LINE = new BasicStroke(2);
     private static Stroke THICK_LINE = new BasicStroke(10);
+    private static final float SCALE_FACTOR = 0.5f;
 
     private boolean showBounds = true;
     private boolean renderText = true;
@@ -35,16 +41,58 @@ public class ViewRenderer {
      * @param root the root of the ViewGroup to render
      * @return the rendered image
      */
-    public BufferedImage renderViews(ViewGroup root) {
+    public BufferedImage renderViews(@Nonnull ViewGroup root) {
+        final long start = System.currentTimeMillis();
         if (root.getWidth() == 0 || root.getHeight() == 0) {
             throw new IllegalArgumentException("View root has no size!");
         }
-        BufferedImage buffer = new BufferedImage(root.getWidth() / 2 + 2, root.getHeight() / 2 + 2, BufferedImage.TYPE_INT_ARGB);
+        int height = getMaxHeight(root);
+        int width = getMaxWidth(root);
+        BufferedImage buffer = new BufferedImage((int) (width * SCALE_FACTOR), (int) (height * SCALE_FACTOR), BufferedImage.TYPE_INT_ARGB);
         Graphics2D canvas = (Graphics2D) buffer.getGraphics();
-        canvas.scale(0.5, 0.5);
+        canvas.scale(SCALE_FACTOR, SCALE_FACTOR);
         canvas.setFont(canvas.getFont().deriveFont(24f));
         renderViewGroup(root, canvas);
+        System.out.println("Rendered views in " + (System.currentTimeMillis() - start) + "ms");
         return buffer;
+    }
+
+    private int getMaxHeight(ViewGroup root) {
+        int height = root.getHeight();
+        for (View view : root.getChildren()) {
+            if (view instanceof ViewGroup) {
+                int childHeight = getMaxHeight((ViewGroup) view);
+                if (view.top + childHeight > height) {
+                    height = view.top + childHeight;
+                }
+            }
+            else {
+                int childHeight = view.getHeight();
+                if (view.top + childHeight > height) {
+                    height = view.top + childHeight;
+                }
+            }
+        }
+        return height;
+    }
+
+    private int getMaxWidth(ViewGroup root) {
+        int width = root.getHeight();
+        for (View view : root.getChildren()) {
+            if (view instanceof ViewGroup) {
+                int childWidth = getMaxWidth((ViewGroup) view);
+                if (view.left + childWidth > width) {
+                    width = view.left + childWidth;
+                }
+            }
+            else {
+                int childWidth = view.getWidth();
+                if (view.left + childWidth > width) {
+                    width = view.left + childWidth;
+                }
+            }
+        }
+        return width;
     }
 
     /**
@@ -160,5 +208,23 @@ public class ViewRenderer {
         }
         return view.getVisibility() == View.VISIBLE ? Color.BLACK : Color.LIGHT_GRAY;
     }
+
+//    // Returns the largest bounding box that would fit all views in the hierarchy (including those
+//    // that are positioned outside of their parents)
+//    private Rectangle getMaximumBounds(@Nonnull ViewGroup root) {
+//        Rectangle bounds = new Rectangle(root.left, root.top, root.getWidth(), root.getHeight());
+//        for (View view : root.getChildren()) {
+//            Rectangle childBounds = getMaximumBounds(view);
+//            childBounds.translate(bounds.x, bounds.y);
+//            if (!bounds.contains(childBounds)) {
+//                bounds = bounds.union(childBounds);
+//            }
+//        }
+//        return bounds;
+//    }
+//
+//    private Rectangle getMaximumBounds(View view) {
+//        return new Rectangle(view.left, view.top, view.getWidth(), view.getHeight());
+//    }
 
 }
