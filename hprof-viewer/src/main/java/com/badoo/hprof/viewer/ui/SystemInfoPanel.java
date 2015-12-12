@@ -5,7 +5,6 @@ import com.badoo.hprof.viewer.android.Location;
 import com.badoo.hprof.viewer.factory.SystemInfo;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.text.DateFormat;
@@ -14,7 +13,6 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -36,6 +34,7 @@ public class SystemInfoPanel extends JPanel implements ItemListener {
     private final SystemInfo sysInfo;
 
     public SystemInfoPanel(SystemInfo sysInfo) {
+        super(new BorderLayout());
         this.sysInfo = sysInfo;
         // Picker
         Vector<String> items = new Vector<String>();
@@ -48,12 +47,9 @@ public class SystemInfoPanel extends JPanel implements ItemListener {
         details = new JTable();
         JScrollPane detailsContainer = new JScrollPane(details);
 
-        JPanel main = new JPanel(new BorderLayout());
-        main.add(picker, BorderLayout.NORTH);
-        main.add(detailsContainer, BorderLayout.CENTER);
-        add(main);
+        add(picker, BorderLayout.NORTH);
+        add(detailsContainer, BorderLayout.CENTER);
         update(LOCATION);
-        setMinimumSize(new Dimension(400, 300));
     }
 
     private void update(String selected) {
