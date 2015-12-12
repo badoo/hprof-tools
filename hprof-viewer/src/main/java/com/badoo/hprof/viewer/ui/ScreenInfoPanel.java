@@ -57,6 +57,7 @@ public class ScreenInfoPanel extends JPanel implements TreeSelectionListener, It
     private View selectedView;
 
     public ScreenInfoPanel(@Nonnull List<Screen> screens) {
+        super(new BorderLayout());
         imagePanel = new ImagePanel();
         viewTree = new JTree(new DefaultMutableTreeNode("Loading..."));
         viewTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -96,7 +97,7 @@ public class ScreenInfoPanel extends JPanel implements TreeSelectionListener, It
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setLeftComponent(leftPanel);
         splitPane.setRightComponent(imagePanel);
-        add(splitPane);
+        add(splitPane, BorderLayout.CENTER);
         selectedScreen = screens.get(0);
         update();
     }

@@ -31,6 +31,9 @@ public class TabbedInfoWindow extends JFrame {
         setVisible(true);
     }
 
-
-
+    @Override
+    public void doLayout() {
+        super.doLayout();
+//        System.out.println(getWidth() + "x" + getHeight());
+    }
 }
