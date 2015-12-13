@@ -11,9 +11,9 @@ import javax.swing.SortOrder;
  */
 public class CountComparator implements Comparator<Object> {
 
-    private final ClassesInfoPanel.InstanceTableRowSorter sorter;
+    private final ClassesInfoPanel.ClassesTableRowSorter sorter;
 
-    public CountComparator(@Nonnull ClassesInfoPanel.InstanceTableRowSorter sorter) {
+    public CountComparator(@Nonnull ClassesInfoPanel.ClassesTableRowSorter sorter) {
         this.sorter = sorter;
     }
 

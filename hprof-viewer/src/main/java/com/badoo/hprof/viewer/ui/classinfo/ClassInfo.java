@@ -19,4 +19,9 @@ public class ClassInfo {
         this.instanceCount = instanceCount;
         this.instanceSize = instanceSize;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

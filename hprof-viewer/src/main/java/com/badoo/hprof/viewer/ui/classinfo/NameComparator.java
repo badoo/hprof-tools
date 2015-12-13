@@ -9,26 +9,26 @@ import javax.swing.SortOrder;
  * Comparator for class names that also makes sure that the first row (containing query) is first after sorting.
  * Created by Erik Andre on 12/12/15.
  */
-public class NameComparator implements Comparator<String> {
+public class NameComparator implements Comparator<Object> {
 
     private final String query;
-    private final ClassesInfoPanel.InstanceTableRowSorter sorter;
+    private final ClassesInfoPanel.ClassesTableRowSorter sorter;
 
-    public NameComparator(@Nonnull ClassesInfoPanel.InstanceTableRowSorter sorter, @Nonnull String query) {
+    public NameComparator(@Nonnull ClassesInfoPanel.ClassesTableRowSorter sorter, @Nonnull String query) {
         this.sorter = sorter;
         this.query = query;
     }
 
     @Override
-    public int compare(String lhs, String rhs) {
-        if (query.equals(lhs)) {
+    public int compare(Object lhs, Object rhs) {
+        if (lhs instanceof String) {
             SortOrder order = sorter.getSortKeys().get(0).getSortOrder();
             return order == SortOrder.ASCENDING ? -1 : 1;
         }
-        else if (query.equals(rhs)) {
+        else if (rhs instanceof String) {
             SortOrder order = sorter.getSortKeys().get(0).getSortOrder();
             return order == SortOrder.ASCENDING ? 1 : -1;
         }
-        return lhs.compareTo(rhs);
+        return ((ClassInfo) lhs).name.compareTo(((ClassInfo) rhs).name);
     }
 }
