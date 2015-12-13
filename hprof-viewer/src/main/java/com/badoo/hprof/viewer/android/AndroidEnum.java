@@ -25,8 +25,12 @@ public class AndroidEnum {
         return ordinal;
     }
 
+    public String getValue() {
+        return value;
+    }
+
     @Override
     public String toString() {
-        return name + " (" + ordinal + ")";
+        return name + "." + value + " (" + ordinal + ")";
     }
 }
