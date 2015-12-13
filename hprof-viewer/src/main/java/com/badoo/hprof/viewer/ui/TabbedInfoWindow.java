@@ -3,7 +3,7 @@ package com.badoo.hprof.viewer.ui;
 import com.badoo.hprof.viewer.MemoryDump;
 import com.badoo.hprof.viewer.factory.Screen;
 import com.badoo.hprof.viewer.factory.SystemInfo;
-import com.badoo.hprof.viewer.ui.instances.InstanceInfoPanel;
+import com.badoo.hprof.viewer.ui.classinfo.ClassesInfoPanel;
 
 import java.util.List;
 
@@ -26,14 +26,9 @@ public class TabbedInfoWindow extends JFrame {
 
         tabHost.addTab("Activities", new ScreenInfoPanel(screenList));
         tabHost.addTab("System info", new SystemInfoPanel(sysInfo));
-        tabHost.addTab("Instances", new InstanceInfoPanel(data));
+        tabHost.addTab("Classes", new ClassesInfoPanel(data));
         pack();
         setVisible(true);
     }
 
-    @Override
-    public void doLayout() {
-        super.doLayout();
-//        System.out.println(getWidth() + "x" + getHeight());
-    }
 }

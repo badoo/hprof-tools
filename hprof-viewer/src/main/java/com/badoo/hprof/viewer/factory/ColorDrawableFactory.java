@@ -13,7 +13,7 @@ import java.io.IOException;
 import javax.annotation.Nonnull;
 
 /**
- * Factory for creating ColorDrawables from instances dumps
+ * Factory for creating ColorDrawables from classinfo dumps
  * <p/>
  * Created by Erik Andre on 08/12/15.
  */

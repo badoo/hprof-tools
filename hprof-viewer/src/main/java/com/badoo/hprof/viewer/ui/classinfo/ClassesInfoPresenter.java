@@ -1,4 +1,4 @@
-package com.badoo.hprof.viewer.ui.instances;
+package com.badoo.hprof.viewer.ui.classinfo;
 
 import java.util.List;
 
@@ -7,7 +7,7 @@ import javax.annotation.Nonnull;
 /**
  * Created by Erik Andre on 12/12/15.
  */
-public interface InstanceInfoPresenter {
+public interface ClassesInfoPresenter {
 
     void onQueryByName(@Nonnull String query);
 

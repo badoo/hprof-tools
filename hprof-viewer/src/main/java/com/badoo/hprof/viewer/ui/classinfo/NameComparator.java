@@ -1,4 +1,4 @@
-package com.badoo.hprof.viewer.ui.instances;
+package com.badoo.hprof.viewer.ui.classinfo;
 
 import java.util.Comparator;
 
@@ -12,9 +12,9 @@ import javax.swing.SortOrder;
 public class NameComparator implements Comparator<String> {
 
     private final String query;
-    private final InstanceInfoPanel.InstanceTableRowSorter sorter;
+    private final ClassesInfoPanel.InstanceTableRowSorter sorter;
 
-    public NameComparator(@Nonnull InstanceInfoPanel.InstanceTableRowSorter sorter, @Nonnull String query) {
+    public NameComparator(@Nonnull ClassesInfoPanel.InstanceTableRowSorter sorter, @Nonnull String query) {
         this.sorter = sorter;
         this.query = query;
     }

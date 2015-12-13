@@ -97,7 +97,7 @@ public class HprofCruncher {
 
             /**
              * Add a class to the list of preserved classes. These classes will not have any primitive fields
-             * removed in order to save space. Objects (including Strings) referenced by instances of the class
+             * removed in order to save space. Objects (including Strings) referenced by classinfo of the class
              * will still be crunched as usual unless they are also added to the list of preserved classes.
              *
              * @param classToPreserve the class to preserve
@@ -110,7 +110,7 @@ public class HprofCruncher {
 
             /**
              * Add a class name to the list of preserved classes. These classes will not have any primitive fields
-             * removed in order to save space. Objects (including Strings) referenced by instances of the class
+             * removed in order to save space. Objects (including Strings) referenced by classinfo of the class
              * will still be crunched as usual unless they are also added to the list of preserved classes.
              *
              * @param classToPreserve the class to preserve

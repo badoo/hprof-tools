@@ -56,14 +56,14 @@ public class HprofViewer {
         Map<Integer, ClassDefinition> viewClasses = filterViewClasses(data);
         System.out.println("Found " + viewClasses.size() + " View classes");
 
-        // Filter out the instances dumps of the View classes
+        // Filter out the classinfo dumps of the View classes
         List<Instance> viewInstances = filterViewInstances(data, viewClasses);
-        System.out.println("Found " + viewInstances.size() + " instances of View classes");
+        System.out.println("Found " + viewInstances.size() + " classinfo of View classes");
 
         // Find the View roots (Decor views), there should be at least one
         ClassDefinition decorClass = findDecorClass(viewClasses, data);
         List<Instance> viewRoots = findViewRoots(viewInstances, decorClass);
-        System.out.println("Found " + viewRoots.size() + " roots instances of " + data.strings.get(decorClass.getNameStringId()).getValue());
+        System.out.println("Found " + viewRoots.size() + " roots classinfo of " + data.strings.get(decorClass.getNameStringId()).getValue());
 
         // Build the View hierarchy, starting with the roots
         List<Screen> screens = new ArrayList<Screen>();

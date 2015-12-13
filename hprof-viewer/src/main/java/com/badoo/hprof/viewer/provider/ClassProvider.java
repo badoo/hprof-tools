@@ -32,6 +32,16 @@ public class ClassProvider extends BaseProvider {
         return classNames.get(cls);
     }
 
+    public int getInstanceSizeForClass(@Nonnull ClassDefinition cls) {
+        int size = 0;
+        //noinspection ConstantConditions
+        while (cls != null) {
+            size += cls.getInstanceSize();
+            cls = data.classes.get(cls.getSuperClassObjectId());
+        }
+        return size;
+    }
+
     public List<ClassDefinition> getClassesMatchingQuery(@Nonnull String query) {
         List<ClassDefinition> result = new ArrayList<ClassDefinition>();
         for (ClassDefinition cls : data.classes.values()) {

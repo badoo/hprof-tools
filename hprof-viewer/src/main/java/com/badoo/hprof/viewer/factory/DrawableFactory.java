@@ -11,7 +11,7 @@ import java.io.IOException;
 import javax.annotation.Nonnull;
 
 /**
- * Factory for creating Drawable instances of different types
+ * Factory for creating Drawable classinfo of different types
  * <p/>
  * Created by Erik Andre on 08/12/15.
  */

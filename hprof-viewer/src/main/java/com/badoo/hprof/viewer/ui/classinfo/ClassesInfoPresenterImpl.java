@@ -1,4 +1,4 @@
-package com.badoo.hprof.viewer.ui.instances;
+package com.badoo.hprof.viewer.ui.classinfo;
 
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.viewer.provider.ClassProvider;
@@ -14,13 +14,13 @@ import javax.annotation.Nonnull;
  *
  * Created by Erik Andre on 12/12/15.
  */
-public class InstanceInfoPresenterImpl implements InstanceInfoPresenter {
+public class ClassesInfoPresenterImpl implements ClassesInfoPresenter {
 
     private final View view;
     private final ClassProvider clsProvider;
     private final InstanceProvider instanceProvider;
 
-    public InstanceInfoPresenterImpl(@Nonnull View view, @Nonnull ClassProvider clsProvider, @Nonnull InstanceProvider instanceProvider) {
+    public ClassesInfoPresenterImpl(@Nonnull View view, @Nonnull ClassProvider clsProvider, @Nonnull InstanceProvider instanceProvider) {
         this.view = view;
         this.clsProvider = clsProvider;
         this.instanceProvider = instanceProvider;
@@ -33,7 +33,8 @@ public class InstanceInfoPresenterImpl implements InstanceInfoPresenter {
         List<ClassInfo> model = new ArrayList<ClassInfo>();
         for (ClassDefinition cls : result) {
             int count = instanceProvider.getInstancesOfClass(cls);
-            model.add(new ClassInfo(cls, clsProvider.getClassName(cls), count));
+            int instanceSize = clsProvider.getInstanceSizeForClass(cls);
+            model.add(new ClassInfo(cls, clsProvider.getClassName(cls), count, instanceSize));
         }
         view.showQueryResult(model, query);
     }

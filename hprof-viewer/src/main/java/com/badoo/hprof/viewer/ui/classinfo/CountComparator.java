@@ -1,4 +1,4 @@
-package com.badoo.hprof.viewer.ui.instances;
+package com.badoo.hprof.viewer.ui.classinfo;
 
 import java.util.Comparator;
 
@@ -11,9 +11,9 @@ import javax.swing.SortOrder;
  */
 public class CountComparator implements Comparator<Object> {
 
-    private final InstanceInfoPanel.InstanceTableRowSorter sorter;
+    private final ClassesInfoPanel.InstanceTableRowSorter sorter;
 
-    public CountComparator(@Nonnull InstanceInfoPanel.InstanceTableRowSorter sorter) {
+    public CountComparator(@Nonnull ClassesInfoPanel.InstanceTableRowSorter sorter) {
         this.sorter = sorter;
     }
 

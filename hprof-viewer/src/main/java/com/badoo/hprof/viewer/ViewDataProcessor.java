@@ -19,7 +19,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 
 /**
- * HPROF processor for finding data (classes definitions and instances) of Views and ViewGroups
+ * HPROF processor for finding data (classes definitions and classinfo) of Views and ViewGroups
  */
 public class ViewDataProcessor extends DiscardProcessor {
 

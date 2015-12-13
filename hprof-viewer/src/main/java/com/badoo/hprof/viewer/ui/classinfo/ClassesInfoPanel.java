@@ -1,4 +1,4 @@
-package com.badoo.hprof.viewer.ui.instances;
+package com.badoo.hprof.viewer.ui.classinfo;
 
 import com.badoo.hprof.viewer.MemoryDump;
 import com.badoo.hprof.viewer.provider.ClassProvider;
@@ -17,11 +17,11 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 
 /**
- * Panel showing information about instances and classes found in the memory dump.
+ * Panel showing information about classinfo and classes found in the memory dump.
  * <p/>
  * Created by Erik Andre on 12/12/15.
  */
-public class InstanceInfoPanel extends JPanel implements InstanceInfoPresenter.View {
+public class ClassesInfoPanel extends JPanel implements ClassesInfoPresenter.View {
 
     static class InstanceTableModel extends DefaultTableModel {
 
@@ -41,6 +41,7 @@ public class InstanceInfoPanel extends JPanel implements InstanceInfoPresenter.V
             super(model);
             setComparator(0, new NameComparator(this, query));
             setComparator(1, new CountComparator(this));
+            setComparator(2, new CountComparator(this));
         }
 
         @Override
@@ -49,9 +50,9 @@ public class InstanceInfoPanel extends JPanel implements InstanceInfoPresenter.V
         }
     }
 
-    private static final String[] HEADER = {"Name", "Instances"};
-    private static final String[] EMPTY_QUERY_HEADER = {"Enter query", ""};
-    private final InstanceInfoPresenter presenter;
+    private static final String[] HEADER = {"Name", "Instances", "Shallow Heap"};
+    private static final String[] EMPTY_QUERY_HEADER = {"Enter query", "", ""};
+    private final ClassesInfoPresenter presenter;
     private final JTable dataTable;
     private TableModelListener queryListener = new TableModelListener() {
         @Override
@@ -63,16 +64,16 @@ public class InstanceInfoPanel extends JPanel implements InstanceInfoPresenter.V
         }
     };
 
-    public InstanceInfoPanel(@Nonnull MemoryDump data) {
+    public ClassesInfoPanel(@Nonnull MemoryDump data) {
         super(new BorderLayout());
 
-        dataTable = new InstanceInfoTable();
+        dataTable = new ClassesInfoTable();
         JScrollPane scroller = new JScrollPane(dataTable);
         add(scroller, BorderLayout.CENTER);
 
         ClassProvider clsProvider = new ClassProvider(data);
         InstanceProvider instanceProvider = new InstanceProvider(data);
-        presenter = new InstanceInfoPresenterImpl(this, clsProvider, instanceProvider);
+        presenter = new ClassesInfoPresenterImpl(this, clsProvider, instanceProvider);
     }
 
     @Override
@@ -89,13 +90,15 @@ public class InstanceInfoPanel extends JPanel implements InstanceInfoPresenter.V
 
     @Override
     public void showQueryResult(List<ClassInfo> result, @Nonnull String query) {
-        Object[][] cells = new Object[result.size() + 1][2];
+        Object[][] cells = new Object[result.size() + 1][3];
         cells[0][0] = query;
         cells[0][1] = "";
+        cells[0][2] = "";
         for (int i = 0; i < result.size(); i++) {
             ClassInfo cls = result.get(i);
             cells[i + 1][0] = cls.name;
             cells[i + 1][1] = cls.instanceCount;
+            cells[i + 1][2] = cls.instanceSize * cls.instanceCount;
         }
         final InstanceTableModel model = new InstanceTableModel(cells);
         dataTable.setModel(model);

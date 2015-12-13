@@ -11,7 +11,7 @@ import java.io.IOException;
 import javax.annotation.Nonnull;
 
 /**
- * Factory for creating BitmapDrawables from instances dumps
+ * Factory for creating BitmapDrawables from classinfo dumps
  * <p/>
  * Created by Erik Andre on 08/12/15.
  */

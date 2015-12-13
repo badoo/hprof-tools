@@ -1,4 +1,4 @@
-package com.badoo.hprof.viewer.ui.instances;
+package com.badoo.hprof.viewer.ui.classinfo;
 
 import com.badoo.hprof.library.model.ClassDefinition;
 
@@ -11,10 +11,12 @@ public class ClassInfo {
     public final ClassDefinition cls;
     public final String name;
     public final int instanceCount;
+    public final int instanceSize;
 
-    public ClassInfo(ClassDefinition cls, String name, int instanceCount) {
+    public ClassInfo(ClassDefinition cls, String name, int instanceCount, int instanceSize) {
         this.cls = cls;
         this.name = name;
         this.instanceCount = instanceCount;
+        this.instanceSize = instanceSize;
     }
 }

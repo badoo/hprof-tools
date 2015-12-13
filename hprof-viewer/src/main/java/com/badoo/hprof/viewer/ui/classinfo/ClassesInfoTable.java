@@ -1,4 +1,4 @@
-package com.badoo.hprof.viewer.ui.instances;
+package com.badoo.hprof.viewer.ui.classinfo;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -11,11 +11,11 @@ import javax.swing.table.TableCellRenderer;
 /**
  * Created by Erik Andre on 12/12/15.
  */
-public class InstanceInfoTable extends JTable {
+public class ClassesInfoTable extends JTable {
 
     private static final Color LIGHT_GRAY = new Color(0xeaeaea);
 
-    public InstanceInfoTable() {
+    public ClassesInfoTable() {
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         setRowSelectionAllowed(true);
     }
