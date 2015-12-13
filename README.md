@@ -4,6 +4,7 @@ Badoo HPROF Tools are a collection of libraries and tools with the goal of makin
 
 ## Modules
 
+* <b>hprof-viewer</b>: Java application for visualizing and analyzing HPROF files.
 * <b>Android example</b>: contains an sample application showing how to use the cruncher library in an Android app
 * <b>bmd-lib</b>: Library for reading and writing BMD files
 * <b>cruncher</b>: Library (and Java application) for converting HPROF files to BMD format
@@ -19,6 +20,33 @@ JavaDoc describing the APIs provided by the modules can be generated using the f
 </code>
 
 The generated documentation will be located under <module>/build/docs.
+
+## hprof-viewer
+
+Hprof-viewer is a Java application for visualizing and analyzing HPROF files. It contains features that are specifically targeting certain data included in HPROF files created on Android devices (such as recreating View hierarchies, activity Intent parameters, loocation data and more)
+
+### Building
+
+HprofCruncher is built by executing the following command from the command line, with the root of the git as your current directory.
+
+<code>
+./gradlew hprof-viewer:jarWithDependencies
+</code>
+
+If the build is successful you will find the output jar file in the following location:
+
+<code>
+./hprof-viewer/build/libs/hprof-viewer-all-1.0.jar
+</code>
+
+### Usage
+
+After building the application jar-file you can execute it with the following command:
+
+<code>
+java -jar ./hprof-viewer/build/libs/hprof-viewer-all-1.0.jar \<input hprof file\>
+</code>
+
 
 ## HPROF Deobfuscator
 
