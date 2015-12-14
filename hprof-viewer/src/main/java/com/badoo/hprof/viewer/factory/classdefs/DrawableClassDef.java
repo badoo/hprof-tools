@@ -4,8 +4,7 @@ import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.viewer.MemoryDump;
 
 import javax.annotation.Nonnull;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findClassByName;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findFieldByName;
+
 
 /**
  * Class definition for accessing data of an instance dump of a Drawable
@@ -18,7 +17,7 @@ public class DrawableClassDef extends BaseClassDef {
     public final ClassDefinition bitmapDrawableCls;
 
     public DrawableClassDef(@Nonnull MemoryDump data) {
-        colorDrawableCls = findClassByName("android.graphics.drawable.ColorDrawable", data);
-        bitmapDrawableCls = findClassByName("android.graphics.drawable.BitmapDrawable", data);
+        colorDrawableCls = data.findClassByName("android.graphics.drawable.ColorDrawable");
+        bitmapDrawableCls = data.findClassByName("android.graphics.drawable.BitmapDrawable");
     }
 }

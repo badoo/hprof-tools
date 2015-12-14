@@ -7,8 +7,8 @@ import com.badoo.hprof.viewer.MemoryDump;
 
 import javax.annotation.Nonnull;
 
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findClassByName;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findFieldByName;
+
+
 
 /**
  * Class definition for creating HashMaps
@@ -22,8 +22,8 @@ public class HashMapClassDef extends BaseClassDef {
     public final HashEntryClassDef hashEntryClassDef;
 
     public HashMapClassDef(@Nonnull MemoryDump data) {
-        cls = findClassByName("java.util.HashMap", data);
-        table = findFieldByName("table", BasicType.OBJECT, cls, data);
+        cls = data.findClassByName("java.util.HashMap");
+        table = data.findFieldByName("table", BasicType.OBJECT, cls);
         hashEntryClassDef = new HashEntryClassDef(data);
     }
 
@@ -35,10 +35,10 @@ public class HashMapClassDef extends BaseClassDef {
         public final InstanceField next;
 
         public HashEntryClassDef(@Nonnull MemoryDump data) {
-            cls = findClassByName("java.util.HashMap$HashMapEntry", data);
-            key = findFieldByName("key", BasicType.OBJECT, cls, data);
-            value = findFieldByName("value", BasicType.OBJECT, cls, data);
-            next = findFieldByName("next", BasicType.OBJECT, cls, data);
+            cls = data.findClassByName("java.util.HashMap$HashMapEntry");
+            key = data.findFieldByName("key", BasicType.OBJECT, cls);
+            value = data.findFieldByName("value", BasicType.OBJECT, cls);
+            next = data.findFieldByName("next", BasicType.OBJECT, cls);
         }
     }
 }

@@ -3,8 +3,7 @@ package com.badoo.hprof.viewer.factory.classdefs;
 import com.badoo.hprof.viewer.MemoryDump;
 
 import javax.annotation.Nonnull;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findClassByName;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findFieldByName;
+
 
 /**
  * Class definition for accessing data of an instance dump of an Intent
@@ -14,7 +13,7 @@ import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findFieldByNam
 public class LollipopBundleClassDef extends BundleClassDef {
 
     public LollipopBundleClassDef(@Nonnull MemoryDump data) {
-        super(findClassByName("android.os.BaseBundle", data), data);
+        super(data.findClassByName("android.os.BaseBundle"), data);
     }
 
 }

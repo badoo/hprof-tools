@@ -7,8 +7,8 @@ import com.badoo.hprof.viewer.MemoryDump;
 
 import javax.annotation.Nonnull;
 
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findClassByName;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findFieldByName;
+
+
 
 /**
  * Class definition for accessing data of an instance dump of a ImageView
@@ -22,7 +22,7 @@ public class ImageViewClassDef extends GenericViewClassDef {
 
     public ImageViewClassDef(@Nonnull MemoryDump data) {
         super(data);
-        imageViewCls = findClassByName("android.widget.ImageView", data);
-        drawable = findFieldByName("mDrawable", BasicType.OBJECT, imageViewCls, data);
+        imageViewCls = data.findClassByName("android.widget.ImageView");
+        drawable = data.findFieldByName("mDrawable", BasicType.OBJECT, imageViewCls);
     }
 }

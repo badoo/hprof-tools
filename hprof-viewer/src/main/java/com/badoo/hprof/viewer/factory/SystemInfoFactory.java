@@ -16,7 +16,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.isInstanceOf;
+
 
 /**
  * Factory class for creating system information classes based on memory dump data.
@@ -44,8 +44,7 @@ public class SystemInfoFactory {
         try {
             SystemRefHolder refs = new SystemRefHolder(data);
             // Find location data
-            List<Location> locations = null;
-            locations = createLocations(refs, data, env);
+            List<Location> locations = createLocations(refs, data, env);
             // Find socket information
             List<AndroidSocket> sockets = createSockets(refs, data, env);
             return new SystemInfo(locations, sockets);
@@ -57,20 +56,19 @@ public class SystemInfoFactory {
         }
     }
 
-    private static List<AndroidSocket> createSockets(SystemRefHolder refs, MemoryDump data, @Nonnull Environment env) throws IOException {
+    private static List<AndroidSocket> createSockets(@Nonnull SystemRefHolder refs, @Nonnull MemoryDump data, @Nonnull Environment env) throws IOException {
         List<AndroidSocket> result = new ArrayList<AndroidSocket>();
         for (Instance instance : data.instances.values()) {
-            if (isInstanceOf(instance, refs.socket.cls, data)) {
+            if (data.isInstanceOf(instance, refs.socket.cls)) {
                 boolean isConnected = instance.getBooleanField(refs.socket.isConnected, data.classes);
                 boolean isClosed = instance.getBooleanField(refs.socket.isClosed, data.classes);
                 Instance impl = data.instances.get(instance.getObjectField(refs.socket.impl, data.classes));
-                if (isInstanceOf(impl, refs.socketImpl.cls, data)) {
+                if (data.isInstanceOf(impl, refs.socketImpl.cls)) {
                     int port = impl.getIntField(refs.socketImpl.port, data.classes);
                     Instance address = data.instances.get(impl.getObjectField(refs.socketImpl.address, data.classes));
-                    if (isInstanceOf(address, refs.inet4Address.cls, data)) {
-                        String hostNameString = null;
+                    if (data.isInstanceOf(address, refs.inet4Address.cls)) {
                         Instance hostNameInstance = data.instances.get(address.getObjectField(refs.inet4Address.hostName, data.classes));
-                        hostNameString = StringFactory.getInstance(data, env).create(hostNameInstance);
+                        String hostNameString = StringFactory.getInstance(data, env).create(hostNameInstance);
                         String addressString = null;
                         PrimitiveArray rawAddress = data.primitiveArrays.get(address.getObjectField(refs.inet4Address.ipaddress, data.classes));
                         if (rawAddress != null) {
@@ -86,10 +84,10 @@ public class SystemInfoFactory {
         return result;
     }
 
-    private static List<Location> createLocations(SystemRefHolder refs, MemoryDump data, @Nonnull Environment env) throws IOException {
+    private static List<Location> createLocations(@Nonnull SystemRefHolder refs, @Nonnull MemoryDump data, @Nonnull Environment env) throws IOException {
         List<Location> result = new ArrayList<Location>();
         for (Instance instance : data.instances.values()) {
-            if (isInstanceOf(instance, refs.location.cls, data)) {
+            if (data.isInstanceOf(instance, refs.location.cls)) {
                 // Provider name
                 Instance providerNameInstance = data.instances.get(instance.getObjectField(refs.location.provider, data.classes));
                 String providerName = StringFactory.getInstance(data, env).create(providerNameInstance);

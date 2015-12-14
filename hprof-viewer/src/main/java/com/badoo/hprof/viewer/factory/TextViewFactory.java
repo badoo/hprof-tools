@@ -9,7 +9,7 @@ import java.io.IOException;
 
 import javax.annotation.Nonnull;
 
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.getClassName;
+
 
 /**
  * Factory for ImageViews from instance dump data
@@ -41,7 +41,7 @@ public class TextViewFactory extends BaseClassFactory<TextViewClassDef, TextView
         int bottom = instance.getIntField(classDef.bottom, data.classes);
         Instance textInstance = data.instances.get(instance.getObjectField(classDef.text, data.classes));
         CharSequence text = CharSequenceFactory.getInstance(data, env).create(textInstance);
-        TextView view = new TextView(getClassName(instance, data),left, right, top, bottom, flags, text);
+        TextView view = new TextView(data.getClassName(instance),left, right, top, bottom, flags, text);
         view.setBackground(DrawableFactory.getInstance(data, env).create(data.instances.get(instance.getObjectField(classDef.background, data.classes))));
         return view;
     }

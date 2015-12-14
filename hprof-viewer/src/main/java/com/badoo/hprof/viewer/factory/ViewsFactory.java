@@ -3,7 +3,6 @@ package com.badoo.hprof.viewer.factory;
 import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.viewer.MemoryDump;
 import com.badoo.hprof.viewer.android.View;
-import com.badoo.hprof.viewer.factory.classdefs.ClassUtils;
 import com.badoo.hprof.viewer.factory.classdefs.ViewsClassDef;
 
 import java.io.IOException;
@@ -32,13 +31,13 @@ public class ViewsFactory extends BaseClassFactory<ViewsClassDef, View> {
 
     @Override
     protected View create(@Nonnull Instance instance, @Nonnull MemoryDump data, @Nonnull Environment env, @Nonnull ViewsClassDef classDef) throws IOException {
-        if (ClassUtils.isInstanceOf(instance, classDef.textView, data)) {
+        if (data.isInstanceOf(instance, classDef.textView)) {
             return TextViewFactory.getInstance(data, env).create(instance);
         }
-        else if (ClassUtils.isInstanceOf(instance, classDef.imageView, data)) {
+        else if (data.isInstanceOf(instance, classDef.imageView)) {
             return ImageViewFactory.getInstance(data, env).create(instance);
         }
-        else if (ClassUtils.isInstanceOf(instance, classDef.viewGroup, data)) {
+        else if (data.isInstanceOf(instance, classDef.viewGroup)) {
             return ViewGroupFactory.getInstance(data, env).create(instance);
         }
         return GenericViewFactory.getInstance(data, env).create(instance);

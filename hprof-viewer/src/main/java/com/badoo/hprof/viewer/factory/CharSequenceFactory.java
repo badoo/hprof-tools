@@ -3,7 +3,6 @@ package com.badoo.hprof.viewer.factory;
 import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.viewer.MemoryDump;
 import com.badoo.hprof.viewer.factory.classdefs.CharSequenceClassDef;
-import com.badoo.hprof.viewer.factory.classdefs.ClassUtils;
 
 import java.io.IOException;
 
@@ -31,7 +30,7 @@ public class CharSequenceFactory extends BaseClassFactory<CharSequenceClassDef, 
 
     @Override
     protected CharSequence create(@Nonnull Instance instance, @Nonnull MemoryDump data, @Nonnull Environment env, @Nonnull CharSequenceClassDef classDef) throws IOException {
-        if (ClassUtils.isInstanceOf(instance, classDef.string, data)) {
+        if (data.isInstanceOf(instance, classDef.string)) {
             return StringFactory.getInstance(data, env).create(instance);
         }
         return null;

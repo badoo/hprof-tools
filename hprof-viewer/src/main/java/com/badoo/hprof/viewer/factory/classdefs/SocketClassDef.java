@@ -7,8 +7,8 @@ import com.badoo.hprof.viewer.MemoryDump;
 
 import javax.annotation.Nonnull;
 
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findClassByName;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findFieldByName;
+
+
 
 /**
  * Class definition for an Android socket
@@ -23,9 +23,9 @@ public class SocketClassDef extends BaseClassDef {
     public final InstanceField isClosed;
 
     public SocketClassDef(@Nonnull MemoryDump data) {
-        cls = findClassByName("java.net.Socket", data);
-        impl = findFieldByName("impl", BasicType.OBJECT, cls, data);
-        isConnected = findFieldByName("isConnected", BasicType.BOOLEAN, cls, data);
-        isClosed = findFieldByName("isClosed", BasicType.BOOLEAN, cls, data);
+        cls = data.findClassByName("java.net.Socket");
+        impl = data.findFieldByName("impl", BasicType.OBJECT, cls);
+        isConnected = data.findFieldByName("isConnected", BasicType.BOOLEAN, cls);
+        isClosed = data.findFieldByName("isClosed", BasicType.BOOLEAN, cls);
     }
 }

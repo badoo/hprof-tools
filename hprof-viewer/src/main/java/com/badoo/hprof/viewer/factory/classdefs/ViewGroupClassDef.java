@@ -6,8 +6,8 @@ import com.badoo.hprof.library.model.InstanceField;
 import com.badoo.hprof.viewer.MemoryDump;
 
 import javax.annotation.Nonnull;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findClassByName;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findFieldByName;
+
+
 
 /**
  * Class definition for accessing data of an instance dump of a ViewGroup
@@ -22,8 +22,8 @@ public class ViewGroupClassDef extends GenericViewClassDef {
 
     public ViewGroupClassDef(@Nonnull MemoryDump data) {
         super(data);
-        viewGroupCls = findClassByName("android.view.ViewGroup", data);
-        children = findFieldByName("mChildren", BasicType.OBJECT, viewGroupCls, data);
-        childrenCount = findFieldByName("mChildrenCount", BasicType.INT, viewGroupCls, data);
+        viewGroupCls = data.findClassByName("android.view.ViewGroup");
+        children = data.findFieldByName("mChildren", BasicType.OBJECT, viewGroupCls);
+        childrenCount = data.findFieldByName("mChildrenCount", BasicType.INT, viewGroupCls);
     }
 }

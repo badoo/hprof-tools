@@ -6,8 +6,6 @@ import com.badoo.hprof.library.model.InstanceField;
 import com.badoo.hprof.viewer.MemoryDump;
 
 import javax.annotation.Nonnull;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findClassByName;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findFieldByName;
 
 /**
  * Class definition for accessing data of an instance dump of a TextView
@@ -21,7 +19,7 @@ public class TextViewClassDef extends GenericViewClassDef {
 
     public TextViewClassDef(@Nonnull MemoryDump data) {
         super(data);
-        textViewCls = findClassByName("android.widget.TextView", data);
-        text = findFieldByName("mText", BasicType.OBJECT, textViewCls, data);
+        textViewCls = data.findClassByName("android.widget.TextView");
+        text = data.findFieldByName("mText", BasicType.OBJECT, textViewCls);
     }
 }

@@ -9,7 +9,6 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.isInstanceOf;
 
 /**
  * Factory for creating different types of maps.
@@ -33,10 +32,10 @@ public class MapFactory extends BaseClassFactory<MapClassDef, Map<Object, Object
 
     @Override
     protected Map<Object, Object> create(@Nonnull Instance instance, @Nonnull MemoryDump data, @Nonnull Environment env, @Nonnull MapClassDef classDef) throws IOException {
-        if (isInstanceOf(instance, classDef.arrayMap, data)) {
+        if (data.isInstanceOf(instance, classDef.arrayMap)) {
             return ArrayMapFactory.getInstance(data, env).create(instance);
         }
-        else if (isInstanceOf(instance, classDef.hashMap, data)) {
+        else if (data.isInstanceOf(instance, classDef.hashMap)) {
             return HashMapFactory.getInstance(data, env).create(instance);
         }
         return null;

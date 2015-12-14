@@ -7,9 +7,6 @@ import com.badoo.hprof.viewer.MemoryDump;
 
 import javax.annotation.Nonnull;
 
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findClassByName;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findFieldByName;
-
 /**
  * Class definition for accessing data of an instance dump of an ArrayMap
  * <p/>
@@ -22,8 +19,8 @@ public class ArrayMapClassDef extends BaseClassDef {
     public final InstanceField array;
 
     public ArrayMapClassDef(@Nonnull MemoryDump data) {
-        cls = findClassByName("android.util.ArrayMap", data);
-        size = findFieldByName("mSize", BasicType.INT, cls, data);
-        array = findFieldByName("mArray", BasicType.OBJECT, cls, data);
+        cls = data.findClassByName("android.util.ArrayMap");
+        size = data.findFieldByName("mSize", BasicType.INT, cls);
+        array = data.findFieldByName("mArray", BasicType.OBJECT, cls);
     }
 }

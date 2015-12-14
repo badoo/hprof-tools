@@ -6,8 +6,8 @@ import com.badoo.hprof.library.model.InstanceField;
 import com.badoo.hprof.viewer.MemoryDump;
 
 import javax.annotation.Nonnull;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findClassByName;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findFieldByName;
+
+
 
 /**
  * Class definition for accessing data of an instance dump of an Inet4Address
@@ -21,8 +21,8 @@ public class Inet4AddressClassDef extends BaseClassDef {
     public final InstanceField ipaddress;
 
     public Inet4AddressClassDef(@Nonnull MemoryDump data) {
-        cls = findClassByName("java.net.InetAddress", data);
-        hostName = findFieldByName("hostName", BasicType.OBJECT, cls, data);
-        ipaddress = findFieldByName("ipaddress", BasicType.OBJECT, cls, data);
+        cls = data.findClassByName("java.net.InetAddress");
+        hostName = data.findFieldByName("hostName", BasicType.OBJECT, cls);
+        ipaddress = data.findFieldByName("ipaddress", BasicType.OBJECT, cls);
     }
 }

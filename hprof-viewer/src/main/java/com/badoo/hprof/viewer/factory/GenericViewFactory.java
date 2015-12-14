@@ -9,7 +9,7 @@ import java.io.IOException;
 
 import javax.annotation.Nonnull;
 
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.getClassName;
+
 
 /**
  * Factory for creating generic Views (those not handled by more specific factories like TextViewFactory)
@@ -39,7 +39,7 @@ public class GenericViewFactory extends BaseClassFactory<GenericViewClassDef, Vi
         int right = instance.getIntField(classDef.right, data.classes);
         int top = instance.getIntField(classDef.top, data.classes);
         int bottom = instance.getIntField(classDef.bottom, data.classes);
-        View view = new View(getClassName(instance, data),left, right, top, bottom, flags);
+        View view = new View(data.getClassName(instance),left, right, top, bottom, flags);
         view.setBackground(DrawableFactory.getInstance(data, env).create(data.instances.get(instance.getObjectField(classDef.background, data.classes))));
         return view;
     }

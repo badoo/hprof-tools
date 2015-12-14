@@ -7,8 +7,8 @@ import com.badoo.hprof.viewer.MemoryDump;
 
 import javax.annotation.Nonnull;
 
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findClassByName;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findFieldByName;
+
+
 
 /**
  * Class definition for accessing data of an instance dump of a ColorDrawable
@@ -23,8 +23,8 @@ public abstract class ColorDrawableClassDef extends BaseClassDef {
         public final InstanceField baseColor;
 
         StateClassDef(@Nonnull MemoryDump data, @Nonnull String colorFieldName) {
-            cls = findClassByName("android.graphics.drawable.ColorDrawable$ColorState", data);
-            baseColor = findFieldByName(colorFieldName, BasicType.INT, cls, data);
+            cls = data.findClassByName("android.graphics.drawable.ColorDrawable$ColorState");
+            baseColor = data.findFieldByName(colorFieldName, BasicType.INT, cls);
         }
     }
     public final ClassDefinition cls;
@@ -32,8 +32,8 @@ public abstract class ColorDrawableClassDef extends BaseClassDef {
     public final StateClassDef state;
 
     public ColorDrawableClassDef(@Nonnull MemoryDump data, @Nonnull String stateFieldName, @Nonnull String colorFieldName) {
-        cls = findClassByName("android.graphics.drawable.ColorDrawable", data);
-        stateField = findFieldByName(stateFieldName, BasicType.OBJECT, cls, data);
+        cls = data.findClassByName("android.graphics.drawable.ColorDrawable");
+        stateField = data.findFieldByName(stateFieldName, BasicType.OBJECT, cls);
         state = new StateClassDef(data, colorFieldName);
 
     }

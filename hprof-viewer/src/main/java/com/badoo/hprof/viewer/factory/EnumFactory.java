@@ -9,8 +9,6 @@ import java.io.IOException;
 
 import javax.annotation.Nonnull;
 
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.getClassName;
-
 /**
  * Factory class for creating Booleans from Boolean instance dumps.
  * <p/>
@@ -34,7 +32,7 @@ public class EnumFactory extends BaseClassFactory<EnumClassDef, AndroidEnum> {
 
     @Override
     protected AndroidEnum create(@Nonnull Instance instance, @Nonnull MemoryDump data, @Nonnull Environment env, @Nonnull EnumClassDef classDef) throws IOException {
-        String clsName = getClassName(instance, data);
+        String clsName = data.getClassName(instance);
         Instance nameInstance = data.instances.get(instance.getObjectField(classDef.name, data.classes));
         String value = StringFactory.getInstance(data, env).create(nameInstance);
         int ordinal = instance.getIntField(classDef.ordinal, data.classes);

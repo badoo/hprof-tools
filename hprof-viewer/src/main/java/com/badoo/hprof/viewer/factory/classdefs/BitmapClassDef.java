@@ -6,8 +6,6 @@ import com.badoo.hprof.library.model.InstanceField;
 import com.badoo.hprof.viewer.MemoryDump;
 
 import javax.annotation.Nonnull;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findClassByName;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findFieldByName;
 
 /**
  * Class definition for accessing data of an instance dump of a Bitmap
@@ -22,9 +20,9 @@ public class BitmapClassDef extends BaseClassDef {
     public final InstanceField height;
 
     public BitmapClassDef(@Nonnull MemoryDump data) {
-        cls = findClassByName("android.graphics.Bitmap", data);
-        buffer = findFieldByName("mBuffer", BasicType.OBJECT, cls, data);
-        width = findFieldByName("mWidth", BasicType.INT, cls, data);
-        height = findFieldByName("mHeight", BasicType.INT, cls, data);
+        cls = data.findClassByName("android.graphics.Bitmap");
+        buffer = data.findFieldByName("mBuffer", BasicType.OBJECT, cls);
+        width = data.findFieldByName("mWidth", BasicType.INT, cls);
+        height = data.findFieldByName("mHeight", BasicType.INT, cls);
     }
 }

@@ -4,8 +4,7 @@ import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.viewer.MemoryDump;
 
 import javax.annotation.Nonnull;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findClassByName;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findFieldByName;
+
 
 /**
  * ClassDef containing a set of references to classes that can be used to determine which type of View an instance extends.
@@ -19,9 +18,9 @@ public class ViewsClassDef extends BaseClassDef {
     public final ClassDefinition viewGroup;
 
     public ViewsClassDef(@Nonnull MemoryDump data) {
-        textView = findClassByName("android.widget.TextView", data);
-        imageView = findClassByName("android.widget.ImageView", data);
-        viewGroup = findClassByName("android.view.ViewGroup", data);;
+        textView = data.findClassByName("android.widget.TextView");
+        imageView = data.findClassByName("android.widget.ImageView");
+        viewGroup = data.findClassByName("android.view.ViewGroup");;
     }
 
 }

@@ -7,8 +7,8 @@ import com.badoo.hprof.viewer.MemoryDump;
 
 import javax.annotation.Nonnull;
 
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findClassByName;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findFieldByName;
+
+
 
 /**
  * Class definition for accessing data of an instance dump of a View
@@ -28,13 +28,13 @@ public class GenericViewClassDef extends BaseClassDef {
 
 
     public GenericViewClassDef(@Nonnull MemoryDump data) {
-        viewCls = findClassByName("android.view.View", data);
-        left = findFieldByName("mLeft", BasicType.INT, viewCls, data);
-        right = findFieldByName("mRight", BasicType.INT, viewCls, data);
-        top = findFieldByName("mTop", BasicType.INT, viewCls, data);
-        bottom = findFieldByName("mBottom", BasicType.INT, viewCls, data);
-        flags = findFieldByName("mViewFlags", BasicType.INT, viewCls, data);
-        background = findFieldByName("mBackground", BasicType.OBJECT, viewCls, data);
-        context = findFieldByName("mContext", BasicType.OBJECT, viewCls, data);
+        viewCls = data.findClassByName("android.view.View");
+        left = data.findFieldByName("mLeft", BasicType.INT, viewCls);
+        right = data.findFieldByName("mRight", BasicType.INT, viewCls);
+        top = data.findFieldByName("mTop", BasicType.INT, viewCls);
+        bottom = data.findFieldByName("mBottom", BasicType.INT, viewCls);
+        flags = data.findFieldByName("mViewFlags", BasicType.INT, viewCls);
+        background = data.findFieldByName("mBackground", BasicType.OBJECT, viewCls);
+        context = data.findFieldByName("mContext", BasicType.OBJECT, viewCls);
     }
 }

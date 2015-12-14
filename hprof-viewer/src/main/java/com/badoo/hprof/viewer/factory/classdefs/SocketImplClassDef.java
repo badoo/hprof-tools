@@ -6,8 +6,9 @@ import com.badoo.hprof.library.model.InstanceField;
 import com.badoo.hprof.viewer.MemoryDump;
 
 import javax.annotation.Nonnull;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findClassByName;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findFieldByName;
+
+import static com.badoo.hprof.library.model.BasicType.*;
+
 
 /**
  * Class definition for a SocketImpl instance
@@ -21,9 +22,9 @@ public class SocketImplClassDef extends BaseClassDef {
     public final InstanceField port;
 
      public SocketImplClassDef(@Nonnull MemoryDump data) {
-            cls = findClassByName("java.net.SocketImpl", data);
-            address = findFieldByName("address", BasicType.OBJECT, cls, data);
-            port = findFieldByName("port", BasicType.INT, cls, data);
+            cls = data.findClassByName("java.net.SocketImpl");
+            address = data.findFieldByName("address", OBJECT, cls);
+            port = data.findFieldByName("port", INT, cls);
     }
 
 }

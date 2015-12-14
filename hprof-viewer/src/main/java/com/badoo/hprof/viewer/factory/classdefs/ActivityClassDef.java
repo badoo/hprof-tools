@@ -7,12 +7,10 @@ import com.badoo.hprof.viewer.MemoryDump;
 
 import javax.annotation.Nonnull;
 
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findClassByName;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findFieldByName;
 
 /**
  * Class definition for accessing data of an instance dump of an Activity
- *
+ * <p/>
  * Created by Erik Andre on 05/12/15.
  */
 public class ActivityClassDef extends BaseClassDef {
@@ -23,8 +21,8 @@ public class ActivityClassDef extends BaseClassDef {
 
 
     public ActivityClassDef(@Nonnull MemoryDump data) {
-        cls = findClassByName("android.app.Activity", data);
-        title = findFieldByName("mTitle", BasicType.OBJECT, cls, data);
-        intent = findFieldByName("mIntent", BasicType.OBJECT, cls, data);
+        cls = data.findClassByName("android.app.Activity");
+        title = data.findFieldByName("mTitle", BasicType.OBJECT, cls);
+        intent = data.findFieldByName("mIntent", BasicType.OBJECT, cls);
     }
 }

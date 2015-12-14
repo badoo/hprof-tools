@@ -6,8 +6,8 @@ import com.badoo.hprof.library.model.InstanceField;
 import com.badoo.hprof.viewer.MemoryDump;
 
 import javax.annotation.Nonnull;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findClassByName;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findFieldByName;
+
+
 
 /**
  * Class definition for accessing data of an instance dump of an Boolean
@@ -21,8 +21,8 @@ public class EnumClassDef extends BaseClassDef {
     public final InstanceField ordinal;
 
     public EnumClassDef(@Nonnull MemoryDump data) {
-        cls = findClassByName("java.lang.Enum", data);
-        name = findFieldByName("name", BasicType.OBJECT, cls, data);
-        ordinal = findFieldByName("ordinal", BasicType.INT, cls, data);
+        cls = data.findClassByName("java.lang.Enum");
+        name = data.findFieldByName("name", BasicType.OBJECT, cls);
+        ordinal = data.findFieldByName("ordinal", BasicType.INT, cls);
     }
 }

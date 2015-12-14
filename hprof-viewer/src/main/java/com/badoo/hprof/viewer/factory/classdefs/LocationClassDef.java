@@ -6,8 +6,8 @@ import com.badoo.hprof.library.model.InstanceField;
 import com.badoo.hprof.viewer.MemoryDump;
 
 import javax.annotation.Nonnull;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findClassByName;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.findFieldByName;
+
+
 
 /**
  * Class definition for accessing data of an instance dump of a Location
@@ -24,11 +24,11 @@ public class LocationClassDef extends BaseClassDef {
     public final InstanceField time;
 
     public LocationClassDef(@Nonnull MemoryDump data) {
-        this.cls = findClassByName("android.location.Location", data);;
-        this.provider = findFieldByName("mProvider", BasicType.OBJECT, cls, data);
-        this.latitude = findFieldByName("mLatitude", BasicType.DOUBLE, cls, data);
-        this.longitude = findFieldByName("mLongitude", BasicType.DOUBLE, cls, data);
-        this.accuracy = findFieldByName("mAccuracy", BasicType.FLOAT, cls, data);
-        this.time = findFieldByName("mTime", BasicType.LONG, cls, data);
+        this.cls = data.findClassByName("android.location.Location");;
+        this.provider = data.findFieldByName("mProvider", BasicType.OBJECT, cls);
+        this.latitude = data.findFieldByName("mLatitude", BasicType.DOUBLE, cls);
+        this.longitude = data.findFieldByName("mLongitude", BasicType.DOUBLE, cls);
+        this.accuracy = data.findFieldByName("mAccuracy", BasicType.FLOAT, cls);
+        this.time = data.findFieldByName("mTime", BasicType.LONG, cls);
     }
 }

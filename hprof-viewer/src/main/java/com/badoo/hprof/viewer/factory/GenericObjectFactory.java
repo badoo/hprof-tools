@@ -8,9 +8,6 @@ import java.io.IOException;
 
 import javax.annotation.Nonnull;
 
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.getClassName;
-import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.isInstanceOf;
-
 /**
  * Factory for creating generic objects of unknown type
  * <p/>
@@ -33,22 +30,22 @@ public class GenericObjectFactory extends BaseClassFactory<GenericObjectClassDef
 
     @Override
     protected Object create(@Nonnull Instance instance, @Nonnull MemoryDump data, @Nonnull Environment env, @Nonnull GenericObjectClassDef classDef) throws IOException {
-        if (isInstanceOf(instance, classDef.string, data)) {
+        if (data.isInstanceOf(instance, classDef.string)) {
             return StringFactory.getInstance(data, env).create(instance);
         }
-        else if (isInstanceOf(instance, classDef.bool, data)) {
+        else if (data.isInstanceOf(instance, classDef.bool)) {
             return BooleanFactory.getInstance(data, env).create(instance);
         }
-        else if (isInstanceOf(instance, classDef.integer, data)) {
+        else if (data.isInstanceOf(instance, classDef.integer)) {
             return IntegerFactory.getInstance(data, env).create(instance);
         }
-        else if (isInstanceOf(instance, classDef.enumCls, data)) {
+        else if (data.isInstanceOf(instance, classDef.enumCls)) {
             return EnumFactory.getInstance(data, env).create(instance);
         }
-        else if (isInstanceOf(instance, classDef.bundle, data)) {
+        else if (data.isInstanceOf(instance, classDef.bundle)) {
             return BundleFactory.getInstance(data, env).create(instance);
         }
-        return getClassName(instance, data);
+        return data.getClassName(instance);
     }
 
     @Nonnull
