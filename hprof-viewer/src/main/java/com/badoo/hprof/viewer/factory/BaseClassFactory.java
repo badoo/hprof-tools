@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
 /**
  * Created by Erik Andre on 08/12/15.
  */
-public abstract class BaseClassFactory<ClassDef extends BaseClassDef, T> {
+public abstract class BaseClassFactory<ClassDef extends BaseClassDef, OutputType> {
 
     private final MemoryDump data;
     private final Environment env;
@@ -23,7 +23,7 @@ public abstract class BaseClassFactory<ClassDef extends BaseClassDef, T> {
         this.env = env;
     }
 
-    public final T create(@Nullable Instance instance) {
+    public final OutputType create(@Nullable Instance instance) {
         if (instance == null) {
             return null;
         }
@@ -35,9 +35,9 @@ public abstract class BaseClassFactory<ClassDef extends BaseClassDef, T> {
         }
     }
 
-    protected abstract T create(@Nonnull Instance instance, @Nonnull MemoryDump data, @Nonnull Environment env, @Nonnull ClassDef classDef) throws IOException;
+    protected abstract OutputType create(@Nonnull Instance instance, @Nonnull MemoryDump data, @Nonnull Environment env, @Nonnull ClassDef classDef) throws IOException;
 
-    protected final ClassDef getClassDef() {
+    private ClassDef getClassDef() {
         if (classDef == null) {
             classDef = createClassDef(data);
         }

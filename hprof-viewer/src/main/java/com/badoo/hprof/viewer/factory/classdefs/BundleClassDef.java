@@ -21,6 +21,6 @@ public abstract class BundleClassDef extends BaseClassDef {
 
     protected BundleClassDef(@Nonnull ClassDefinition cls, @Nonnull MemoryDump data) {
         this.cls = cls;
-        this.map = findFieldByName("mMap", BasicType.OBJECT, cls, data);;
+        this.map = findFieldByName("mMap", BasicType.OBJECT, cls, data);
     }
 }

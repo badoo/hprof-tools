@@ -10,6 +10,8 @@ import java.io.IOException;
 
 import javax.annotation.Nonnull;
 
+import static com.badoo.hprof.viewer.factory.classdefs.ClassUtils.isInstanceOf;
+
 /**
  * Factory for creating Drawable classinfo of different types
  * <p/>
@@ -32,10 +34,10 @@ public class DrawableFactory extends BaseClassFactory<DrawableClassDef, Drawable
 
     @Override
     protected Drawable create(@Nonnull Instance instance, @Nonnull MemoryDump data, @Nonnull Environment env, @Nonnull DrawableClassDef classDef) throws IOException {
-        if (ClassUtils.isInstanceOf(instance, classDef.colorDrawableCls, data)) {
+        if (isInstanceOf(instance, classDef.colorDrawableCls, data)) {
             return ColorDrawableFactory.getInstance(data, env).create(instance);
         }
-        else if (ClassUtils.isInstanceOf(instance, classDef.bitmapDrawableCls, data)) {
+        else if (isInstanceOf(instance, classDef.bitmapDrawableCls, data)) {
             return BitmapDrawableFactory.getInstance(data, env).create(instance);
         }
         return null; // Unsupported drawable type

@@ -41,8 +41,8 @@ public class ViewGroupFactory extends BaseClassFactory<ViewGroupClassDef, ViewGr
     @Override
     protected ViewGroup create(@Nonnull Instance instance, @Nonnull MemoryDump data, Environment env, @Nonnull ViewGroupClassDef classDef) throws IOException {
         List<View> children = new ArrayList<View>();
-        ObjectArray childArray = data.objArrays.get(instance.getObjectField(getClassDef().children, data.classes));
-        final int childrenCount = instance.getIntField(getClassDef().childrenCount, data.classes);
+        ObjectArray childArray = data.objArrays.get(instance.getObjectField(classDef.children, data.classes));
+        final int childrenCount = instance.getIntField(classDef.childrenCount, data.classes);
         if (childArray != null) {
             for (int i = 0; i < childrenCount; i++) {
                 View child = ViewsFactory.getInstance(data, env).create(data.instances.get(childArray.getElements()[i]));

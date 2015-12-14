@@ -51,7 +51,7 @@ public class ViewRenderer {
         BufferedImage buffer = new BufferedImage((int) (width * SCALE_FACTOR), (int) (height * SCALE_FACTOR), BufferedImage.TYPE_INT_ARGB);
         Graphics2D canvas = (Graphics2D) buffer.getGraphics();
         canvas.scale(SCALE_FACTOR, SCALE_FACTOR);
-        canvas.setFont(canvas.getFont().deriveFont(24f));
+        canvas.setFont(canvas.getFont().deriveFont(24f)); //TODO Don't hard code!
         renderViewGroup(root, canvas);
         System.out.println("Rendered views in " + (System.currentTimeMillis() - start) + "ms");
         return buffer;
@@ -166,6 +166,7 @@ public class ViewRenderer {
 
     private void renderView(View view, Graphics2D canvas) {
         Drawable background = view.getBackground();
+        canvas.translate(view.left, view.top);
         if (renderBackgrounds && background != null) {
             if (forceAlpha) {
                 background.setAlpha(120);
@@ -173,19 +174,19 @@ public class ViewRenderer {
             else {
                 background.setAlpha(255);
             }
-            background.draw(canvas, view.left, view.top, view.right, view.bottom);
+            background.draw(canvas, 0, 0, view.getWidth(), view.getHeight());
         }
         canvas.setColor(getViewOutlineColor(view));
         canvas.setColor(view.isSelected() ? Color.RED : Color.BLACK);
         canvas.setStroke(view.isSelected() ? THICK_LINE : THIN_LINE);
         if (showBounds) {
-            canvas.drawRect(view.left, view.top, view.getWidth(), view.getHeight());
+            canvas.drawRect(0, 0, view.getWidth(), view.getHeight());
         }
+        canvas.translate(-view.left, -view.top);
     }
 
     private void renderTextView(TextView view, Graphics2D canvas) {
         renderView(view, canvas);
-        // Seems like we have a problem here if the text is too long (rendering stalls)
         canvas.translate(view.left, view.top); // Apply translation
         CharSequence text = view.getText();
         if (renderText && text != null) {
@@ -196,10 +197,12 @@ public class ViewRenderer {
 
     private void renderImageView(ImageView view, Graphics2D canvas) {
         renderView(view, canvas);
+        canvas.translate(view.left, view.top); // Apply translation
         Drawable image = view.getImage();
         if (renderImageViews && image != null) {
-            image.draw(canvas, view.left, view.top, view.right, view.bottom);
+            image.draw(canvas, 0, 0, view.getWidth(), view.getHeight());
         }
+        canvas.translate(-view.left, -view.top);
     }
 
     private Color getViewOutlineColor(View view) {
@@ -208,23 +211,5 @@ public class ViewRenderer {
         }
         return view.getVisibility() == View.VISIBLE ? Color.BLACK : Color.LIGHT_GRAY;
     }
-
-//    // Returns the largest bounding box that would fit all views in the hierarchy (including those
-//    // that are positioned outside of their parents)
-//    private Rectangle getMaximumBounds(@Nonnull ViewGroup root) {
-//        Rectangle bounds = new Rectangle(root.left, root.top, root.getWidth(), root.getHeight());
-//        for (View view : root.getChildren()) {
-//            Rectangle childBounds = getMaximumBounds(view);
-//            childBounds.translate(bounds.x, bounds.y);
-//            if (!bounds.contains(childBounds)) {
-//                bounds = bounds.union(childBounds);
-//            }
-//        }
-//        return bounds;
-//    }
-//
-//    private Rectangle getMaximumBounds(View view) {
-//        return new Rectangle(view.left, view.top, view.getWidth(), view.getHeight());
-//    }
 
 }
