@@ -9,7 +9,6 @@ import com.badoo.hprof.viewer.factory.Screen;
 import com.badoo.hprof.viewer.factory.ScreenFactory;
 import com.badoo.hprof.viewer.factory.SystemInfo;
 import com.badoo.hprof.viewer.factory.SystemInfoFactory;
-import com.badoo.hprof.viewer.ui.ScreenInfoPanel;
 import com.badoo.hprof.viewer.ui.TabbedInfoWindow;
 
 import java.io.BufferedInputStream;
@@ -67,7 +66,7 @@ public class HprofViewer {
 
         // Build the View hierarchy, starting with the roots
         List<Screen> screens = new ArrayList<Screen>();
-        Environment env = new Environment(data);
+        Environment env = Environment.getEnvironment(data);
         for (Instance root : viewRoots) {
             Screen screen = ScreenFactory.buildViewHierarchy(root, data, env);
             screens.add(screen);
@@ -90,7 +89,7 @@ public class HprofViewer {
     private static List<Instance> findViewRoots(List<Instance> viewInstances, ClassDefinition decorClass) {
         List<Instance> roots = new ArrayList<Instance>();
         for (Instance instance : viewInstances) {
-            if (instance.getClassObjectId() == decorClass.getObjectId()) {
+            if (instance.getClassId() == decorClass.getObjectId()) {
                 roots.add(instance);
             }
         }
@@ -120,7 +119,7 @@ public class HprofViewer {
     private static List<Instance> filterViewInstances(MemoryDump data, Map<Integer, ClassDefinition> viewClasses) {
         List<Instance> viewInstances = new ArrayList<Instance>();
         for (Instance instance : data.instances.values()) {
-            if (viewClasses.containsKey(instance.getClassObjectId())) {
+            if (viewClasses.containsKey(instance.getClassId())) {
                 viewInstances.add(instance);
             }
         }

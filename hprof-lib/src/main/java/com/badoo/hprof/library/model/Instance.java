@@ -12,6 +12,7 @@ import static com.badoo.hprof.library.util.StreamUtil.readDouble;
 import static com.badoo.hprof.library.util.StreamUtil.readFloat;
 import static com.badoo.hprof.library.util.StreamUtil.readInt;
 import static com.badoo.hprof.library.util.StreamUtil.readLong;
+import static com.badoo.hprof.library.util.StreamUtil.readShort;
 import static com.badoo.hprof.library.util.StreamUtil.skip;
 
 /**
@@ -19,17 +20,18 @@ import static com.badoo.hprof.library.util.StreamUtil.skip;
  * <p/>
  * Created by Erik Andre on 17/07/2014.
  */
+@SuppressWarnings({"RedundantIfStatement", "unused"})
 public class Instance {
 
     private int objectId;
     private int stackTraceSerialId;
-    private int classObjectId;
+    private int classId;
     private byte[] instanceFieldData;
 
-    public Instance(int objectId, int stackTraceSerialId, int classObjectId, @Nonnull byte[] instanceFieldData) {
+    public Instance(int objectId, int stackTraceSerialId, int classId, @Nonnull byte[] instanceFieldData) {
         this.objectId = objectId;
         this.stackTraceSerialId = stackTraceSerialId;
-        this.classObjectId = classObjectId;
+        this.classId = classId;
         this.instanceFieldData = instanceFieldData;
     }
 
@@ -49,12 +51,12 @@ public class Instance {
         this.stackTraceSerialId = stackTraceSerialId;
     }
 
-    public int getClassObjectId() {
-        return classObjectId;
+    public int getClassId() {
+        return classId;
     }
 
-    public void setClassObjectId(int classObjectId) {
-        this.classObjectId = classObjectId;
+    public void setClassId(int classId) {
+        this.classId = classId;
     }
 
     @Nonnull
@@ -73,7 +75,7 @@ public class Instance {
 
         Instance instance = (Instance) o;
 
-        if (classObjectId != instance.classObjectId) return false;
+        if (classId != instance.classId) return false;
         if (objectId != instance.objectId) return false;
         if (stackTraceSerialId != instance.stackTraceSerialId) return false;
         if (!Arrays.equals(instanceFieldData, instance.instanceFieldData)) return false;
@@ -85,7 +87,7 @@ public class Instance {
     public int hashCode() {
         int result = objectId;
         result = 31 * result + stackTraceSerialId;
-        result = 31 * result + classObjectId;
+        result = 31 * result + classId;
         result = 31 * result + Arrays.hashCode(instanceFieldData);
         return result;
     }
@@ -103,11 +105,39 @@ public class Instance {
         }
         // Iterate over all the instance fields until we find one that is matching
         ByteArrayInputStream in = new ByteArrayInputStream(instanceFieldData);
-        ClassDefinition currentClass = classes.get(classObjectId);
+        ClassDefinition currentClass = classes.get(classId);
         while (currentClass != null) {
             for (InstanceField currentField : currentClass.getInstanceFields()) {
                 if (currentField == field) { // This is the one we are looking for
                     return readInt(in);
+                }
+                else {
+                    skip(in, currentField.getType().size);
+                }
+            }
+            currentClass = classes.get(currentClass.getSuperClassObjectId());
+        }
+        throw new IllegalStateException("Failed to find field");
+    }
+
+    /**
+     * Returns the value of an byte field in this instance
+     *
+     * @param field   the field to read
+     * @param classes map containing all classes (or at least the ones between this class and the root)
+     * @return the field value
+     */
+    public int getByteField(InstanceField field, Map<Integer, ClassDefinition> classes) throws IOException {
+        if (field.getType() != BasicType.BYTE) {
+            throw new IllegalArgumentException("Field is not of type BYTE");
+        }
+        // Iterate over all the instance fields until we find one that is matching
+        ByteArrayInputStream in = new ByteArrayInputStream(instanceFieldData);
+        ClassDefinition currentClass = classes.get(classId);
+        while (currentClass != null) {
+            for (InstanceField currentField : currentClass.getInstanceFields()) {
+                if (currentField == field) { // This is the one we are looking for
+                    return readByte(in);
                 }
                 else {
                     skip(in, currentField.getType().size);
@@ -131,11 +161,67 @@ public class Instance {
         }
         // Iterate over all the instance fields until we find one that is matching
         ByteArrayInputStream in = new ByteArrayInputStream(instanceFieldData);
-        ClassDefinition currentClass = classes.get(classObjectId);
+        ClassDefinition currentClass = classes.get(classId);
         while (currentClass != null) {
             for (InstanceField currentField : currentClass.getInstanceFields()) {
                 if (currentField == field) { // This is the one we are looking for
                     return readInt(in);
+                }
+                else {
+                    skip(in, currentField.getType().size);
+                }
+            }
+            currentClass = classes.get(currentClass.getSuperClassObjectId());
+        }
+        throw new IllegalStateException("Failed to find field");
+    }
+
+    /**
+     * Returns the value of an short field in this instance
+     *
+     * @param field   the field to read
+     * @param classes map containing all classes (or at least the ones between this class and the root)
+     * @return the field value
+     */
+    public int getShortField(InstanceField field, Map<Integer, ClassDefinition> classes) throws IOException {
+        if (field.getType() != BasicType.SHORT) {
+            throw new IllegalArgumentException("Field is not of type SHORT");
+        }
+        // Iterate over all the instance fields until we find one that is matching
+        ByteArrayInputStream in = new ByteArrayInputStream(instanceFieldData);
+        ClassDefinition currentClass = classes.get(classId);
+        while (currentClass != null) {
+            for (InstanceField currentField : currentClass.getInstanceFields()) {
+                if (currentField == field) { // This is the one we are looking for
+                    return readShort(in);
+                }
+                else {
+                    skip(in, currentField.getType().size);
+                }
+            }
+            currentClass = classes.get(currentClass.getSuperClassObjectId());
+        }
+        throw new IllegalStateException("Failed to find field");
+    }
+
+    /**
+     * Returns the value of an char field in this instance
+     *
+     * @param field   the field to read
+     * @param classes map containing all classes (or at least the ones between this class and the root)
+     * @return the field value
+     */
+    public char getCharField(InstanceField field, Map<Integer, ClassDefinition> classes) throws IOException {
+        if (field.getType() != BasicType.INT) {
+            throw new IllegalArgumentException("Field is not of type INT");
+        }
+        // Iterate over all the instance fields until we find one that is matching
+        ByteArrayInputStream in = new ByteArrayInputStream(instanceFieldData);
+        ClassDefinition currentClass = classes.get(classId);
+        while (currentClass != null) {
+            for (InstanceField currentField : currentClass.getInstanceFields()) {
+                if (currentField == field) { // This is the one we are looking for
+                    return (char) readShort(in);
                 }
                 else {
                     skip(in, currentField.getType().size);
@@ -159,7 +245,7 @@ public class Instance {
         }
         // Iterate over all the instance fields until we find one that is matching
         ByteArrayInputStream in = new ByteArrayInputStream(instanceFieldData);
-        ClassDefinition currentClass = classes.get(classObjectId);
+        ClassDefinition currentClass = classes.get(classId);
         while (currentClass != null) {
             for (InstanceField currentField : currentClass.getInstanceFields()) {
                 if (currentField == field) { // This is the one we are looking for
@@ -187,7 +273,7 @@ public class Instance {
         }
         // Iterate over all the instance fields until we find one that is matching
         ByteArrayInputStream in = new ByteArrayInputStream(instanceFieldData);
-        ClassDefinition currentClass = classes.get(classObjectId);
+        ClassDefinition currentClass = classes.get(classId);
         while (currentClass != null) {
             for (InstanceField currentField : currentClass.getInstanceFields()) {
                 if (currentField == field) { // This is the one we are looking for
@@ -215,7 +301,7 @@ public class Instance {
         }
         // Iterate over all the instance fields until we find one that is matching
         ByteArrayInputStream in = new ByteArrayInputStream(instanceFieldData);
-        ClassDefinition currentClass = classes.get(classObjectId);
+        ClassDefinition currentClass = classes.get(classId);
         while (currentClass != null) {
             for (InstanceField currentField : currentClass.getInstanceFields()) {
                 if (currentField == field) { // This is the one we are looking for
@@ -243,7 +329,7 @@ public class Instance {
         }
         // Iterate over all the instance fields until we find one that is matching
         ByteArrayInputStream in = new ByteArrayInputStream(instanceFieldData);
-        ClassDefinition currentClass = classes.get(classObjectId);
+        ClassDefinition currentClass = classes.get(classId);
         while (currentClass != null) {
             for (InstanceField currentField : currentClass.getInstanceFields()) {
                 if (currentField == field) { // This is the one we are looking for

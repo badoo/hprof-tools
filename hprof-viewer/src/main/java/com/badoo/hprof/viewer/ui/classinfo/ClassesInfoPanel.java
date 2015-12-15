@@ -109,6 +109,7 @@ public class ClassesInfoPanel extends JPanel implements ClassesInfoPresenter.Vie
         this.mainWindow = mainWindow;
         dataTable = new ClassesInfoTable();
         JScrollPane scroller = new JScrollPane(dataTable);
+        dataTable.setRowSelectionAllowed(true);
         add(scroller, BorderLayout.CENTER);
 
         JPopupMenu popupMenu = new JPopupMenu();
