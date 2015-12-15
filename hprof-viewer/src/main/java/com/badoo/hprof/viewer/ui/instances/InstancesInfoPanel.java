@@ -9,7 +9,9 @@ import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -86,9 +88,17 @@ public class InstancesInfoPanel extends JPanel implements InstancesInfoPresenter
     public void showInstanceDetails(@Nonnull Map<Object, Object> fields) {
         Object[][] cells = new Object[fields.size()][2];
         int count = 0;
-        for (Object name : fields.keySet()) {
+        List<Object> keys = new ArrayList<Object>(fields.keySet());
+        Collections.sort(keys, new Comparator<Object>() {
+            @Override
+            public int compare(Object lhs, Object rhs) {
+                return ((String) lhs).compareToIgnoreCase((String) rhs);
+            }
+        });
+        for (Object name : keys) {
             cells[count][0] = name;
-            cells[count][1] = fields.get(name);
+            final Object value = fields.get(name);
+            cells[count][1] = value != null? value : "null";
             count++;
         }
         final DefaultTableModel model = new DefaultTableModel(cells, DETAILS_HEADER);
