@@ -91,6 +91,7 @@ public class InstancesInfoPanel extends JPanel implements InstancesInfoPresenter
             cells[count][1] = fields.get(name);
             count++;
         }
-        detailsTable.setModel(new DefaultTableModel(cells, DETAILS_HEADER));
+        final DefaultTableModel model = new DefaultTableModel(cells, DETAILS_HEADER);
+        detailsTable.setModel(model);
     }
 }

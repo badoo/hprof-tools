@@ -1,5 +1,9 @@
 package com.badoo.hprof.viewer.android;
 
+import com.badoo.hprof.library.model.Instance;
+
+import javax.annotation.Nonnull;
+
 /**
  * Model class for an Android view
  */
@@ -20,13 +24,20 @@ public class View {
     private boolean selected;
     private Drawable background;
 
-    public View(String className, int left, int right, int top, int bottom, int flags) {
+    private final Instance instance;
+
+    public View(@Nonnull Instance instance, @Nonnull String className, int left, int right, int top, int bottom, int flags) {
+        this.instance = instance;
         this.left = left;
         this.right = right;
         this.top = top;
         this.bottom = bottom;
         this.className = className;
         this.flags = flags;
+    }
+
+    public Instance getInstance() {
+        return instance;
     }
 
     public int getWidth() {
