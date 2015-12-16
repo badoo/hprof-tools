@@ -38,7 +38,7 @@ public class BmdObjectArray {
     }
 
     /**
-     * Returns the element data (object ids referencing instances).
+     * Returns the element data (object ids referencing classinfo).
      *
      * @return The elements
      */

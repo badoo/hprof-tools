@@ -17,7 +17,7 @@ public class ClassDefinition extends Record {
     private int nameStringId;
     private int stackTraceSerial;
 
-    // Fiends from CLASS_DUMP
+    // Fields from CLASS_DUMP
     private int superClassObjectId;
     private int classLoaderObjectId;
     private int signersObjectId;
