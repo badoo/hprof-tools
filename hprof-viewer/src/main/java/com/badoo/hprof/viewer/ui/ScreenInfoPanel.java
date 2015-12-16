@@ -162,6 +162,7 @@ public class ScreenInfoPanel extends JPanel implements TreeSelectionListener, It
         if (activity != null && activity.getIntent() != null) {
             Intent intent = activity.getIntent();
             boolean hasAction = intent.getAction() != null;
+            System.out.println("extras: " + intent.getExtras());
             Map<Object, Object> params = intent.getExtras().getMap();
             cells = new Object[params.size() + (hasAction ? 1 : 0)][2];
             if (hasAction) {

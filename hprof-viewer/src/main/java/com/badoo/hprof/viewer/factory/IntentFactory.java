@@ -7,6 +7,7 @@ import com.badoo.hprof.viewer.android.Intent;
 import com.badoo.hprof.viewer.factory.classdefs.IntentClassDef;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import javax.annotation.Nonnull;
 
@@ -36,6 +37,9 @@ public class IntentFactory extends BaseClassFactory<IntentClassDef, Intent> {
         String action = StringFactory.getInstance(data, env).create(actionInstance);
         Instance bundleInstance = data.instances.get(instance.getObjectField(classDef.extras, data.classes));
         Bundle extras = BundleFactory.getInstance(data, env).create(bundleInstance);
+        if (extras == null) {
+            extras = new Bundle(Collections.emptyMap());
+        }
         return new Intent(action, extras);
     }
 
