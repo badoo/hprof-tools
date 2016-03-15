@@ -8,6 +8,7 @@ import com.badoo.hprof.viewer.factory.classdefs.LegacyBundleClassDef;
 import com.badoo.hprof.viewer.factory.classdefs.LollipopBundleClassDef;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
@@ -45,6 +46,9 @@ public class BundleFactory extends BaseClassFactory<BundleClassDef, Bundle> {
     protected Bundle create(@Nonnull Instance instance, @Nonnull MemoryDump data, @Nonnull Environment env, @Nonnull BundleClassDef classDef) throws IOException {
         Instance mapInstance = data.instances.get(instance.getObjectField(classDef.map, data.classes));
         Map<Object, Object> map = MapFactory.getInstance(data, env).create(mapInstance);
+        if (map == null) {
+            map = Collections.emptyMap();
+        }
         return new Bundle(map);
     }
 

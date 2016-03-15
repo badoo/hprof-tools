@@ -56,7 +56,7 @@ public class ViewGroupFactory extends BaseClassFactory<ViewGroupClassDef, ViewGr
         int right = instance.getIntField(classDef.right, data.classes);
         int top = instance.getIntField(classDef.top, data.classes);
         int bottom = instance.getIntField(classDef.bottom, data.classes);
-        ViewGroup group = new ViewGroup(data.getClassName(instance), children, left, right, top, bottom, flags);
+        ViewGroup group = new ViewGroup(instance, data.getClassName(instance), children, left, right, top, bottom, flags);
         group.setBackground(DrawableFactory.getInstance(data, env).create(data.instances.get(instance.getObjectField(classDef.background, data.classes))));
         return group;
     }

@@ -1,30 +1,35 @@
 package com.badoo.hprof.viewer.ui;
 
 import com.badoo.hprof.viewer.android.Activity;
-import com.badoo.hprof.viewer.android.Bundle;
 import com.badoo.hprof.viewer.android.Intent;
 import com.badoo.hprof.viewer.android.View;
 import com.badoo.hprof.viewer.android.ViewGroup;
-import com.badoo.hprof.viewer.factory.SystemInfo;
-import com.badoo.hprof.viewer.rendering.ViewRenderer;
 import com.badoo.hprof.viewer.factory.Screen;
+import com.badoo.hprof.viewer.rendering.ViewRenderer;
+import com.badoo.hprof.viewer.ui.classinfo.ClassInfo;
+import com.badoo.hprof.viewer.ui.instances.InstancesInfoPresenter;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
 import javax.annotation.Nonnull;
+import javax.swing.AbstractAction;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
@@ -35,6 +40,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 /**
@@ -43,6 +49,35 @@ import javax.swing.tree.TreeSelectionModel;
  * Created by Erik Andre on 22/11/15.
  */
 public class ScreenInfoPanel extends JPanel implements TreeSelectionListener, ItemListener {
+
+    class PopupListener extends MouseAdapter {
+
+        private final JPopupMenu popup;
+
+        public PopupListener(@Nonnull JPopupMenu popup) {
+            this.popup = popup;
+        }
+
+        public void mousePressed(MouseEvent e) {
+            maybeShowPopup(e);
+        }
+
+        public void mouseReleased(MouseEvent e) {
+            maybeShowPopup(e);
+        }
+
+        private void maybeShowPopup(MouseEvent e) {
+            if (e.isPopupTrigger()) {
+                TreePath selected = viewTree.getPathForLocation(e.getX(), e.getY());
+                if (selected != null) {
+                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) selected.getLastPathComponent();
+                    rightClickedViewed = (View) node.getUserObject();
+                    popup.show(e.getComponent(),
+                        e.getX(), e.getY());
+                }
+            }
+        }
+    }
 
     private static final String[] HEADER = new String[]{"Name", "Value"};
 
@@ -55,13 +90,26 @@ public class ScreenInfoPanel extends JPanel implements TreeSelectionListener, It
     private Screen selectedScreen;
     private ImagePanel imagePanel;
     private View selectedView;
+    private View rightClickedViewed;
 
-    public ScreenInfoPanel(@Nonnull List<Screen> screens) {
+    public ScreenInfoPanel(@Nonnull final TabbedInfoWindow mainWindow, @Nonnull List<Screen> screens) {
         super(new BorderLayout());
+
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem item = new JMenuItem("Inspect View");
+        item.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                mainWindow.showInstancesListTab(rightClickedViewed.getClassName(), Collections.singletonList(rightClickedViewed.getInstance()));
+            }
+        });
+        popupMenu.add(item);
+
         imagePanel = new ImagePanel();
         viewTree = new JTree(new DefaultMutableTreeNode("Loading..."));
         viewTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         viewTree.addTreeSelectionListener(this);
+        viewTree.addMouseListener(new PopupListener(popupMenu));
         JScrollPane treeScroller = new JScrollPane(viewTree);
 
         rootPicker = new JComboBox(new Vector<Object>(screens));
@@ -114,6 +162,7 @@ public class ScreenInfoPanel extends JPanel implements TreeSelectionListener, It
         if (activity != null && activity.getIntent() != null) {
             Intent intent = activity.getIntent();
             boolean hasAction = intent.getAction() != null;
+            System.out.println("extras: " + intent.getExtras());
             Map<Object, Object> params = intent.getExtras().getMap();
             cells = new Object[params.size() + (hasAction ? 1 : 0)][2];
             if (hasAction) {

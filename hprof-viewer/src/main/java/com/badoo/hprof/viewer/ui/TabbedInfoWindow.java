@@ -28,7 +28,7 @@ public class TabbedInfoWindow extends JFrame {
         this.data = data;
         add(tabHost);
 
-        tabHost.addTab("Activities", new ScreenInfoPanel(screenList));
+        tabHost.addTab("Activities", new ScreenInfoPanel(this, screenList));
         tabHost.addTab("System info", new SystemInfoPanel(sysInfo));
         tabHost.addTab("Classes", new ClassesInfoPanel(data, this));
         pack();

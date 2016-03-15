@@ -69,10 +69,10 @@ public class ValidatingProcessor extends DiscardProcessor {
      */
     public void verifyInstances() {
         for (Instance instance : instances) {
-            ClassDefinition cls = classes.get(instance.getClassObjectId());
+            ClassDefinition cls = classes.get(instance.getClassId());
             // Check that the class exists
             if (cls == null) {
-                throw new IllegalStateException("Object with id " + cls.getObjectId() + " does not have a class (" + instance.getClassObjectId());
+                throw new IllegalStateException("Object with id " + cls.getObjectId() + " does not have a class (" + instance.getClassId());
             }
             String name = strings.get(cls.getNameStringId());
             // Verify that the instance dump size is correct

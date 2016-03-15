@@ -42,7 +42,7 @@ public class ImageViewFactory extends BaseClassFactory<ImageViewClassDef, ImageV
         int bottom = instance.getIntField(classDef.bottom, data.classes);
         Instance imageInstance = data.instances.get(instance.getObjectField(classDef.drawable, data.classes));
         Drawable image = DrawableFactory.getInstance(data, env).create(imageInstance);
-        ImageView view = new ImageView(data.getClassName(instance),left, right, top, bottom, flags, image);
+        ImageView view = new ImageView(instance, data.getClassName(instance),left, right, top, bottom, flags, image);
         view.setBackground(DrawableFactory.getInstance(data, env).create(data.instances.get(instance.getObjectField(classDef.background, data.classes))));
         return view;
     }

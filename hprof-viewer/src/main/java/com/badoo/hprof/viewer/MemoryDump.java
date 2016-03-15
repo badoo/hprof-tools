@@ -95,7 +95,7 @@ public class MemoryDump {
     }
 
     public String getClassName(@Nonnull Instance instance) {
-        ClassDefinition cls = classes.get(instance.getClassObjectId());
+        ClassDefinition cls = classes.get(instance.getClassId());
         return strings.get(cls.getNameStringId()).getValue();
     }
 
@@ -107,7 +107,7 @@ public class MemoryDump {
         if (instance == null || of == null) {
             return false;
         }
-        ClassDefinition cls = classes.get(instance.getClassObjectId());
+        ClassDefinition cls = classes.get(instance.getClassId());
         while (cls != null) {
             if (cls == of) {
                 return true;

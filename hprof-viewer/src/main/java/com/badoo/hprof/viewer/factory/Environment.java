@@ -18,9 +18,19 @@ import javax.annotation.Nonnull;
  */
 public class Environment {
 
+    private static Environment instance;
+
     public final int sdkVersion;
 
-    public Environment(@Nonnull MemoryDump data) {
+    @Nonnull
+    public static Environment getEnvironment(@Nonnull MemoryDump data) {
+        if (instance == null) {
+            instance = new Environment(data);
+        }
+        return instance;
+    }
+
+    private Environment(@Nonnull MemoryDump data) {
         ClassDefinition versionCls = data.findClassByName("android.os.Build$VERSION");
         StaticField versionField = data.findStaticFieldByName("SDK_INT", BasicType.INT, versionCls);
         try {

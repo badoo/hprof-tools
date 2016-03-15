@@ -322,8 +322,8 @@ public class CrunchProcessor extends DiscardProcessor {
             final long start = getCurrentPosition();
             writeTag(BmdTag.INSTANCE_DUMP);
             writeInt32(mapObjectId(instance.getObjectId()));
-            writeInt32(mapObjectId(instance.getClassObjectId()));
-            ClassDefinition currentClass = classesByOriginalId.get(instance.getClassObjectId());
+            writeInt32(mapObjectId(instance.getClassId()));
+            ClassDefinition currentClass = classesByOriginalId.get(instance.getClassId());
             ByteArrayInputStream in = new ByteArrayInputStream(instance.getInstanceFieldData());
             boolean preserveClass = shouldPreserve(currentClass);
             while (currentClass != null) {

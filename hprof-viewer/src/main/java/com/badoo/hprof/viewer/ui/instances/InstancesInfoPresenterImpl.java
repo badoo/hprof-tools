@@ -5,8 +5,10 @@ import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.viewer.provider.ClassProvider;
 import com.badoo.hprof.viewer.provider.InstanceProvider;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 
@@ -37,5 +39,17 @@ public class InstancesInfoPresenterImpl implements InstancesInfoPresenter {
             model.add(new InstanceInfo(instance, name, clsProvider.getInstanceSizeForClass(instanceCls)));
         }
         view.showInstances(model);
+    }
+
+    @Override
+    public void onInstanceSelected(@Nonnull InstanceInfo instance) {
+        Map<Object, Object> fields = null;
+        try {
+            fields = instanceProvider.getInstanceFields(instance.instance);
+            view.showInstanceDetails(fields);
+        }
+        catch (IOException e) {
+            throw new RuntimeException("Could not read fields for instance " + instance.name);
+        }
     }
 }
