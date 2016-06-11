@@ -10,9 +10,9 @@ import javax.annotation.Nonnull;
 public class InstanceField implements NamedField {
 
     private BasicType type;
-    private int nameId;
+    private ID nameId;
 
-    public InstanceField(@Nonnull BasicType type, int nameId) {
+    public InstanceField(@Nonnull BasicType type, ID nameId) {
         this.type = type;
         this.nameId = nameId;
     }
@@ -27,12 +27,12 @@ public class InstanceField implements NamedField {
     }
 
     @Override
-    public int getFieldNameId() {
+    public ID getFieldNameId() {
         return nameId;
     }
 
     @Override
-    public void setFieldNameId(int nameId) {
+    public void setFieldNameId(ID nameId) {
         this.nameId = nameId;
     }
 

@@ -3,6 +3,7 @@ package com.badoo.hprof.library.heap;
 import com.badoo.hprof.library.model.BasicType;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.ConstantField;
+import com.badoo.hprof.library.model.ID;
 import com.badoo.hprof.library.model.InstanceField;
 import com.badoo.hprof.library.model.StaticField;
 
@@ -11,8 +12,10 @@ import java.io.OutputStream;
 
 import javax.annotation.Nonnull;
 
+import static com.badoo.hprof.library.util.StreamUtil.ID_SIZE;
 import static com.badoo.hprof.library.util.StreamUtil.write;
 import static com.badoo.hprof.library.util.StreamUtil.writeByte;
+import static com.badoo.hprof.library.util.StreamUtil.writeID;
 import static com.badoo.hprof.library.util.StreamUtil.writeInt;
 import static com.badoo.hprof.library.util.StreamUtil.writeShort;
 
@@ -46,14 +49,14 @@ public class HeapDumpWriter {
      */
     public void writeClassDumpRecord(@Nonnull ClassDefinition cls) throws IOException {
         out.write(HeapTag.CLASS_DUMP);
-        writeInt(out, cls.getObjectId());
+        writeID(out, cls.getObjectId());
         writeInt(out, cls.getStackTraceSerial());
-        writeInt(out, cls.getSuperClassObjectId());
-        writeInt(out, cls.getClassLoaderObjectId());
-        writeInt(out, cls.getSignersObjectId());
-        writeInt(out, cls.getProtectionDomainObjectId());
-        writeInt(out, 0); // Reserved
-        writeInt(out, 0); // Reserved
+        writeID(out, cls.getSuperClassObjectId());
+        writeID(out, cls.getClassLoaderObjectId());
+        writeID(out, cls.getSignersObjectId());
+        writeID(out, cls.getProtectionDomainObjectId());
+        writeID(out, new ID()); // Reserved
+        writeID(out, new ID()); // Reserved
         writeInt(out, cls.getInstanceSize());
         // Write constant fields
         writeShort(out, (short) cls.getConstantFields().size());
@@ -65,14 +68,14 @@ public class HeapDumpWriter {
         // Write static fields
         writeShort(out, (short) cls.getStaticFields().size());
         for (StaticField field : cls.getStaticFields()) {
-            writeInt(out, field.getFieldNameId());
+            writeID(out, field.getFieldNameId());
             writeByte(out, field.getType().type);
             write(out, field.getValue());
         }
         // Write instance fields
         writeShort(out, (short) cls.getInstanceFields().size());
         for (InstanceField field : cls.getInstanceFields()) {
-            writeInt(out, field.getFieldNameId());
+            writeID(out, field.getFieldNameId());
             writeByte(out, field.getType().type);
         }
     }
@@ -85,11 +88,11 @@ public class HeapDumpWriter {
      * @param classId          Id of the instance's class
      * @param data             Instance data (packed instance field values)
      */
-    public void writeInstanceDumpRecord(int objectId, int stackTraceSerial, int classId, @Nonnull byte[] data) throws IOException {
+    public void writeInstanceDumpRecord(ID objectId, int stackTraceSerial, ID classId, @Nonnull byte[] data) throws IOException {
         out.write(HeapTag.INSTANCE_DUMP);
-        writeInt(out, objectId);
+        writeID(out, objectId);
         writeInt(out, stackTraceSerial);
-        writeInt(out, classId);
+        writeID(out, classId);
         writeInt(out, data.length);
         write(out, data);
     }
@@ -102,14 +105,14 @@ public class HeapDumpWriter {
      * @param elementClassId   Class id of the elements
      * @param elements         An array containing the object ids of the elements
      */
-    public void writeObjectArray(int objectId, int stackTraceSerial, int elementClassId, @Nonnull int[] elements) throws IOException {
+    public void writeObjectArray(ID objectId, int stackTraceSerial, ID elementClassId, @Nonnull ID[] elements) throws IOException {
         out.write(HeapTag.OBJECT_ARRAY_DUMP);
-        writeInt(out, objectId);
+        writeID(out, objectId);
         writeInt(out, stackTraceSerial);
         writeInt(out, elements.length);
-        writeInt(out, elementClassId);
-        for (int element : elements) {
-            writeInt(out, element);
+        writeID(out, elementClassId);
+        for (ID element : elements) {
+            writeID(out, element);
         }
     }
 
@@ -121,9 +124,9 @@ public class HeapDumpWriter {
      * @param elementType      The basic type of the elements in the array
      * @param length           Length of the array
      */
-    public void writePrimitiveArrayHeader(int objectId, int stackTraceSerial, @Nonnull BasicType elementType, int length) throws IOException {
+    public void writePrimitiveArrayHeader(ID objectId, int stackTraceSerial, @Nonnull BasicType elementType, int length) throws IOException {
         out.write(HeapTag.PRIMITIVE_ARRAY_DUMP);
-        writeInt(out, objectId);
+        writeID(out, objectId);
         writeInt(out, stackTraceSerial);
         writeInt(out, length);
         writeByte(out, elementType.type);
@@ -134,8 +137,8 @@ public class HeapDumpWriter {
      *
      * @param objectId The object id of the root object.
      */
-    public void writeUnknownRoot(int objectId) throws IOException {
+    public void writeUnknownRoot(ID objectId) throws IOException {
         out.write(HeapTag.ROOT_UNKNOWN);
-        writeInt(out, objectId);
+        writeID(out, objectId);
     }
 }

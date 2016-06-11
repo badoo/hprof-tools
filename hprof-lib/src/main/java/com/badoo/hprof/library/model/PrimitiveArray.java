@@ -1,5 +1,7 @@
 package com.badoo.hprof.library.model;
 
+import java.util.Arrays;
+
 import javax.annotation.Nonnull;
 
 /**
@@ -9,13 +11,13 @@ import javax.annotation.Nonnull;
  */
 public class PrimitiveArray {
 
-    private final int objectId;
+    private final ID objectId;
     private final int stackTraceSerial;
     private final BasicType type;
     private final int count;
     private final byte[] arrayData;
 
-    public PrimitiveArray(int objectId, int stackTraceSerial, @Nonnull BasicType type, int count, @Nonnull byte[] arrayData) {
+    public PrimitiveArray(ID objectId, int stackTraceSerial, @Nonnull BasicType type, int count, @Nonnull byte[] arrayData) {
         this.objectId = objectId;
         this.stackTraceSerial = stackTraceSerial;
         this.type = type;
@@ -23,7 +25,7 @@ public class PrimitiveArray {
         this.arrayData = arrayData;
     }
 
-    public int getObjectId() {
+    public ID getObjectId() {
         return objectId;
     }
 
@@ -41,5 +43,17 @@ public class PrimitiveArray {
 
     public byte[] getArrayData() {
         return arrayData;
+    }
+
+
+    @Override
+    public String toString() {
+        return "PrimitiveArray{" +
+                "objectId=" + objectId +
+                ", stackTraceSerial=" + stackTraceSerial +
+                ", type=" + type +
+                ", count=" + count +
+                ", arrayData=" + Arrays.toString(arrayData) +
+                '}';
     }
 }

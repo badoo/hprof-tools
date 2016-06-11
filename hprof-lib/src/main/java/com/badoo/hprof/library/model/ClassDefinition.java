@@ -1,6 +1,9 @@
 package com.badoo.hprof.library.model;
 
+import com.badoo.hprof.library.util.StreamUtil;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,15 +16,15 @@ public class ClassDefinition extends Record {
 
     // Fields from LOAD_CLASS
     private int serialNumber;
-    private int objectId;
-    private int nameStringId;
+    private ID objectId;
+    private ID nameStringId;
     private int stackTraceSerial;
 
     // Fields from CLASS_DUMP
-    private int superClassObjectId;
-    private int classLoaderObjectId;
-    private int signersObjectId;
-    private int protectionDomainObjectId;
+    private ID superClassObjectId;
+    private ID classLoaderObjectId;
+    private ID signersObjectId;
+    private ID protectionDomainObjectId;
     private int instanceSize;
     private List<ConstantField> constantFields;
     private List<StaticField> staticFields;
@@ -32,7 +35,7 @@ public class ClassDefinition extends Record {
         return serialNumber;
     }
 
-    public int getObjectId() {
+    public ID getObjectId() {
         return objectId;
     }
 
@@ -44,40 +47,40 @@ public class ClassDefinition extends Record {
         this.stackTraceSerial = stackTraceSerial;
     }
 
-    public int getNameStringId() {
+    public ID getNameStringId() {
         return nameStringId;
     }
 
-    public int getSuperClassObjectId() {
+    public ID getSuperClassObjectId() {
         return superClassObjectId;
     }
 
-    public void setSuperClassObjectId(int superClassObjectId) {
+    public void setSuperClassObjectId(ID superClassObjectId) {
         this.superClassObjectId = superClassObjectId;
     }
 
-    public int getClassLoaderObjectId() {
+    public ID getClassLoaderObjectId() {
 
         return classLoaderObjectId;
     }
 
-    public void setClassLoaderObjectId(int classLoaderObjectId) {
+    public void setClassLoaderObjectId(ID classLoaderObjectId) {
         this.classLoaderObjectId = classLoaderObjectId;
     }
 
-    public int getSignersObjectId() {
+    public ID getSignersObjectId() {
         return signersObjectId;
     }
 
-    public void setSignersObjectId(int signersObjectId) {
+    public void setSignersObjectId(ID signersObjectId) {
         this.signersObjectId = signersObjectId;
     }
 
-    public int getProtectionDomainObjectId() {
+    public ID getProtectionDomainObjectId() {
         return protectionDomainObjectId;
     }
 
-    public void setProtectionDomainObjectId(int protectionDomainObjectId) {
+    public void setProtectionDomainObjectId(ID protectionDomainObjectId) {
         this.protectionDomainObjectId = protectionDomainObjectId;
     }
 
@@ -138,11 +141,11 @@ public class ClassDefinition extends Record {
         this.serialNumber = serialNumber;
     }
 
-    public void setObjectId(int objectId) {
+    public void setObjectId(ID objectId) {
         this.objectId = objectId;
     }
 
-    public void setNameStringId(int nameStringId) {
+    public void setNameStringId(ID nameStringId) {
         this.nameStringId = nameStringId;
     }
 
@@ -153,15 +156,27 @@ public class ClassDefinition extends Record {
 
         ClassDefinition that = (ClassDefinition) o;
 
-        if (classLoaderObjectId != that.classLoaderObjectId) return false;
+
+//        if (classLoaderObjectId != that.classLoaderObjectId) return false;
+        if(!classLoaderObjectId.equals(that.classLoaderObjectId))return false;
+
         if (instanceSize != that.instanceSize) return false;
-        if (nameStringId != that.nameStringId) return false;
-        if (objectId != that.objectId) return false;
-        if (protectionDomainObjectId != that.protectionDomainObjectId) return false;
+//        if (nameStringId != that.nameStringId) return false;
+        if(!nameStringId.equals(that.nameStringId)) return false;
+//        if (objectId != that.objectId) return false;
+        if(!objectId.equals(that.objectId)) return false;
+
+//        if (protectionDomainObjectId != that.protectionDomainObjectId) return false;
+        if(!protectionDomainObjectId.equals(that.protectionDomainObjectId))return false;
+
         if (serialNumber != that.serialNumber) return false;
-        if (signersObjectId != that.signersObjectId) return false;
+//        if (signersObjectId != that.signersObjectId) return false;
+        if(signersObjectId.equals(that.signersObjectId))return false;
         if (stackTraceSerial != that.stackTraceSerial) return false;
-        if (superClassObjectId != that.superClassObjectId) return false;
+//        if (superClassObjectId != that.superClassObjectId) return false;
+        if (superClassObjectId.equals(that.superClassObjectId)) return false;
+
+
         if (constantFields != null ? !constantFields.equals(that.constantFields) : that.constantFields != null) return false;
         if (instanceFields != null ? !instanceFields.equals(that.instanceFields) : that.instanceFields != null) return false;
         if (staticFields != null ? !staticFields.equals(that.staticFields) : that.staticFields != null) return false;
@@ -172,17 +187,55 @@ public class ClassDefinition extends Record {
     @Override
     public int hashCode() {
         int result = serialNumber;
-        result = 31 * result + objectId;
-        result = 31 * result + nameStringId;
+
+
+        int objIdInt=0;
+        int nameStringIdInt=0;
+        int superClassObjectIdInt=0;
+        int classLoaderObjectIdInt=0;
+        int signersObjectIdInt=0;
+        int protectionDomainObjectIdInt=0;
+
+        int maxIterations = Math.min(4,StreamUtil.ID_SIZE); // 4 for integer size
+        for (int i=0;i< maxIterations;i++)
+        {
+            objIdInt |= objectId.getIdBytes()[i] << (8 * (maxIterations-i-1));
+            nameStringIdInt |= nameStringId.getIdBytes()[i] << (8 * (maxIterations-i-1));
+            superClassObjectIdInt |= superClassObjectId.getIdBytes()[i] << (8 * (maxIterations-i-1));
+            classLoaderObjectIdInt |= classLoaderObjectId.getIdBytes()[i] << (8 * (maxIterations-i-1));
+            signersObjectIdInt |= signersObjectId.getIdBytes()[i] << (8 * (maxIterations-i-1));
+            protectionDomainObjectIdInt |= protectionDomainObjectId.getIdBytes()[i] << (8 * (maxIterations-i-1));
+
+        }
+        result = 31 * result + objIdInt;
+        result = 31 * result + nameStringIdInt;
         result = 31 * result + stackTraceSerial;
-        result = 31 * result + superClassObjectId;
-        result = 31 * result + classLoaderObjectId;
-        result = 31 * result + signersObjectId;
-        result = 31 * result + protectionDomainObjectId;
+        result = 31 * result + superClassObjectIdInt;
+        result = 31 * result + classLoaderObjectIdInt;
+        result = 31 * result + signersObjectIdInt;
+        result = 31 * result + protectionDomainObjectIdInt;
         result = 31 * result + instanceSize;
         result = 31 * result + (constantFields != null ? constantFields.hashCode() : 0);
         result = 31 * result + (staticFields != null ? staticFields.hashCode() : 0);
         result = 31 * result + (instanceFields != null ? instanceFields.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "ClassDefinition{" +
+                "serialNumber=" + serialNumber +
+                ", objectId=" + objectId +
+                ", nameStringId=" + nameStringId +
+                ", stackTraceSerial=" + stackTraceSerial +
+                ", superClassObjectId=" + superClassObjectId +
+                ", classLoaderObjectId=" + classLoaderObjectId +
+                ", signersObjectId=" + signersObjectId +
+                ", protectionDomainObjectId=" + protectionDomainObjectId +
+                ", instanceSize=" + instanceSize +
+                ", constantFields=" + constantFields +
+                ", staticFields=" + staticFields +
+                ", instanceFields=" + instanceFields +
+                '}';
     }
 }

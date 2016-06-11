@@ -9,20 +9,20 @@ import javax.annotation.Nonnull;
  */
 public class HprofString extends Record {
 
-    private int id;
+    private ID id;
     private String value;
 
-    public HprofString(int id, @Nonnull String value, int timestamp) {
+    public HprofString(ID id, @Nonnull String value, int timestamp) {
         this.id = id;
         this.value = value;
         setTimestamp(timestamp);
     }
 
-    public int getId() {
+    public ID getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(ID id) {
         this.id = id;
     }
     @Nonnull
@@ -36,6 +36,6 @@ public class HprofString extends Record {
 
     @Override
     public String toString() {
-        return value + " (" + id + ")";
+        return "HPROF_STRING," + value + " (" + id + ")";
     }
 }

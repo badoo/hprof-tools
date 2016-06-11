@@ -1,5 +1,7 @@
 package com.badoo.hprof.library.util;
 
+import com.badoo.hprof.library.model.ID;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -106,6 +108,27 @@ public class StreamUtil {
         return (in.read() << 24) | (in.read() << 16) | (in.read() << 8) | in.read();
     }
 
+
+    public static int ID_SIZE = 8;
+
+    public static final int U1_SIZE = 1;
+    public static final int U2_SIZE = 2;
+    public static final int U4_SIZE = 4;
+    public static final int U8_SIZE = 8;
+
+
+    public static ID readID(InputStream in) throws IOException {
+
+
+        return new ID(read(in,ID_SIZE));
+    }
+
+
+    public static void writeID(OutputStream out, ID id) throws IOException
+    {
+        write(out, id.getIdBytes());
+    }
+
     /**
      * Write an int.
      *
@@ -146,6 +169,11 @@ public class StreamUtil {
     public static long readLong(InputStream in) throws IOException {
         return ((long) in.read() << 56) | ((long) in.read() << 48) | ((long) in.read() << 40) | ((long) in.read() << 32) | ((long) in.read() << 24) | ((long) in.read() << 16) | ((long) in.read() << 8) | (long) in.read();
     }
+
+
+
+
+
 
     /**
      * Read an short.

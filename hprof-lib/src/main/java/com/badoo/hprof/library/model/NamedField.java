@@ -12,12 +12,12 @@ public interface NamedField {
      *
      * @return The field name string id
      */
-    int getFieldNameId();
+    ID getFieldNameId();
 
     /**
      * Set the field name string id.
      *
      * @param fieldNameId The field name string id
      */
-    void setFieldNameId(int fieldNameId);
+    void setFieldNameId(ID fieldNameId);
 }

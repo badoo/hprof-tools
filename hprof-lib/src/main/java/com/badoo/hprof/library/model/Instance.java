@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
+import static com.badoo.hprof.library.util.StreamUtil.ID_SIZE;
 import static com.badoo.hprof.library.util.StreamUtil.readByte;
 import static com.badoo.hprof.library.util.StreamUtil.readDouble;
 import static com.badoo.hprof.library.util.StreamUtil.readFloat;
@@ -23,23 +24,23 @@ import static com.badoo.hprof.library.util.StreamUtil.skip;
 @SuppressWarnings({"RedundantIfStatement", "unused"})
 public class Instance {
 
-    private int objectId;
+    private ID objectId;
     private int stackTraceSerialId;
-    private int classId;
+    private ID classId;
     private byte[] instanceFieldData;
 
-    public Instance(int objectId, int stackTraceSerialId, int classId, @Nonnull byte[] instanceFieldData) {
+    public  Instance(ID objectId, int stackTraceSerialId, ID classId, @Nonnull byte[] instanceFieldData) {
         this.objectId = objectId;
         this.stackTraceSerialId = stackTraceSerialId;
         this.classId = classId;
         this.instanceFieldData = instanceFieldData;
     }
 
-    public int getObjectId() {
+    public ID getObjectId() {
         return objectId;
     }
 
-    public void setObjectId(int objectId) {
+    public void setObjectId(ID objectId) {
         this.objectId = objectId;
     }
 
@@ -51,11 +52,11 @@ public class Instance {
         this.stackTraceSerialId = stackTraceSerialId;
     }
 
-    public int getClassId() {
+    public ID getClassId() {
         return classId;
     }
 
-    public void setClassId(int classId) {
+    public void setClassId(ID classId) {
         this.classId = classId;
     }
 
@@ -75,8 +76,11 @@ public class Instance {
 
         Instance instance = (Instance) o;
 
-        if (classId != instance.classId) return false;
-        if (objectId != instance.objectId) return false;
+//        if (classId != instance.classId) return false;
+//        if (objectId != instance.objectId) return false;
+        if(!classId.equals(instance.classId)) return false;
+        if(!objectId.equals(instance.objectId))return false;
+
         if (stackTraceSerialId != instance.stackTraceSerialId) return false;
         if (!Arrays.equals(instanceFieldData, instance.instanceFieldData)) return false;
 
@@ -85,9 +89,21 @@ public class Instance {
 
     @Override
     public int hashCode() {
-        int result = objectId;
+
+        int objIdInt=0;
+        int classIdInt=0;
+
+        int maxIterations = Math.min(4,ID_SIZE); // 4 for integer size
+        for (int i=0;i< maxIterations;i++)
+        {
+            objIdInt |= objectId.getIdBytes()[i] << (8 * (maxIterations-i-1));
+            classIdInt |= classId.getIdBytes()[i] << (8 * (maxIterations-i-1));
+
+        }
+
+        int result = objIdInt;
         result = 31 * result + stackTraceSerialId;
-        result = 31 * result + classId;
+        result = 31 * result + classIdInt;
         result = 31 * result + Arrays.hashCode(instanceFieldData);
         return result;
     }
@@ -342,5 +358,15 @@ public class Instance {
             currentClass = classes.get(currentClass.getSuperClassObjectId());
         }
         throw new IllegalStateException("Failed to find field");
+    }
+
+    @Override
+    public String toString() {
+        return "Instance{" +
+                "objectId=" + objectId +
+                ", stackTraceSerialId=" + stackTraceSerialId +
+                ", classId=" + classId +
+                ", instanceFieldData=" + Arrays.toString(instanceFieldData) +
+                '}';
     }
 }
