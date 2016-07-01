@@ -9,6 +9,7 @@ import com.badoo.hprof.library.heap.HeapTag;
 import com.badoo.hprof.library.heap.processor.HeapDumpBaseProcessor;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.HprofString;
+import com.badoo.hprof.library.model.ID;
 import com.badoo.hprof.library.processor.CopyProcessor;
 import com.badoo.hprof.library.util.StreamUtil;
 
@@ -49,9 +50,9 @@ public class StringUpdateProcessor extends CopyProcessor {
     }
 
     private final Collection<HprofString> strings;
-    private final Map<Integer, ClassDefinition> classes;
+    private final Map<ID, ClassDefinition> classes;
     private boolean writeUpdatedClassDefinitions = true;
-    public StringUpdateProcessor(OutputStream out, Map<Integer, ClassDefinition> classes, Collection<HprofString> strings) {
+    public StringUpdateProcessor(OutputStream out, Map<ID, ClassDefinition> classes, Collection<HprofString> strings) {
         super(out);
         this.strings = strings;
         this.classes = classes;
@@ -69,17 +70,28 @@ public class StringUpdateProcessor extends CopyProcessor {
 
     @Override
     public void onRecord(int tag, int timestamp, int length, @Nonnull HprofReader reader) throws IOException {
+
+        System.out.println(Tag.tagToString(tag));
+
         if (tag == Tag.STRING) {
             skip(reader.getInputStream(), length); // Discard all the original strings
         }
         else if (tag == Tag.HEAP_DUMP || tag == Tag.HEAP_DUMP_SEGMENT) {
+
+
+            ByteArrayOutputStream buffer ;
+
             if (writeUpdatedClassDefinitions) {
                 // Write the updated class definitions before continuing with the existing data
-                writeClasses(tag, timestamp);
+                buffer = writeClassesToBAOS(tag, timestamp);
                 writeUpdatedClassDefinitions = false;
             }
+            else
+            {
+                buffer = new ByteArrayOutputStream();
+            }
             // Filter the heap dump, removing any class definition
-            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
             HeapDumpReader heapReader = new HeapDumpReader(reader.getInputStream(), length, new ClassDefinitionRemoverProcessor(buffer));
             while (heapReader.hasNext()) {
                 heapReader.next();
@@ -94,7 +106,7 @@ public class StringUpdateProcessor extends CopyProcessor {
     }
 
     private void writeClasses(int tag, int timestamp) throws IOException {
-        // Write all class definitions to a buffer in order to calculate the size. Uses more memory but avoids an extra pass to calculate size before writing the data
+        // Write all class  definitions to a buffer in order to calculate the size. Uses more memory but avoids an extra pass to calculate size before writing the data
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         HeapDumpWriter bufferWrite = new HeapDumpWriter(buffer);
         for (ClassDefinition cls : classes.values()) {
@@ -103,6 +115,20 @@ public class StringUpdateProcessor extends CopyProcessor {
         byte[] data = buffer.toByteArray();
         writer.writeRecordHeader(tag, timestamp, data.length);
         out.write(data);
+    }
+
+
+    private ByteArrayOutputStream writeClassesToBAOS(int tag, int timestamp) throws IOException {
+        // Write all class  definitions to a buffer in order to calculate the size. Uses more memory but avoids an extra pass to calculate size before writing the data
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        HeapDumpWriter bufferWrite = new HeapDumpWriter(buffer);
+        for (ClassDefinition cls : classes.values()) {
+            bufferWrite.writeClassDumpRecord(cls);
+        }
+        return buffer;
+//        byte[] data = buffer.toByteArray();
+//        writer.writeRecordHeader(tag, timestamp, data.length);
+//        out.write(data);
     }
 
 }

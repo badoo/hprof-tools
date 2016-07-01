@@ -9,13 +9,13 @@ import javax.annotation.Nonnull;
  */
 public class ObjectArray {
 
-    private final int objectId;
+    private final ID objectId;
     private final int stackTraceSerial;
-    private final int elementClassId;
+    private final ID elementClassId;
     private final int count;
-    private final int[] elements;
+    private final ID[] elements;
 
-    public ObjectArray(int objectId, int stackTraceSerial, int elementClassId, int count, @Nonnull int[] elements) {
+    public ObjectArray(ID objectId, int stackTraceSerial, ID elementClassId, int count, @Nonnull ID[] elements) {
         this.objectId = objectId;
         this.stackTraceSerial = stackTraceSerial;
         this.elementClassId = elementClassId;
@@ -23,7 +23,7 @@ public class ObjectArray {
         this.elements = elements;
     }
 
-    public int getObjectId() {
+    public ID getObjectId() {
         return objectId;
     }
 
@@ -31,7 +31,7 @@ public class ObjectArray {
         return stackTraceSerial;
     }
 
-    public int getElementClassId() {
+    public ID getElementClassId() {
         return elementClassId;
     }
 
@@ -39,7 +39,7 @@ public class ObjectArray {
         return count;
     }
 
-    public int[] getElements() {
+    public ID[] getElements() {
         return elements;
     }
 }

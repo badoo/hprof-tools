@@ -1,16 +1,22 @@
 package com.badoo.hprof.library;
 
+import com.badoo.hprof.library.model.BasicType;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.HprofString;
+import com.badoo.hprof.library.model.ID;
+import com.badoo.hprof.library.model.StackFrame;
 import com.badoo.hprof.library.util.StreamUtil;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 import javax.annotation.Nonnull;
 import javax.naming.OperationNotSupportedException;
 
+import static com.badoo.hprof.library.util.StreamUtil.ID_SIZE;
 import static com.badoo.hprof.library.util.StreamUtil.readByte;
+import static com.badoo.hprof.library.util.StreamUtil.readID;
 import static com.badoo.hprof.library.util.StreamUtil.readInt;
 import static com.badoo.hprof.library.util.StreamUtil.readString;
 
@@ -90,10 +96,11 @@ public class HprofReader {
      */
     @Nonnull
     public ClassDefinition readLoadClassRecord() throws IOException {
+        System.out.println("readLoadClassRecord");
         int serialNumber = readInt(in);
-        int classObjectId = readInt(in);
+        ID classObjectId = readID(in);
         int stackTraceSerial = readInt(in);
-        int classNameStringId = readInt(in);
+        ID classNameStringId = readID(in);
         ClassDefinition cls = new ClassDefinition();
         cls.setSerialNumber(serialNumber);
         cls.setObjectId(classObjectId);
@@ -112,10 +119,22 @@ public class HprofReader {
      */
     @Nonnull
     public HprofString readStringRecord(int recordLength, int timestamp) throws IOException {
-        int id = readInt(in);
-        String string = readString(in, recordLength - 4);
+        ID id = readID(in);
+        String string = readString(in, recordLength - ID_SIZE);
         return new HprofString(id, string, timestamp);
     }
+
+
+
+
+    public StackFrame readStackFrame() throws IOException {
+
+        StackFrame stackFrame = new StackFrame(readID(in),readID(in), readID(in),readID(in),readInt(in),readInt(in));
+
+        return  stackFrame;
+
+    }
+
 
     private void readRecord() throws IOException {
         int tagValue = nextTag;
@@ -127,9 +146,14 @@ public class HprofReader {
     private void readHprofFileHeader() throws IOException {
         String text = StreamUtil.readNullTerminatedString(in);
         int idSize = readInt(in);
-        if (idSize != 4) { // Currently only 4-byte ids are supported
-            throw new UnsupportedOperationException("Only hprof files with 4-byte ids can be read! This file has ids of " + idSize + " bytes");
-        }
+        // updating id size
+        StreamUtil.ID_SIZE = idSize;
+        BasicType.OBJECT.size=ID_SIZE;
+
+
+//        if (idSize != 4) { // Currently only 4-byte ids are supported
+//            throw new UnsupportedOperationException("Only hprof files with 4-byte ids can be read! This file has ids of " + idSize + " bytes");
+//        }
         int timeHigh = readInt(in);
         int timeLow = readInt(in);
         processor.onHeader(text, idSize, timeHigh, timeLow);

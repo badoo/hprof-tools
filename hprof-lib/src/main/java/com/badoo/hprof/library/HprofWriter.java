@@ -8,7 +8,10 @@ import java.io.OutputStream;
 
 import javax.annotation.Nonnull;
 
+import static com.badoo.hprof.library.util.StreamUtil.ID_SIZE;
+import static com.badoo.hprof.library.util.StreamUtil.U4_SIZE;
 import static com.badoo.hprof.library.util.StreamUtil.write;
+import static com.badoo.hprof.library.util.StreamUtil.writeID;
 import static com.badoo.hprof.library.util.StreamUtil.writeInt;
 import static com.badoo.hprof.library.util.StreamUtil.writeNullTerminatedString;
 
@@ -70,8 +73,8 @@ public class HprofWriter {
      */
     public void writeStringRecord(@Nonnull HprofString string) throws IOException {
         byte[] stringData = string.getValue().getBytes();
-        writeRecordHeader(Tag.STRING, string.getTimestamp(), stringData.length + 4);
-        writeInt(out, string.getId());
+        writeRecordHeader(Tag.STRING, string.getTimestamp(), stringData.length + ID_SIZE);
+        writeID(out, string.getId());
         write(out, stringData);
     }
 
@@ -82,11 +85,11 @@ public class HprofWriter {
      * @throws IOException
      */
     public void writeLoadClassRecord(@Nonnull ClassDefinition cls) throws IOException {
-        writeRecordHeader(Tag.LOAD_CLASS, cls.getTimestamp(), 16);
+        writeRecordHeader(Tag.LOAD_CLASS, cls.getTimestamp(), 2 * (U4_SIZE + ID_SIZE));
         writeInt(out, cls.getSerialNumber());
-        writeInt(out, cls.getObjectId());
+        writeID(out, cls.getObjectId());
         writeInt(out, cls.getStackTraceSerial());
-        writeInt(out, cls.getNameStringId());
+        writeID(out, cls.getNameStringId());
     }
 
     /**

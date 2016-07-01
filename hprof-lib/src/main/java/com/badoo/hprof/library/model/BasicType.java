@@ -11,6 +11,7 @@ public enum BasicType {
 
     /**
      * Tag identifying an Object reference.
+     * This number is based on the length of the identifier used. for 8byte ID, 4 should be converted to 8
      */
     OBJECT(2, 4),
     /**
@@ -54,7 +55,7 @@ public enum BasicType {
     /**
      * Size in bytes for a field of this type
      */
-    public final int size;
+    public int size;
 
     BasicType(int type, int size) {
         this.type = type;

@@ -1,5 +1,7 @@
 package com.badoo.hprof.library.model;
 
+import java.util.Arrays;
+
 import javax.annotation.Nonnull;
 
 /**
@@ -29,5 +31,12 @@ public class ConstantField {
         return value;
     }
 
-
+    @Override
+    public String toString() {
+        return "ConstantField{" +
+                "poolIndex=" + poolIndex +
+                ", type=" + type +
+                ", value=" + Arrays.toString(value) +
+                '}';
+    }
 }

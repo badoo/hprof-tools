@@ -1,5 +1,7 @@
 package com.badoo.hprof.library.model;
 
+import java.util.Arrays;
+
 import javax.annotation.Nonnull;
 
 /**
@@ -11,9 +13,9 @@ public class StaticField implements NamedField {
 
     private byte[] value;
 
-    private int fieldNameId;
+    private ID fieldNameId;
 
-    public StaticField(@Nonnull BasicType type, @Nonnull byte[] value, int fieldNameId) {
+    public StaticField(@Nonnull BasicType type, @Nonnull byte[] value, ID fieldNameId) {
         this.type = type;
         this.value = value;
         this.fieldNameId = fieldNameId;
@@ -38,12 +40,21 @@ public class StaticField implements NamedField {
     }
 
     @Override
-    public int getFieldNameId() {
+    public ID getFieldNameId() {
         return fieldNameId;
     }
 
     @Override
-    public void setFieldNameId(int fieldNameId) {
+    public void setFieldNameId(ID fieldNameId) {
         this.fieldNameId = fieldNameId;
+    }
+
+    @Override
+    public String toString() {
+        return "StaticField{" +
+                "type=" + type +
+                ", value=" + Arrays.toString(value) +
+                ", fieldNameId=" + fieldNameId +
+                '}';
     }
 }

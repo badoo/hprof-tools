@@ -3,11 +3,13 @@ package com.badoo.hprof.library.heap;
 import com.badoo.hprof.library.model.BasicType;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.ConstantField;
+import com.badoo.hprof.library.model.ID;
 import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.library.model.InstanceField;
 import com.badoo.hprof.library.model.ObjectArray;
 import com.badoo.hprof.library.model.PrimitiveArray;
 import com.badoo.hprof.library.model.StaticField;
+import com.badoo.hprof.library.util.StreamUtil;
 import com.google.common.io.CountingInputStream;
 
 import java.io.IOException;
@@ -18,8 +20,10 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
+import static com.badoo.hprof.library.util.StreamUtil.ID_SIZE;
 import static com.badoo.hprof.library.util.StreamUtil.read;
 import static com.badoo.hprof.library.util.StreamUtil.readByte;
+import static com.badoo.hprof.library.util.StreamUtil.readID;
 import static com.badoo.hprof.library.util.StreamUtil.readInt;
 import static com.badoo.hprof.library.util.StreamUtil.readShort;
 import static com.badoo.hprof.library.util.StreamUtil.skip;
@@ -95,19 +99,24 @@ public class HeapDumpReader {
      * @param loadedClasses Map of class ids and loaded classes. The class dump being read must be in this map
      */
     @Nonnull
-    public ClassDefinition readClassDumpRecord(Map<Integer, ClassDefinition> loadedClasses) throws IOException {
-        int objectId = readInt(in);
+    public ClassDefinition readClassDumpRecord(Map<ID, ClassDefinition> loadedClasses) throws IOException {
+
+//        System.out.println("readClassDumpRecord");
+
+        ID objectId = readID(in);
         ClassDefinition cls = loadedClasses.get(objectId);
         if (cls == null) {
             throw new IllegalStateException("No class loaded for id " + objectId);
         }
         cls.setObjectId(objectId);
         cls.setStackTraceSerial(readInt(in));
-        cls.setSuperClassObjectId(readInt(in));
-        cls.setClassLoaderObjectId(readInt(in));
-        cls.setSignersObjectId(readInt(in));
-        cls.setProtectionDomainObjectId(readInt(in));
-        skip(in, 8); // Reserved data
+        cls.setSuperClassObjectId(readID(in));
+        cls.setClassLoaderObjectId(readID(in));
+        cls.setSignersObjectId(readID(in));
+        cls.setProtectionDomainObjectId(readID(in));
+
+        skip(in, 2 * ID_SIZE); // Reserved data
+//        skip(in, 8); // Reserved data
         cls.setInstanceSize(readInt(in));
         // Read constants fields
         short constantCount = readShort(in);
@@ -128,7 +137,7 @@ public class HeapDumpReader {
             ArrayList<StaticField> staticFields = new ArrayList<StaticField>();
             cls.setStaticFields(staticFields);
             for (int i = 0; i < staticCount; i++) {
-                int nameId = readInt(in);
+                ID nameId = readID(in);
                 BasicType type = BasicType.fromType(readByte(in));
                 byte[] value = read(in, type.size);
                 staticFields.add(new StaticField(type, value, nameId));
@@ -140,11 +149,12 @@ public class HeapDumpReader {
             ArrayList<InstanceField> instanceFields = new ArrayList<InstanceField>();
             cls.setInstanceFields(instanceFields);
             for (int i = 0; i < fieldCount; i++) {
-                int nameId = readInt(in);
+                ID nameId = readID(in);
                 BasicType type = BasicType.fromType(readByte(in));
                 instanceFields.add(new InstanceField(type, nameId));
             }
         }
+//        System.out.println("cls=" + cls);
         return cls;
     }
 
@@ -164,9 +174,9 @@ public class HeapDumpReader {
      */
     @Nonnull
     public Instance readInstanceDump() throws IOException {
-        int objectId = readInt(in);
+        ID objectId = readID(in);
         int stackTraceSerial = readInt(in);
-        int classId = readInt(in);
+        ID classId = readID(in);
         int length = readInt(in);
         byte[] data = read(in, length);
         return new Instance(objectId, stackTraceSerial, classId, data);
@@ -179,7 +189,7 @@ public class HeapDumpReader {
      */
     @Nonnull
     public PrimitiveArray readPrimitiveArray() throws IOException {
-        int objectId = readInt(in);
+        ID objectId = readID(in);
         int stackTraceSerial = readInt(in);
         int count = readInt(in);
         BasicType type = BasicType.fromType(in.read());
@@ -194,13 +204,13 @@ public class HeapDumpReader {
      */
     @Nonnull
     public ObjectArray readObjectArray() throws IOException {
-        int objectId = readInt(in);
+        ID objectId = readID(in);
         int stackTraceSerial = readInt(in);
         int count = readInt(in);
-        int elementClassId = readInt(in);
-        int[] elements = new int[count];
+        ID elementClassId = readID(in);
+        ID[] elements = new ID[count];
         for (int i = 0; i < count; i++) {
-            elements[i] = readInt(in);
+            elements[i] = readID(in);
         }
         return new ObjectArray(objectId, stackTraceSerial, elementClassId, count, elements);
     }
