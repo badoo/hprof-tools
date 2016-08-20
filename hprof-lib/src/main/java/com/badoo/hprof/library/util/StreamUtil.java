@@ -126,7 +126,11 @@ public class StreamUtil {
 
     public static void writeID(OutputStream out, ID id) throws IOException
     {
-        write(out, id.getIdBytes());
+        if (id == null) {
+            write(out, new ID(0).getIdBytes());
+        } else {
+            write(out, id.getIdBytes());
+        }
     }
 
     /**

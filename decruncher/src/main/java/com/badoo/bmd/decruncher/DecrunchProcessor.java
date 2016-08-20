@@ -17,12 +17,8 @@ import com.badoo.bmd.model.BmdString;
 import com.badoo.hprof.library.HprofWriter;
 import com.badoo.hprof.library.Tag;
 import com.badoo.hprof.library.heap.HeapDumpWriter;
-import com.badoo.hprof.library.model.BasicType;
-import com.badoo.hprof.library.model.ClassDefinition;
-import com.badoo.hprof.library.model.ConstantField;
-import com.badoo.hprof.library.model.HprofString;
-import com.badoo.hprof.library.model.InstanceField;
-import com.badoo.hprof.library.model.StaticField;
+import com.badoo.hprof.library.model.*;
+import com.badoo.hprof.library.util.StreamUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -57,8 +53,8 @@ public class DecrunchProcessor implements BmdProcessor {
 
     private static final boolean DEBUG = false;
     private static final int FILLER_FIELD_NAME = Integer.MAX_VALUE;
-    private static final InstanceField BYTE_FILLER_FIELD = new InstanceField(BasicType.BYTE, FILLER_FIELD_NAME);
-    private static final InstanceField INT_FILLER_FIELD = new InstanceField(BasicType.INT, FILLER_FIELD_NAME);
+    private final InstanceField BYTE_FILLER_FIELD;
+    private final InstanceField INT_FILLER_FIELD;
 
     private final HprofWriter writer;
     private final Map<Integer, BmdClassDefinition> classes = new HashMap<Integer, BmdClassDefinition>();
@@ -85,6 +81,9 @@ public class DecrunchProcessor implements BmdProcessor {
             }
             this.strings.put(hashCode, string);
         }
+        StreamUtil.ID_SIZE = 4;
+        BYTE_FILLER_FIELD = new InstanceField(BasicType.BYTE, new ID(FILLER_FIELD_NAME));
+        INT_FILLER_FIELD = new InstanceField(BasicType.INT, new ID(FILLER_FIELD_NAME));
     }
 
     @Override
@@ -151,9 +150,9 @@ public class DecrunchProcessor implements BmdProcessor {
         }
         // GC roots
         for (Integer root : rootObjects) {
-            heapWriter.writeUnknownRoot(root);
+            heapWriter.writeUnknownRoot(new ID(root));
         }
-        writer.writeStringRecord(new HprofString(FILLER_FIELD_NAME, "field_removed", 0)); // This string is used as the name for all discarded instance fields that we have recreated
+        writer.writeStringRecord(new HprofString(new ID(FILLER_FIELD_NAME), "field_removed", 0)); // This string is used as the name for all discarded instance fields that we have recreated
         byte[] record = buffer.toByteArray();
         writer.writeRecordHeader(Tag.HEAP_DUMP, 0, record.length);
         writer.getOutputStream().write(record);
@@ -161,9 +160,9 @@ public class DecrunchProcessor implements BmdProcessor {
 
     private ClassDefinition convertClassDefinition(BmdClassDefinition bmdClassDef) throws IOException {
         ClassDefinition classDef = new ClassDefinition();
-        classDef.setObjectId(bmdClassDef.getId());
-        classDef.setNameStringId(bmdClassDef.getName());
-        classDef.setSuperClassObjectId(bmdClassDef.getSuperClassId());
+        classDef.setObjectId(new ID(bmdClassDef.getId()));
+        classDef.setNameStringId(new ID(bmdClassDef.getName()));
+        classDef.setSuperClassObjectId(new ID(bmdClassDef.getSuperClassId()));
         // Constant fields
         List<ConstantField> constFields = new ArrayList<ConstantField>();
         for (BmdConstantField field : bmdClassDef.getConstantFields()) {
@@ -177,14 +176,14 @@ public class DecrunchProcessor implements BmdProcessor {
         for (BmdStaticField field : bmdClassDef.getStaticFields()) {
             BasicType type = convertType(field.getType());
             byte[] value = getFieldValue(field);
-            staticFields.add(new StaticField(type, value, field.getNameId()));
+            staticFields.add(new StaticField(type, value, new ID(field.getNameId())));
         }
         classDef.setStaticFields(staticFields);
         // Instance fields
         List<InstanceField> instanceFields = new ArrayList<InstanceField>();
         for (BmdInstanceFieldDefinition field : bmdClassDef.getInstanceFields()) {
             BasicType type = convertType(field.getType());
-            instanceFields.add(new InstanceField(type, field.getNameId()));
+            instanceFields.add(new InstanceField(type, new ID(field.getNameId())));
         }
         // Add extra instance fields replacing removed fields
         int filler = bmdClassDef.getDiscardedFieldSize();
@@ -205,14 +204,22 @@ public class DecrunchProcessor implements BmdProcessor {
 
     private void writePrimitiveArray(HeapDumpWriter writer, BmdPrimitiveArray array) throws IOException {
         BasicType elementType = convertType(array.getType());
-        writer.writePrimitiveArrayHeader(array.getId(), 0, elementType, array.getElementCount());
+        writer.writePrimitiveArrayHeader(new ID(array.getId()), 0, elementType, array.getElementCount());
         // Just write 0's to fill the space
         byte[] data = new byte[elementType.size * array.getElementCount()];
         writer.getOutputStream().write(data);
     }
 
     private void writeObjectArray(HeapDumpWriter writer, BmdObjectArray array) throws IOException {
-        writer.writeObjectArray(array.getId(), 0, array.getElementClassId(), array.getElements());
+        writer.writeObjectArray(new ID(array.getId()), 0, new ID(array.getElementClassId()), toIDArray(array.getElements()));
+    }
+    private ID[] toIDArray(int[] is){
+        final ID[] res = new ID[is.length];
+        for (int i = 0; i < is.length; i++) {
+            int id = is[i];
+            res[i] = new ID(id);
+        }
+        return res;
     }
 
     private void writeInstanceDump(HeapDumpWriter writer, BmdInstanceDump instance) throws IOException {
@@ -233,7 +240,7 @@ public class DecrunchProcessor implements BmdProcessor {
             currentClassId = currentClass.getSuperClassId();
         }
         byte[] data = buffer.toByteArray();
-        writer.writeInstanceDumpRecord(instance.getId(), 0, instance.getClassId(), data);
+        writer.writeInstanceDumpRecord(new ID(instance.getId()), 0, new ID(instance.getClassId()), data);
     }
 
     private void writeFieldValue(OutputStream out, Object value) throws IOException {
@@ -271,8 +278,8 @@ public class DecrunchProcessor implements BmdProcessor {
 
     private void writeLoadClassRecord(BmdClassDefinition classDef) throws IOException {
         ClassDefinition hprofCls = new ClassDefinition();
-        hprofCls.setObjectId(classDef.getId());
-        hprofCls.setNameStringId(classDef.getName());
+        hprofCls.setObjectId(new ID(classDef.getId()));
+        hprofCls.setNameStringId(new ID(classDef.getName()));
         writer.writeLoadClassRecord(hprofCls);
     }
 
@@ -291,7 +298,7 @@ public class DecrunchProcessor implements BmdProcessor {
                 stringVal += new String(filler, "UTF-8");
             }
         }
-        HprofString hprofString = new HprofString(string.getId(), stringVal, 0);
+        HprofString hprofString = new HprofString(new ID(string.getId()), stringVal, 0);
         writer.writeStringRecord(hprofString);
     }
 
