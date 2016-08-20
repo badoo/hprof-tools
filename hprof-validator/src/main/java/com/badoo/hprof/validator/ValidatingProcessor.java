@@ -8,6 +8,7 @@ import com.badoo.hprof.library.heap.HeapTag;
 import com.badoo.hprof.library.heap.processor.HeapDumpDiscardProcessor;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.HprofString;
+import com.badoo.hprof.library.model.ID;
 import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.library.processor.DiscardProcessor;
 import com.badoo.hprof.validator.utils.Log;
@@ -31,8 +32,8 @@ public class ValidatingProcessor extends DiscardProcessor {
     private static final String TAG = "ValidatingProcessor";
 
     private final CountingInputStream in;
-    private Map<Integer, String> strings = new HashMap<Integer, String>();
-    private Map<Integer, ClassDefinition> classes = new HashMap<Integer, ClassDefinition>();
+    private Map<ID, String> strings = new HashMap<ID, String>();
+    private Map<ID, ClassDefinition> classes = new HashMap<ID, ClassDefinition>();
     private List<Instance> instances = new ArrayList<Instance>();
     private Map<Instance, Long> instancePositions = new HashMap<Instance, Long>();
 
@@ -43,6 +44,9 @@ public class ValidatingProcessor extends DiscardProcessor {
     @Override
     public void onHeader(@Nonnull String text, int idSize, int timeHigh, int timeLow) throws IOException {
         Log.d(TAG, "Header text=" + text + ", idSize=" + idSize + ", timeHigh=" + timeHigh + ", timeLow=" + timeLow);
+        if (idSize != 4) {
+            throw new RuntimeException("unimplemented");
+        }
     }
 
     @Override
@@ -114,12 +118,12 @@ public class ValidatingProcessor extends DiscardProcessor {
     }
 
     private void verifySuperClass(ClassDefinition cls) {
-        int superId = cls.getSuperClassObjectId();
+        final ID superId = cls.getSuperClassObjectId();
         String className = strings.get(cls.getNameStringId());
         if (classes.containsKey(superId)) {
             verifySuperClass(classes.get(superId));
         }
-        else if (superId != 0) { // Zero is valid for classes that has not super class (like java.lang.Object and others)
+        else if (superId.toLong() != 0) { // Zero is valid for classes that has not super class (like java.lang.Object and others)
             throw new IllegalStateException("Class " + className + " does not have a super class (" + superId + ")");
         }
     }

@@ -30,6 +30,7 @@ public class HprofValidator {
         catch (IOException e) {
            System.err.print("Failed to process file");
             e.printStackTrace(System.err);
+            throw new RuntimeException(e);
         }
     }
 
