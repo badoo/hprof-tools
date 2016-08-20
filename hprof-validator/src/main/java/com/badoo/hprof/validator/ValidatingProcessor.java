@@ -45,7 +45,7 @@ public class ValidatingProcessor extends DiscardProcessor {
     public void onHeader(@Nonnull String text, int idSize, int timeHigh, int timeLow) throws IOException {
         Log.d(TAG, "Header text=" + text + ", idSize=" + idSize + ", timeHigh=" + timeHigh + ", timeLow=" + timeLow);
         if (idSize != 4) {
-            throw new RuntimeException("unimplemented");
+            throw new RuntimeException("hprof validator is not implemented for idSize = " + idSize);
         }
     }
 

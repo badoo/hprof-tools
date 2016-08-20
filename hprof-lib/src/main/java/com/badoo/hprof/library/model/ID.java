@@ -68,4 +68,12 @@ public final class ID {
         return hash;
 
     }
+
+    public int toInt32() {
+        if (idBytes.length == StreamUtil.U4_SIZE) {
+            return ByteBuffer.wrap(idBytes).getInt();
+        } else {
+            throw new IllegalStateException("trying to convert a 8 byte id to ");
+        }
+    }
 }
