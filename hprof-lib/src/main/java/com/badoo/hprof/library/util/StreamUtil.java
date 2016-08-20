@@ -109,7 +109,7 @@ public class StreamUtil {
     }
 
 
-    public static int ID_SIZE = 8;
+    public static int ID_SIZE = 8;//todo wtf, this should not be static
 
     public static final int U1_SIZE = 1;
     public static final int U2_SIZE = 2;
