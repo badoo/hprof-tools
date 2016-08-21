@@ -208,7 +208,6 @@ public class CrunchProcessor extends DiscardProcessor {
             return originalId; // Zero is a special case used when there is no value (null), do not map it to a new id
         }
         if (!stringIds.containsKey(originalId)) {
-            //todo test it is 4 bytes
             stringIds.put(originalId, new ID(nextStringId));
             nextStringId++;
         }

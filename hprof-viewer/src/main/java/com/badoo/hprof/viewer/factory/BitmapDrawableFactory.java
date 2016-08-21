@@ -1,5 +1,6 @@
 package com.badoo.hprof.viewer.factory;
 
+import com.badoo.hprof.library.model.ID;
 import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.viewer.MemoryDump;
 import com.badoo.hprof.viewer.android.drawables.BitmapDrawable;
@@ -32,7 +33,7 @@ public class BitmapDrawableFactory extends BaseClassFactory<BitmapDrawableClassD
 
     @Override
     protected BitmapDrawable create(@Nonnull Instance instance, @Nonnull MemoryDump data, @Nonnull Environment env, @Nonnull BitmapDrawableClassDef classDef) throws IOException {
-        int stateId = instance.getObjectField(classDef.stateField, data.classes);
+        ID stateId = instance.getObjectField(classDef.stateField, data.classes);
         Instance state = data.instances.get(stateId);
         Instance bitmapInstance = data.instances.get(state.getObjectField(classDef.state.bitmap, data.classes));
         BufferedImage bitmap = BitmapFactory.getInstance(data, env).create(bitmapInstance);

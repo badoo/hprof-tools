@@ -1,6 +1,7 @@
 package com.badoo.hprof.viewer.factory;
 
 import com.badoo.hprof.library.model.BasicType;
+import com.badoo.hprof.library.model.ID;
 import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.library.model.PrimitiveArray;
 import com.badoo.hprof.viewer.MemoryDump;
@@ -33,7 +34,7 @@ public class StringFactory extends BaseClassFactory<StringClassDef, String> {
 
     @Override
     protected String create(@Nonnull Instance instance, @Nonnull MemoryDump data, @Nonnull Environment env, @Nonnull StringClassDef classDef) throws IOException {
-        final int valueObjectId = instance.getObjectField(classDef.value, data.classes);
+        final ID valueObjectId = instance.getObjectField(classDef.value, data.classes);
         final int offset = classDef.offset != null ? instance.getIntField(classDef.offset, data.classes) : 0;
         final int count = instance.getIntField(classDef.count, data.classes);
         PrimitiveArray value = data.primitiveArrays.get(valueObjectId);

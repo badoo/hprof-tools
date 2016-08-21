@@ -5,11 +5,7 @@ import com.badoo.hprof.library.Tag;
 import com.badoo.hprof.library.heap.HeapDumpReader;
 import com.badoo.hprof.library.heap.HeapTag;
 import com.badoo.hprof.library.heap.processor.HeapDumpDiscardProcessor;
-import com.badoo.hprof.library.model.ClassDefinition;
-import com.badoo.hprof.library.model.HprofString;
-import com.badoo.hprof.library.model.Instance;
-import com.badoo.hprof.library.model.ObjectArray;
-import com.badoo.hprof.library.model.PrimitiveArray;
+import com.badoo.hprof.library.model.*;
 import com.badoo.hprof.library.processor.DiscardProcessor;
 
 import java.io.IOException;
@@ -23,11 +19,11 @@ import javax.annotation.Nonnull;
  */
 public class ViewDataProcessor extends DiscardProcessor {
 
-    private Map<Integer, HprofString> strings = new HashMap<Integer, HprofString>();
-    private Map<Integer, ClassDefinition> classes = new HashMap<Integer, ClassDefinition>();
-    private Map<Integer, ObjectArray> objArrays = new HashMap<Integer, ObjectArray>();
-    private Map<Integer, PrimitiveArray> primitiveArrays = new HashMap<Integer, PrimitiveArray>();
-    private Map<Integer, Instance> instances = new HashMap<Integer, Instance>();
+    private Map<ID, HprofString> strings = new HashMap<ID, HprofString>();
+    private Map<ID, ClassDefinition> classes = new HashMap<ID, ClassDefinition>();
+    private Map<ID, ObjectArray> objArrays = new HashMap<ID, ObjectArray>();
+    private Map<ID, PrimitiveArray> primitiveArrays = new HashMap<ID, PrimitiveArray>();
+    private Map<ID, Instance> instances = new HashMap<ID, Instance>();
     private HeapDumpDiscardProcessor heapDumpProcessor = new HeapDumpDiscardProcessor() {
 
         @Override
@@ -58,23 +54,23 @@ public class ViewDataProcessor extends DiscardProcessor {
         }
     };
 
-    public Map<Integer, ClassDefinition> getClasses() {
+    public Map<ID, ClassDefinition> getClasses() {
         return classes;
     }
 
-    public Map<Integer, HprofString> getStrings() {
+    public Map<ID, HprofString> getStrings() {
         return strings;
     }
 
-    public Map<Integer, ObjectArray> getObjectArrays() {
+    public Map<ID, ObjectArray> getObjectArrays() {
         return objArrays;
     }
 
-    public Map<Integer, PrimitiveArray> getPrimitiveArrays() {
+    public Map<ID, PrimitiveArray> getPrimitiveArrays() {
         return primitiveArrays;
     }
 
-    public Map<Integer, Instance> getInstances() {
+    public Map<ID, Instance> getInstances() {
         return instances;
     }
 

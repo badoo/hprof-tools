@@ -1,5 +1,7 @@
 package com.badoo.hprof.viewer;
 
+import com.badoo.hprof.library.model.ID;
+
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,10 +15,10 @@ import javax.annotation.Nullable;
  */
 public class BitmapCache {
 
-    private static Map<Integer, BufferedImage> cache = new HashMap<Integer, BufferedImage>();
+    private static Map<ID, BufferedImage> cache = new HashMap<ID, BufferedImage>();
 
     @Nullable
-    public static BufferedImage createBitmap(int bitmapObjectId, byte[] data, int width, int height) {
+    public static BufferedImage createBitmap(ID bitmapObjectId, byte[] data, int width, int height) {
         if (cache.containsKey(bitmapObjectId)) {
             return cache.get(bitmapObjectId);
         }
