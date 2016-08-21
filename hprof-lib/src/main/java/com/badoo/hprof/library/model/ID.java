@@ -9,7 +9,7 @@ import static com.badoo.hprof.library.util.StreamUtil.ID_SIZE;
 
 public final class ID {
 
-    private final byte[] idBytes;
+    private final byte[] idBytes;//todo why is int it a long field?
 
 
     public ID() {

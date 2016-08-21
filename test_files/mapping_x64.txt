@@ -1,0 +1,4 @@
+foo.bar.Main -> foo.bar.a:
+    int instanceField -> a
+    int staticField -> b
+    void <init>() -> <init>
