@@ -17,11 +17,11 @@ public class HprofCruncherTest {
     @Test
     public void testCrunch() throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        HprofSource source = new HprofFileSource(new File("test_files/crunch_test_in.hprof"));
+        HprofSource source = new HprofFileSource(new File("../test_files/crunch_test_in.hprof"));
         HprofCruncher.Config config = new HprofCruncher.Config.Builder().stats(true).build();
         HprofCruncher.crunch(source, out, config);
         // Verify the output
-        verify(new FileInputStream("test_files/crunch_test_out.bmd"), new ByteArrayInputStream(out.toByteArray()));
+        verify(new FileInputStream("../test_files/crunch_test_out.bmd"), new ByteArrayInputStream(out.toByteArray()));
     }
 
     private void verify(InputStream expected, InputStream actual) throws IOException {

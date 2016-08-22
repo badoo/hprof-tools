@@ -3,6 +3,9 @@ package com.badoo.hprof.library.heap;
 import com.badoo.hprof.library.heap.processor.HeapDumpDiscardProcessor;
 import com.badoo.hprof.library.model.ClassDefinition;
 
+import com.badoo.hprof.library.model.ID;
+import com.badoo.hprof.library.util.StreamUtil;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -18,14 +21,24 @@ import static org.junit.Assert.*;
 
 public class HeapDumpReaderTest {
 
-    private static final int OBJECT_ID = 1;
+    private ID OBJECT_ID;
     private static final int STACK_TRACE_SERIAL = 2;
-    private static final int SUPER_CLASS_OBJECT_ID = 3;
-    private static final int CLASS_LOADER_OBJECT_ID = 4;
-    private static final int SIGNERS_OBJECT_ID = 5;
-    private static final int PROTECTION_DOMAIN_OBJECT_ID = 6;
+    private ID SUPER_CLASS_OBJECT_ID;
+    private ID CLASS_LOADER_OBJECT_ID;
+    private ID SIGNERS_OBJECT_ID;
+    private ID PROTECTION_DOMAIN_OBJECT_ID;
     private static final int INSTANCE_SIZE = 7;
 
+
+    @Before
+    public void setUp() throws Exception {
+        StreamUtil.ID_SIZE = 4;
+        OBJECT_ID = new ID(1);
+        SUPER_CLASS_OBJECT_ID = new ID(3);
+        CLASS_LOADER_OBJECT_ID = new ID(4);
+        SIGNERS_OBJECT_ID = new ID(5);
+        PROTECTION_DOMAIN_OBJECT_ID = new ID(6);
+    }
 
     @Test
     public void readClassDump() throws IOException {
@@ -49,7 +62,7 @@ public class HeapDumpReaderTest {
             @Override
             public void onHeapRecord(int tag, @Nonnull HeapDumpReader reader) throws IOException {
                 called.set(true);
-                Map<Integer, ClassDefinition> loadedClasses = new HashMap<Integer, ClassDefinition>();
+                Map<ID, ClassDefinition> loadedClasses = new HashMap<ID, ClassDefinition>();
                 loadedClasses.put(OBJECT_ID, new ClassDefinition());
                 ClassDefinition dstClass = reader.readClassDumpRecord(loadedClasses);
                 assertEquals(OBJECT_ID, dstClass.getObjectId());

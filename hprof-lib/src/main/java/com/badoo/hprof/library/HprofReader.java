@@ -96,7 +96,6 @@ public class HprofReader {
      */
     @Nonnull
     public ClassDefinition readLoadClassRecord() throws IOException {
-        System.out.println("readLoadClassRecord");
         int serialNumber = readInt(in);
         ID classObjectId = readID(in);
         int stackTraceSerial = readInt(in);

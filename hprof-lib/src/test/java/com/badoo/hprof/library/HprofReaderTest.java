@@ -2,6 +2,7 @@ package com.badoo.hprof.library;
 
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.HprofString;
+import com.badoo.hprof.library.model.ID;
 import com.badoo.hprof.library.processor.DiscardProcessor;
 
 import org.junit.Before;
@@ -63,9 +64,9 @@ public class HprofReaderTest {
     @Test
     public void readStrings() throws IOException {
         // Setup data
-        writer.writeStringRecord(new HprofString(0, STRING_A, 0));
-        writer.writeStringRecord(new HprofString(1, STRING_B, 1));
-        writer.writeStringRecord(new HprofString(2, STRING_C, 2));
+        writer.writeStringRecord(new HprofString(new ID(0), STRING_A, 0));
+        writer.writeStringRecord(new HprofString(new ID(1), STRING_B, 1));
+        writer.writeStringRecord(new HprofString(new ID(2), STRING_C, 2));
         // Verify
         final AtomicInteger calls = new AtomicInteger(0);
         HprofProcessor processor = new DiscardProcessor() {
@@ -77,17 +78,17 @@ public class HprofReaderTest {
                 switch (calls.get()) {
                     case 0:
                         assertEquals(0, timestamp);
-                        assertEquals(0, string.getId());
+                        assertEquals(new ID(0), string.getId());
                         assertEquals(STRING_A, string.getValue());
                         break;
                     case 1:
                         assertEquals(1, timestamp);
-                        assertEquals(1, string.getId());
+                        assertEquals(new ID(1), string.getId());
                         assertEquals(STRING_B, string.getValue());
                         break;
                     case 2:
                         assertEquals(2, timestamp);
-                        assertEquals(2, string.getId());
+                        assertEquals(new ID(2), string.getId());
                         assertEquals(STRING_C, string.getValue());
                         break;
                     default:
@@ -107,9 +108,9 @@ public class HprofReaderTest {
     public void readLoadClassRecord() throws IOException {
         ClassDefinition cls = new ClassDefinition();
         cls.setSerialNumber(SERIAL);
-        cls.setObjectId(OBJECT_ID);
+        cls.setObjectId(new ID(OBJECT_ID));
         cls.setStackTraceSerial(STACK_SERIAL);
-        cls.setNameStringId(NAME_ID);
+        cls.setNameStringId(new ID(NAME_ID));
         writer.writeLoadClassRecord(cls);
         // Verify written data
         final AtomicBoolean called = new AtomicBoolean(false);
@@ -120,9 +121,9 @@ public class HprofReaderTest {
                 called.set(true);
                 ClassDefinition readCls = reader.readLoadClassRecord();
                 assertEquals(SERIAL, readCls.getSerialNumber());
-                assertEquals(OBJECT_ID, readCls.getObjectId());
+                assertEquals(new ID(OBJECT_ID), readCls.getObjectId());
                 assertEquals(STACK_SERIAL, readCls.getStackTraceSerial());
-                assertEquals(NAME_ID, readCls.getNameStringId());
+                assertEquals(new ID(NAME_ID), readCls.getNameStringId());
             }
         };
         HprofReader reader = new HprofReader(new ByteArrayInputStream(buffer.toByteArray()), processor);

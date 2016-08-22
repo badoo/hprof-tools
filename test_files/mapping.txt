@@ -1,0 +1,16 @@
+example.com.hprof_tools_tmp_project.FooBar -> example.com.hprof_tools_tmp_project.a:
+    int baz -> a
+    void <init>(int) -> <init>
+example.com.hprof_tools_tmp_project.MainActivity -> example.com.hprof_tools_tmp_project.MainActivity:
+    example.com.hprof_tools_tmp_project.FooBar instanceField -> a
+    example.com.hprof_tools_tmp_project.FooBar staticField -> b
+    void <init>() -> <init>
+    void onCreate(android.os.Bundle) -> onCreate
+    void instanceMethod() -> a
+    void staticMethod() -> b
+    void access$000(example.com.hprof_tools_tmp_project.MainActivity) -> a
+    void <clinit>() -> <clinit>
+example.com.hprof_tools_tmp_project.MainActivity$1 -> example.com.hprof_tools_tmp_project.b:
+    example.com.hprof_tools_tmp_project.MainActivity this$0 -> a
+    void <init>(example.com.hprof_tools_tmp_project.MainActivity) -> <init>
+    void onClick(android.view.View) -> onClick

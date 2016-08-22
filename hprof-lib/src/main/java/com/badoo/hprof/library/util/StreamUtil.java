@@ -109,7 +109,7 @@ public class StreamUtil {
     }
 
 
-    public static int ID_SIZE = 8;
+    public static int ID_SIZE = 8;//todo wtf, this should not be static
 
     public static final int U1_SIZE = 1;
     public static final int U2_SIZE = 2;
@@ -126,7 +126,11 @@ public class StreamUtil {
 
     public static void writeID(OutputStream out, ID id) throws IOException
     {
-        write(out, id.getIdBytes());
+        if (id == null) {
+            write(out, new ID(0).getIdBytes());
+        } else {
+            write(out, id.getIdBytes());
+        }
     }
 
     /**

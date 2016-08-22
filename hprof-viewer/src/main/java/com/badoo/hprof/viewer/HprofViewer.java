@@ -3,6 +3,7 @@ package com.badoo.hprof.viewer;
 import com.badoo.hprof.library.HprofReader;
 import com.badoo.hprof.library.model.ClassDefinition;
 import com.badoo.hprof.library.model.HprofString;
+import com.badoo.hprof.library.model.ID;
 import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.viewer.factory.Environment;
 import com.badoo.hprof.viewer.factory.Screen;
@@ -52,7 +53,7 @@ public class HprofViewer {
             processor.getObjectArrays(), processor.getPrimitiveArrays());
 
         // Class data read, now we can figure out which classes are Views (or ViewGroups)
-        Map<Integer, ClassDefinition> viewClasses = filterViewClasses(data);
+        Map<ID, ClassDefinition> viewClasses = filterViewClasses(data);
         System.out.println("Found " + viewClasses.size() + " View classes");
 
         // Filter out the classinfo dumps of the View classes
@@ -89,14 +90,14 @@ public class HprofViewer {
     private static List<Instance> findViewRoots(List<Instance> viewInstances, ClassDefinition decorClass) {
         List<Instance> roots = new ArrayList<Instance>();
         for (Instance instance : viewInstances) {
-            if (instance.getClassId() == decorClass.getObjectId()) {
+            if (instance.getClassId().equals(decorClass.getObjectId())) {
                 roots.add(instance);
             }
         }
         return roots;
     }
 
-    private static ClassDefinition findDecorClass(Map<Integer, ClassDefinition> viewClasses, MemoryDump data) {
+    private static ClassDefinition findDecorClass(Map<ID, ClassDefinition> viewClasses, MemoryDump data) {
         for (ClassDefinition cls : viewClasses.values()) {
             HprofString clsName = data.strings.get(cls.getNameStringId());
             if (clsName.getValue().endsWith("$DecorView")) {
@@ -106,8 +107,8 @@ public class HprofViewer {
         throw new IllegalStateException("Dump contained no decor views!");
     }
 
-    private static Map<Integer, ClassDefinition> filterViewClasses(MemoryDump data) {
-        Map<Integer, ClassDefinition> viewClasses = new HashMap<Integer, ClassDefinition>();
+    private static Map<ID, ClassDefinition> filterViewClasses(MemoryDump data) {
+        Map<ID, ClassDefinition> viewClasses = new HashMap<ID, ClassDefinition>();
         for (ClassDefinition cls : data.classes.values()) {
             if (isView(cls, data)) {
                 viewClasses.put(cls.getObjectId(), cls);
@@ -116,7 +117,7 @@ public class HprofViewer {
         return viewClasses;
     }
 
-    private static List<Instance> filterViewInstances(MemoryDump data, Map<Integer, ClassDefinition> viewClasses) {
+    private static List<Instance> filterViewInstances(MemoryDump data, Map<ID, ClassDefinition> viewClasses) {
         List<Instance> viewInstances = new ArrayList<Instance>();
         for (Instance instance : data.instances.values()) {
             if (viewClasses.containsKey(instance.getClassId())) {

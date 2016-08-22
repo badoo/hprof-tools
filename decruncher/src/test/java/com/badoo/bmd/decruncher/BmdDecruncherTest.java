@@ -20,8 +20,8 @@ public class BmdDecruncherTest {
     @Test
     public void testDecrunch() throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        BmdDecruncher.decrunch(new FileInputStream("test_files/decrunch_test_in.bmd"), out, Collections.<String>emptyList());
-        verify(new FileInputStream("test_files/decrunch_test_out.hprof"), new ByteArrayInputStream(out.toByteArray()));
+        BmdDecruncher.decrunch(new FileInputStream("../test_files/decrunch_test_in.bmd"), out, Collections.<String>emptyList());
+        verify(new FileInputStream("../test_files/decrunch_test_out.hprof"), new ByteArrayInputStream(out.toByteArray()));
     }
 
     private void verify(InputStream expected, InputStream actual) throws IOException {

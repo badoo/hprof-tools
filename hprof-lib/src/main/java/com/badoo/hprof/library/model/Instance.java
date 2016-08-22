@@ -7,14 +7,7 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-import static com.badoo.hprof.library.util.StreamUtil.ID_SIZE;
-import static com.badoo.hprof.library.util.StreamUtil.readByte;
-import static com.badoo.hprof.library.util.StreamUtil.readDouble;
-import static com.badoo.hprof.library.util.StreamUtil.readFloat;
-import static com.badoo.hprof.library.util.StreamUtil.readInt;
-import static com.badoo.hprof.library.util.StreamUtil.readLong;
-import static com.badoo.hprof.library.util.StreamUtil.readShort;
-import static com.badoo.hprof.library.util.StreamUtil.skip;
+import static com.badoo.hprof.library.util.StreamUtil.*;
 
 /**
  * Class containing the data of a class instance dump (INSTANCE_DUMP) heap record.
@@ -115,7 +108,7 @@ public class Instance {
      * @param classes map containing all classes (or at least the ones between this class and the root)
      * @return the field value
      */
-    public int getObjectField(InstanceField field, Map<Integer, ClassDefinition> classes) throws IOException {
+    public ID getObjectField(InstanceField field, Map<ID, ClassDefinition> classes) throws IOException {
         if (field.getType() != BasicType.OBJECT) {
             throw new IllegalArgumentException("Field is not of type OBJECT");
         }
@@ -125,7 +118,7 @@ public class Instance {
         while (currentClass != null) {
             for (InstanceField currentField : currentClass.getInstanceFields()) {
                 if (currentField == field) { // This is the one we are looking for
-                    return readInt(in);
+                    return readID(in);
                 }
                 else {
                     skip(in, currentField.getType().size);
@@ -143,7 +136,7 @@ public class Instance {
      * @param classes map containing all classes (or at least the ones between this class and the root)
      * @return the field value
      */
-    public int getByteField(InstanceField field, Map<Integer, ClassDefinition> classes) throws IOException {
+    public int getByteField(InstanceField field, Map<ID, ClassDefinition> classes) throws IOException {
         if (field.getType() != BasicType.BYTE) {
             throw new IllegalArgumentException("Field is not of type BYTE");
         }
@@ -171,7 +164,7 @@ public class Instance {
      * @param classes map containing all classes (or at least the ones between this class and the root)
      * @return the field value
      */
-    public int getIntField(InstanceField field, Map<Integer, ClassDefinition> classes) throws IOException {
+    public int getIntField(InstanceField field, Map<ID, ClassDefinition> classes) throws IOException {
         if (field.getType() != BasicType.INT) {
             throw new IllegalArgumentException("Field is not of type INT");
         }
@@ -199,7 +192,7 @@ public class Instance {
      * @param classes map containing all classes (or at least the ones between this class and the root)
      * @return the field value
      */
-    public int getShortField(InstanceField field, Map<Integer, ClassDefinition> classes) throws IOException {
+    public int getShortField(InstanceField field, Map<ID, ClassDefinition> classes) throws IOException {
         if (field.getType() != BasicType.SHORT) {
             throw new IllegalArgumentException("Field is not of type SHORT");
         }
@@ -227,7 +220,7 @@ public class Instance {
      * @param classes map containing all classes (or at least the ones between this class and the root)
      * @return the field value
      */
-    public char getCharField(InstanceField field, Map<Integer, ClassDefinition> classes) throws IOException {
+    public char getCharField(InstanceField field, Map<ID, ClassDefinition> classes) throws IOException {
         if (field.getType() != BasicType.INT) {
             throw new IllegalArgumentException("Field is not of type INT");
         }
@@ -255,7 +248,7 @@ public class Instance {
      * @param classes map containing all classes (or at least the ones between this class and the root)
      * @return the field value
      */
-    public long getLongField(InstanceField field, Map<Integer, ClassDefinition> classes) throws IOException {
+    public long getLongField(InstanceField field, Map<ID, ClassDefinition> classes) throws IOException {
         if (field.getType() != BasicType.LONG) {
             throw new IllegalArgumentException("Field is not of type LONG");
         }
@@ -283,7 +276,7 @@ public class Instance {
      * @param classes map containing all classes (or at least the ones between this class and the root)
      * @return the field value
      */
-    public boolean getBooleanField(InstanceField field, Map<Integer, ClassDefinition> classes) throws IOException {
+    public boolean getBooleanField(InstanceField field, Map<ID, ClassDefinition> classes) throws IOException {
         if (field.getType() != BasicType.BOOLEAN) {
             throw new IllegalArgumentException("Field is not of type BOOLEAN");
         }
@@ -311,7 +304,7 @@ public class Instance {
      * @param classes map containing all classes (or at least the ones between this class and the root)
      * @return the field value
      */
-    public double getDoubleField(InstanceField field, Map<Integer, ClassDefinition> classes) throws IOException {
+    public double getDoubleField(InstanceField field, Map<ID, ClassDefinition> classes) throws IOException {
         if (field.getType() != BasicType.DOUBLE) {
             throw new IllegalArgumentException("Field is not of type DOUBLE");
         }
@@ -339,7 +332,7 @@ public class Instance {
      * @param classes map containing all classes (or at least the ones between this class and the root)
      * @return the field value
      */
-    public float getFloatField(InstanceField field, Map<Integer, ClassDefinition> classes) throws IOException {
+    public float getFloatField(InstanceField field, Map<ID, ClassDefinition> classes) throws IOException {
         if (field.getType() != BasicType.FLOAT) {
             throw new IllegalArgumentException("Field is not of type FLOAT");
         }

@@ -1,5 +1,6 @@
 package com.badoo.hprof.viewer.factory;
 
+import com.badoo.hprof.library.model.ID;
 import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.viewer.MemoryDump;
 import com.badoo.hprof.viewer.android.Version;
@@ -42,7 +43,7 @@ public class ColorDrawableFactory extends BaseClassFactory<ColorDrawableClassDef
 
     @Override
     protected ColorDrawable create(@Nonnull Instance instance, @Nonnull MemoryDump data, @Nonnull Environment env, @Nonnull ColorDrawableClassDef classDef) throws IOException {
-        int stateId = instance.getObjectField(classDef.stateField, data.classes);
+        ID stateId = instance.getObjectField(classDef.stateField, data.classes);
         Instance state = data.instances.get(stateId);
         int baseColor = state.getIntField(classDef.state.baseColor, data.classes);
         return new ColorDrawable(baseColor);

@@ -1,5 +1,6 @@
 package com.badoo.hprof.viewer.factory;
 
+import com.badoo.hprof.library.model.ID;
 import com.badoo.hprof.library.model.Instance;
 import com.badoo.hprof.library.model.ObjectArray;
 import com.badoo.hprof.viewer.MemoryDump;
@@ -37,8 +38,8 @@ public class ArrayMapFactory extends BaseClassFactory<ArrayMapClassDef, Map<Obje
         ObjectArray array = data.objArrays.get(instance.getObjectField(classDef.array, data.classes));
         Map<Object, Object> values = new HashMap<Object, Object>();
         for (int i = 0; i < size; i++) {
-            int keyObjectId = array.getElements()[i * 2];
-            int valueObjectId = array.getElements()[i * 2 + 1];
+            ID keyObjectId = array.getElements()[i * 2];
+            ID valueObjectId = array.getElements()[i * 2 + 1];
             Object key = GenericObjectFactory.getInstance(data, env).create(data.instances.get(keyObjectId));
             Object value = GenericObjectFactory.getInstance(data, env).create(data.instances.get(valueObjectId));
             values.put(key, value);

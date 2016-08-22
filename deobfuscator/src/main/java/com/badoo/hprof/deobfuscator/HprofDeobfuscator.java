@@ -75,16 +75,18 @@ public class HprofDeobfuscator {
             for (ClassDefinition cls : dataCollectionProcessor.getClasses().values()) {
                 // Check if the class has any mapped fields
                 HprofString className = hprofStrings.get(cls.getNameStringId());
-                Map<String, FieldInfo> mappedFields = mapping.getFieldMappingsForClass(className.getValue()); // Map of
+                final String slashedClassName = className.getValue()
+                        .replace('.', '/');
+                Map<String, FieldInfo> mappedFields = mapping.getFieldMappingsForClass(slashedClassName); // Map of
                 if (mappedFields == null || mappedFields.isEmpty()) {
                     continue;
                 }
                 // Deobfuscate the fields one by one
                 for (StaticField field : cls.getStaticFields()) {
-                    deobfuscateFieldName(className.getValue(), field, mappedFields);
+                    deobfuscateFieldName(slashedClassName, field, mappedFields);
                 }
                 for (InstanceField field : cls.getInstanceFields()) {
-                    deobfuscateFieldName(className.getValue(), field, mappedFields);
+                    deobfuscateFieldName(slashedClassName, field, mappedFields);
                 }
             }
 
@@ -152,18 +154,17 @@ public class HprofDeobfuscator {
 
     private void deobfuscateClassName(ClassDefinition cls, Mapping mapping) {
 
-        HprofString name = hprofStrings.get(cls.getNameStringId());
-//        System.out.println(name);
-        String classNameString = name.getValue();
-//        String dottedClassName = classNameString.replace('/','.');
-        String deobfuscatedName = mapping.getClassName(classNameString);
+        final HprofString name = hprofStrings.get(cls.getNameStringId());
+        final String classNameString = name.getValue();
+        final String slashClassName = classNameString.replace('.','/');
+        final String deobfuscatedName = mapping.getClassName(slashClassName);
 
         if (deobfuscatedName != null) {
             if (debug) {
                 System.out.println("Deobfuscating class " + name + " to " + deobfuscatedName);
             }
-//            String slasheddeobfuscatedName = dotteddeobfuscatedName.replace('.','/');
-            name.setValue(deobfuscatedName);
+            final String dottedObfuscated = deobfuscatedName.replace('/','.');
+            name.setValue(dottedObfuscated);
         }
     }
 
