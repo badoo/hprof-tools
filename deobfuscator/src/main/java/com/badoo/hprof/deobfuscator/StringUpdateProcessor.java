@@ -71,7 +71,6 @@ public class StringUpdateProcessor extends CopyProcessor {
     @Override
     public void onRecord(int tag, int timestamp, int length, @Nonnull HprofReader reader) throws IOException {
 
-        System.out.println(Tag.tagToString(tag));
 
         if (tag == Tag.STRING) {
             skip(reader.getInputStream(), length); // Discard all the original strings

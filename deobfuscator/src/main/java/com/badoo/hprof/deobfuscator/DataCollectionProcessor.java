@@ -184,9 +184,7 @@ public class DataCollectionProcessor extends DiscardProcessor {
 
         long stringIdLong = lastStringId.toLong();
         stringIdLong++;
-        System.out.println("ID_CURR=" + lastStringId);
         lastStringId = new ID(stringIdLong);
-        System.out.println("ID_Next="+lastStringId);
         return lastStringId;
     }
 

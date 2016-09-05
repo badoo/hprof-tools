@@ -61,7 +61,6 @@ public class HprofDeobfuscator {
             }
             hprofStrings = dataCollectionProcessor.getStrings();
 
-            System.out.println(hprofStrings);
 
             // Deobfuscate all class names first since they are needed when processing fields and methods
             for (ClassDefinition cls : dataCollectionProcessor.getClasses().values()) {
