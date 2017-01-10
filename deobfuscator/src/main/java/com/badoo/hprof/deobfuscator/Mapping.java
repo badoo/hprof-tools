@@ -127,7 +127,31 @@ class Mapping implements MappingProcessor {
     private Map<String, Map<MethodInfoKey,MethodInfo>> methodMapping = new HashMap<String, Map<MethodInfoKey, MethodInfo>>();
 
     public String getClassName(String obfuscatedName) {
+        if (obfuscatedName.endsWith("[]")) {
+          return getArrayClassName(obfuscatedName);
+        }
         return classNameMapping.get(obfuscatedName);
+    }
+
+    private String getArrayClassName(final String obfuscatedName) {
+        String componentName = getArrayComponentName(obfuscatedName);
+        String suffix = obfuscatedName.substring(componentName.length());
+        String deobfuscatedComponentName = classNameMapping.get(componentName);
+        if (deobfuscatedComponentName == null) {
+          return deobfuscatedComponentName;
+        }
+
+        return deobfuscatedComponentName.concat(suffix);
+    }
+
+    private String getArrayComponentName(final String className) {
+        int endIndex = className.length();
+        while (endIndex >= 0
+            && (className.charAt(endIndex - 2) == '[')
+            && (className.charAt(endIndex - 1) == ']')) {
+          endIndex -= 2;
+        }
+        return className.substring(0, endIndex);
     }
 
     public Map<String, FieldInfo> getFieldMappingsForClass(String className) {
