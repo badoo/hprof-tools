@@ -147,8 +147,8 @@ class Mapping implements MappingProcessor {
     private String getArrayComponentName(final String className) {
         int endIndex = className.length();
         while (endIndex >= 0
-            && (className.charAt(endIndex - 2) == '[')
-            && (className.charAt(endIndex - 1) == ']')) {
+            && (className.charAt(endIndex - 1) == ']')
+            && (className.charAt(endIndex - 2) == '[')) {
           endIndex -= 2;
         }
         return className.substring(0, endIndex);
