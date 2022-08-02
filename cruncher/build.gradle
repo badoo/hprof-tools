@@ -8,7 +8,7 @@ group = 'com.badoo.hprof.cruncher'
 version = '1.1'
 
 repositories {
-    mavenCentral()
+    maven { url "https://repo1.maven.org/maven2/" }
 }
 
 run {

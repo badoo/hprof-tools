@@ -5,7 +5,7 @@ sourceCompatibility = 1.5
 mainClassName = "com.badoo.hprof.viewer.HprofViewer"
 
 repositories {
-    mavenCentral()
+    maven { url "https://repo1.maven.org/maven2/" }
 }
 
 run {
